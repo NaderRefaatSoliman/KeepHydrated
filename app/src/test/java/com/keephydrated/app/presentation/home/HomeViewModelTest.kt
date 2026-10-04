@@ -91,7 +91,7 @@ class HomeViewModelTest {
         viewModel.addWater(250)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify(exactly = 1) { addWaterIntakeUseCase(250) }
+        coVerify(exactly = 1) { addWaterIntakeUseCase(amountMl = 250, timestamp = any()) }
     }
 
     @Test
