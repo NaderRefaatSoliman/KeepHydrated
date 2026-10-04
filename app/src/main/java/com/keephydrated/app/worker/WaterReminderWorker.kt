@@ -10,6 +10,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.keephydrated.app.KeepHydratedApp
 import com.keephydrated.app.R
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.presentation.MainActivity
 import dagger.assisted.Assisted
@@ -31,17 +32,27 @@ class WaterReminderWorker @AssistedInject constructor(
             return Result.success()
         }
 
-        // Check active / quiet hours
         val currentHour = LocalTime.now().hour
-        val isQuietHour = if (settings.startHour <= settings.endHour) {
-            currentHour < settings.startHour || currentHour >= settings.endHour
-        } else {
-            // crosses midnight (e.g. start at 22, end at 6)
-            currentHour in settings.endHour until settings.startHour
-        }
 
-        if (isQuietHour) {
-            return Result.success()
+        when (settings.reminderMode) {
+            ReminderMode.CUSTOM_ROUTINE -> {
+                // If custom routine is active, only notify during user-selected hours
+                if (currentHour !in settings.customReminderHours) {
+                    return Result.success()
+                }
+            }
+            ReminderMode.INTERVAL -> {
+                // Check active / quiet hours
+                val isQuietHour = if (settings.startHour <= settings.endHour) {
+                    currentHour < settings.startHour || currentHour >= settings.endHour
+                } else {
+                    currentHour in settings.endHour until settings.startHour
+                }
+
+                if (isQuietHour) {
+                    return Result.success()
+                }
+            }
         }
 
         showReminderNotification()

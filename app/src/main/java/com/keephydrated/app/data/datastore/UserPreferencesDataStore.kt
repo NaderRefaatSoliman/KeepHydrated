@@ -7,7 +7,10 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +32,8 @@ class UserPreferencesDataStore @Inject constructor(
         val REMINDERS_ENABLED = booleanPreferencesKey("reminders_enabled")
         val START_HOUR = intPreferencesKey("start_hour")
         val END_HOUR = intPreferencesKey("end_hour")
+        val REMINDER_MODE = stringPreferencesKey("reminder_mode")
+        val CUSTOM_REMINDER_HOURS = stringSetPreferencesKey("custom_reminder_hours")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -45,13 +50,23 @@ class UserPreferencesDataStore @Inject constructor(
             val remindersEnabled = preferences[PreferencesKeys.REMINDERS_ENABLED] ?: true
             val startHour = preferences[PreferencesKeys.START_HOUR] ?: 8
             val endHour = preferences[PreferencesKeys.END_HOUR] ?: 22
+            val modeStr = preferences[PreferencesKeys.REMINDER_MODE] ?: ReminderMode.INTERVAL.name
+            val mode = try {
+                ReminderMode.valueOf(modeStr)
+            } catch (e: Exception) {
+                ReminderMode.INTERVAL
+            }
+            val hoursSet = preferences[PreferencesKeys.CUSTOM_REMINDER_HOURS] ?: setOf("9", "12", "15", "18", "21")
+            val customHours = hoursSet.mapNotNull { it.toIntOrNull() }.toSet()
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
                 reminderIntervalHours = reminderInterval,
                 remindersEnabled = remindersEnabled,
                 startHour = startHour,
-                endHour = endHour
+                endHour = endHour,
+                reminderMode = mode,
+                customReminderHours = if (customHours.isNotEmpty()) customHours else setOf(9, 12, 15, 18, 21)
             )
         }
 
@@ -77,6 +92,18 @@ class UserPreferencesDataStore @Inject constructor(
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.START_HOUR] = startHour
             preferences[PreferencesKeys.END_HOUR] = endHour
+        }
+    }
+
+    suspend fun updateReminderMode(mode: ReminderMode) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REMINDER_MODE] = mode.name
+        }
+    }
+
+    suspend fun updateCustomReminderHours(hours: Set<Int>) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CUSTOM_REMINDER_HOURS] = hours.map { it.toString() }.toSet()
         }
     }
 }

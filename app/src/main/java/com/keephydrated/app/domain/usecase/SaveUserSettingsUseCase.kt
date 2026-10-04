@@ -1,6 +1,6 @@
 package com.keephydrated.app.domain.usecase
 
-import com.keephydrated.app.domain.model.UserSettings
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
 import javax.inject.Inject
 
@@ -24,5 +24,14 @@ class SaveUserSettingsUseCase @Inject constructor(
     suspend fun updateActiveHours(startHour: Int, endHour: Int) {
         require(startHour in 0..23 && endHour in 0..23) { "Hours must be between 0 and 23" }
         settingsRepository.updateActiveHours(startHour, endHour)
+    }
+
+    suspend fun updateReminderMode(mode: ReminderMode) {
+        settingsRepository.updateReminderMode(mode)
+    }
+
+    suspend fun updateCustomReminderHours(hours: Set<Int>) {
+        require(hours.all { it in 0..23 }) { "All selected hours must be between 0 and 23" }
+        settingsRepository.updateCustomReminderHours(hours)
     }
 }

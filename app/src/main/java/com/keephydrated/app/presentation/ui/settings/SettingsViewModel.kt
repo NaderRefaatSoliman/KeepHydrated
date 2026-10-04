@@ -2,6 +2,7 @@ package com.keephydrated.app.presentation.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.usecase.GetUserSettingsUseCase
 import com.keephydrated.app.domain.usecase.SaveUserSettingsUseCase
 import com.keephydrated.app.worker.ReminderScheduler
@@ -38,6 +39,8 @@ class SettingsViewModel @Inject constructor(
                         remindersEnabled = settings.remindersEnabled,
                         startHour = settings.startHour,
                         endHour = settings.endHour,
+                        reminderMode = settings.reminderMode,
+                        customReminderHours = settings.customReminderHours,
                         isLoading = false
                     )
                 }
@@ -60,7 +63,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 saveUserSettingsUseCase.updateReminderInterval(hours)
-                reminderScheduler.scheduleReminders(hours, _uiState.value.remindersEnabled)
+                reminderScheduler.scheduleReminders(
+                    intervalHours = hours,
+                    enabled = _uiState.value.remindersEnabled,
+                    mode = _uiState.value.reminderMode
+                )
                 _uiState.update { it.copy(userMessage = "Reminder interval updated") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update interval") }
@@ -72,11 +79,53 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 saveUserSettingsUseCase.updateRemindersEnabled(enabled)
-                reminderScheduler.scheduleReminders(_uiState.value.reminderIntervalHours, enabled)
+                reminderScheduler.scheduleReminders(
+                    intervalHours = _uiState.value.reminderIntervalHours,
+                    enabled = enabled,
+                    mode = _uiState.value.reminderMode
+                )
                 val msg = if (enabled) "Reminders enabled" else "Reminders disabled"
                 _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = "Failed to update reminders") }
+            }
+        }
+    }
+
+    fun updateReminderMode(mode: ReminderMode) {
+        viewModelScope.launch {
+            try {
+                saveUserSettingsUseCase.updateReminderMode(mode)
+                reminderScheduler.scheduleReminders(
+                    intervalHours = _uiState.value.reminderIntervalHours,
+                    enabled = _uiState.value.remindersEnabled,
+                    mode = mode
+                )
+                val msg = if (mode == ReminderMode.CUSTOM_ROUTINE) "Custom routine enabled" else "Interval mode enabled"
+                _uiState.update { it.copy(userMessage = msg) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to change reminder mode") }
+            }
+        }
+    }
+
+    fun toggleCustomReminderHour(hour: Int) {
+        viewModelScope.launch {
+            try {
+                val current = _uiState.value.customReminderHours.toMutableSet()
+                if (current.contains(hour)) {
+                    if (current.size > 1) {
+                        current.remove(hour)
+                    } else {
+                        _uiState.update { it.copy(userMessage = "At least one reminder hour is required") }
+                        return@launch
+                    }
+                } else {
+                    current.add(hour)
+                }
+                saveUserSettingsUseCase.updateCustomReminderHours(current)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to update reminder hours") }
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.keephydrated.app.data.repository
 
 import com.keephydrated.app.data.datastore.UserPreferencesDataStore
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -30,5 +31,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updateActiveHours(startHour: Int, endHour: Int) {
         preferencesDataStore.updateActiveHours(startHour, endHour)
+    }
+
+    override suspend fun updateReminderMode(mode: ReminderMode) {
+        preferencesDataStore.updateReminderMode(mode)
+    }
+
+    override suspend fun updateCustomReminderHours(hours: Set<Int>) {
+        preferencesDataStore.updateCustomReminderHours(hours)
     }
 }

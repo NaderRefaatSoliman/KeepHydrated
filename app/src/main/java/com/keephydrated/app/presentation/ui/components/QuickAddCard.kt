@@ -3,11 +3,14 @@ package com.keephydrated.app.presentation.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -17,10 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.keephydrated.app.presentation.ui.theme.BluePrimaryContainer
 import com.keephydrated.app.presentation.ui.theme.BlueOnPrimaryContainer
+import com.keephydrated.app.presentation.ui.theme.BluePrimaryContainer
 
 data class ContainerOption(
     val title: String,
@@ -38,42 +42,30 @@ fun QuickAddSection(
         ContainerOption("Glass", 250, "🥛"),
         ContainerOption("Can", 330, "🥤"),
         ContainerOption("Bottle", 500, "🍶"),
-        ContainerOption("Flask", 750, "🫙")
+        ContainerOption("Flask", 750, "🫙"),
+        ContainerOption("Large", 1000, "🚰")
     )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Quick Add",
-            style = MaterialTheme.typography.titleLarge.copy(
+            style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold
             ),
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
         )
 
-        Row(
+        // Horizontally scrollable row ensures all cards scale perfectly on any device width
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
         ) {
-            containers.take(3).forEach { container ->
+            items(containers, key = { it.amountMl }) { container ->
                 QuickAddCard(
                     container = container,
                     onClick = { onAddWater(container.amountMl) },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            containers.drop(3).forEach { container ->
-                QuickAddCard(
-                    container = container,
-                    onClick = { onAddWater(container.amountMl) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.width(92.dp)
                 )
             }
         }
@@ -91,32 +83,38 @@ fun QuickAddCard(
         colors = CardDefaults.cardColors(
             containerColor = BluePrimaryContainer
         ),
-        modifier = modifier
-            .clickable(onClick = onClick)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = modifier.clickable(onClick = onClick)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 8.dp)
+                .padding(vertical = 12.dp, horizontal = 6.dp)
         ) {
             Text(
                 text = container.emoji,
-                fontSize = 28.sp
+                fontSize = 26.sp
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "+${container.amountMl} ml",
-                style = MaterialTheme.typography.labelLarge.copy(
+                text = "+${container.amountMl}ml",
+                style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = BlueOnPrimaryContainer
-                )
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = container.title,
                 style = MaterialTheme.typography.bodySmall.copy(
-                    color = BlueOnPrimaryContainer.copy(alpha = 0.8f)
-                )
+                    fontSize = 11.sp,
+                    color = BlueOnPrimaryContainer.copy(alpha = 0.85f)
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

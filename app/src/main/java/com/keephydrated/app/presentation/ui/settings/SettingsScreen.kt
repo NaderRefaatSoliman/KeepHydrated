@@ -5,10 +5,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,15 +25,16 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,10 +60,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -116,6 +120,7 @@ fun SettingsScreen(
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp)
             ) {
+                // Section 1: Hydration Goal
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -167,9 +172,12 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Row(
+
+                            // FlowRow wraps buttons automatically so they fit any device width (e.g. Samsung A70)
+                            FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 listOf(1500, 2000, 2500, 3000).forEach { goal ->
                                     FilterChip(
@@ -199,6 +207,7 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
+                            // Master reminder switch
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -233,25 +242,102 @@ fun SettingsScreen(
 
                             if (uiState.remindersEnabled) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Alarm, contentDescription = null, tint = BluePrimary)
-                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                    Text(
-                                        text = "Remind me every:",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+
+                                // Reminder Mode: Regular Interval vs Custom Routine
+                                Text(
+                                    text = "Reminder Schedule Mode:",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    FilterChip(
+                                        selected = uiState.reminderMode == ReminderMode.INTERVAL,
+                                        onClick = { viewModel.updateReminderMode(ReminderMode.INTERVAL) },
+                                        label = { Text("Every X Hours") }
+                                    )
+                                    FilterChip(
+                                        selected = uiState.reminderMode == ReminderMode.CUSTOM_ROUTINE,
+                                        onClick = { viewModel.updateReminderMode(ReminderMode.CUSTOM_ROUTINE) },
+                                        label = { Text("Custom Daily Routine") }
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    listOf(1, 2, 3, 4).forEach { hours ->
-                                        FilterChip(
-                                            selected = uiState.reminderIntervalHours == hours,
-                                            onClick = { viewModel.updateReminderInterval(hours) },
-                                            label = { Text(if (hours == 1) "1 Hour" else "$hours Hours") }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                if (uiState.reminderMode == ReminderMode.INTERVAL) {
+                                    // Mode 1: Regular Interval
+                                    Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                        Icon(Icons.Default.Alarm, contentDescription = null, tint = BluePrimary)
+                                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                        Text(
+                                            text = "Remind me every:",
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                                         )
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    FlowRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        listOf(1, 2, 3, 4).forEach { hours ->
+                                            FilterChip(
+                                                selected = uiState.reminderIntervalHours == hours,
+                                                onClick = { viewModel.updateReminderInterval(hours) },
+                                                label = { Text(if (hours == 1) "1 Hour" else "$hours Hours") }
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    // Mode 2: Custom Reminder Routine (User selected hours)
+                                    Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                        Icon(Icons.Default.Schedule, contentDescription = null, tint = BluePrimary)
+                                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                        Text(
+                                            text = "Select Routine Hours (${uiState.customReminderHours.size} set):",
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Tap to enable/disable reminder times throughout your day:",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // Display hours with clean responsive AM/PM format
+                                    val candidateHours = listOf(7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)
+
+                                    FlowRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        candidateHours.forEach { hour ->
+                                            val isSelected = uiState.customReminderHours.contains(hour)
+                                            val timeLabel = formatHourToAmPm(hour)
+
+                                            FilterChip(
+                                                selected = isSelected,
+                                                onClick = { viewModel.toggleCustomReminderHour(hour) },
+                                                label = {
+                                                    Text(
+                                                        text = timeLabel,
+                                                        fontSize = 13.sp
+                                                    )
+                                                },
+                                                leadingIcon = if (isSelected) {
+                                                    { Icon(Icons.Default.Check, contentDescription = null) }
+                                                } else null
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -275,7 +361,7 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(verticalAlignment = Alignment.CenterVertizontally) {
                                 Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
                                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                 Text(
@@ -285,7 +371,7 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Version 1.0.0 (Clean Architecture & Jetpack Compose)",
+                                text = "Version 1.1.0 (Clean Architecture, Compose & WorkManager)",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -307,6 +393,15 @@ fun SettingsScreen(
                 showGoalDialog = false
             }
         )
+    }
+}
+
+private fun formatHourToAmPm(hour: Int): String {
+    return when {
+        hour == 0 -> "12 AM"
+        hour == 12 -> "12 PM"
+        hour < 12 -> "$hour AM"
+        else -> "${hour - 12} PM"
     }
 }
 

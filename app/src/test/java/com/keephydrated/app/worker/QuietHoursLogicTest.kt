@@ -14,6 +14,10 @@ class QuietHoursLogicTest {
         }
     }
 
+    private fun isCustomRoutineHourActive(currentHour: Int, selectedHours: Set<Int>): Boolean {
+        return currentHour in selectedHours
+    }
+
     @Test
     fun `standard day hours - within active hours is not quiet`() {
         val startHour = 8  // 8:00 AM
@@ -46,7 +50,6 @@ class QuietHoursLogicTest {
 
     @Test
     fun `overnight schedule - correctly identifies quiet period`() {
-        // e.g. Night shift: active from 20:00 to 06:00
         val startHour = 20
         val endHour = 6
 
@@ -58,5 +61,20 @@ class QuietHoursLogicTest {
 
         // At 12:00 PM, in quiet period (sleep time)
         assertTrue(isQuietHour(currentHour = 12, startHour = startHour, endHour = endHour))
+    }
+
+    @Test
+    fun `custom routine - correctly triggers only on user selected hours`() {
+        val selectedHours = setOf(9, 12, 15, 18, 21)
+
+        // Selected hours should be active
+        assertTrue(isCustomRoutineHourActive(currentHour = 9, selectedHours = selectedHours))
+        assertTrue(isCustomRoutineHourActive(currentHour = 12, selectedHours = selectedHours))
+        assertTrue(isCustomRoutineHourActive(currentHour = 21, selectedHours = selectedHours))
+
+        // Non-selected hours should not be active
+        assertFalse(isCustomRoutineHourActive(currentHour = 10, selectedHours = selectedHours))
+        assertFalse(isCustomRoutineHourActive(currentHour = 14, selectedHours = selectedHours))
+        assertFalse(isCustomRoutineHourActive(currentHour = 23, selectedHours = selectedHours))
     }
 }

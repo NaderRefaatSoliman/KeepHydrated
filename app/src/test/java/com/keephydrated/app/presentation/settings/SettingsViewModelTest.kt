@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation.settings
 
+import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.usecase.GetUserSettingsUseCase
 import com.keephydrated.app.domain.usecase.SaveUserSettingsUseCase
@@ -18,6 +19,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -51,7 +53,9 @@ class SettingsViewModelTest {
         val userSettings = UserSettings(
             dailyGoalMl = 2500,
             reminderIntervalHours = 3,
-            remindersEnabled = true
+            remindersEnabled = true,
+            reminderMode = ReminderMode.CUSTOM_ROUTINE,
+            customReminderHours = setOf(8, 12, 16, 20)
         )
         settingsFlow.emit(userSettings)
 
@@ -66,6 +70,8 @@ class SettingsViewModelTest {
         assertEquals(2500, state.dailyGoalMl)
         assertEquals(3, state.reminderIntervalHours)
         assertEquals(true, state.remindersEnabled)
+        assertEquals(ReminderMode.CUSTOM_ROUTINE, state.reminderMode)
+        assertEquals(setOf(8, 12, 16, 20), state.customReminderHours)
     }
 
     @Test
@@ -95,6 +101,42 @@ class SettingsViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateRemindersEnabled(false) }
-        verify(exactly = 1) { reminderScheduler.scheduleReminders(any(), false) }
+        verify(exactly = 1) { reminderScheduler.scheduleReminders(any(), false, any()) }
+    }
+
+    @Test
+    fun `updateReminderMode delegates to usecase and updates scheduler`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateReminderMode(ReminderMode.CUSTOM_ROUTINE)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateReminderMode(ReminderMode.CUSTOM_ROUTINE) }
+        verify(exactly = 1) { reminderScheduler.scheduleReminders(any(), any(), ReminderMode.CUSTOM_ROUTINE) }
+    }
+
+    @Test
+    fun `toggleCustomReminderHour toggles hour in usecase`() = runTest {
+        val userSettings = UserSettings(
+            customReminderHours = setOf(9, 12, 15)
+        )
+        settingsFlow.emit(userSettings)
+
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Toggle hour 18 on (not currently in set)
+        viewModel.toggleCustomReminderHour(18)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(setOf(9, 12, 15, 18)) }
     }
 }
