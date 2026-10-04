@@ -41,7 +41,9 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
 
       - name: Run Unit Tests
-        run: ./gradlew test
+        run: |
+          set -o pipefail
+          ./gradlew test --stacktrace --no-daemon 2>&1 | tee test.log
 
       - name: Report Build Result to Branch
         if: always()
@@ -52,9 +54,8 @@ jobs:
           echo "Status: ${{ job.status }}" > build-status.txt
           echo "Commit: ${{ github.sha }}" >> build-status.txt
           echo "Date: $(date -u)" >> build-status.txt
-          if [ -f build.log ]; then
-            git add -f build.log
-          fi
+          if [ -f build.log ]; then git add -f build.log; fi
+          if [ -f test.log ]; then git add -f test.log; fi
           git add -f build-status.txt
           git commit -m "Build result for ${{ github.sha }}: ${{ job.status }}"
           git push -f origin build-logs

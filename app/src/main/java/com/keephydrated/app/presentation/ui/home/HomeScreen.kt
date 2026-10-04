@@ -16,7 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -81,7 +81,7 @@ fun HomeScreen(
                     if (uiState.todayIntakes.isNotEmpty()) {
                         IconButton(onClick = { viewModel.undoLastIntake() }) {
                             Icon(
-                                imageVector = Icons.Default.Undo,
+                                imageVector = Icons.AutoMirrored.Filled.Undo,
                                 contentDescription = "Undo last intake",
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
