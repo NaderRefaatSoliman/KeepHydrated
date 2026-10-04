@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build & Test APK
@@ -27,7 +30,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
@@ -37,3 +42,19 @@ jobs:
 
       - name: Run Unit Tests
         run: ./gradlew test
+
+      - name: Report Build Result to Branch
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B build-logs
+          echo "Status: ${{ job.status }}" > build-status.txt
+          echo "Commit: ${{ github.sha }}" >> build-status.txt
+          echo "Date: $(date -u)" >> build-status.txt
+          if [ -f build.log ]; then
+            git add -f build.log
+          fi
+          git add -f build-status.txt
+          git commit -m "Build result for ${{ github.sha }}: ${{ job.status }}"
+          git push -f origin build-logs
