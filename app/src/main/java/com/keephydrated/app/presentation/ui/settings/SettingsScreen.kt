@@ -271,7 +271,7 @@ fun SettingsScreen(
 
                                 if (uiState.reminderMode == ReminderMode.INTERVAL) {
                                     // Mode 1: Regular Interval
-                                    Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Default.Alarm, contentDescription = null, tint = BluePrimary)
                                         Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                         Text(
@@ -295,7 +295,7 @@ fun SettingsScreen(
                                     }
                                 } else {
                                     // Mode 2: Custom Reminder Routine (User selected hours)
-                                    Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Default.Schedule, contentDescription = null, tint = BluePrimary)
                                         Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                         Text(
@@ -361,7 +361,7 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertizontally) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
                                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                 Text(
