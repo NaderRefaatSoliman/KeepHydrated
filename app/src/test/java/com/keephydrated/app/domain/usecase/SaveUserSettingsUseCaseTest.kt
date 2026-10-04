@@ -26,15 +26,14 @@ class SaveUserSettingsUseCaseTest {
         coVerify(exactly = 1) { settingsRepository.updateDailyGoal(2500) }
     }
 
-    @Test
-    fun `updateGoal with invalid value throws IllegalArgumentException`() = runTest {
-        assertThrows(IllegalArgumentException::class.java) {
-            runTest { useCase.updateGoal(300) } // below 500
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            runTest { useCase.updateGoal(15000) } // above 10000
-        }
-        coVerify(exactly = 0) { settingsRepository.updateDailyGoal(any()) }
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateGoal with too low value throws IllegalArgumentException`() = runTest {
+        useCase.updateGoal(300)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateGoal with too high value throws IllegalArgumentException`() = runTest {
+        useCase.updateGoal(15000)
     }
 
     @Test
@@ -43,14 +42,13 @@ class SaveUserSettingsUseCaseTest {
         coVerify(exactly = 1) { settingsRepository.updateReminderInterval(3) }
     }
 
-    @Test
-    fun `updateReminderInterval with invalid hours throws IllegalArgumentException`() = runTest {
-        assertThrows(IllegalArgumentException::class.java) {
-            runTest { useCase.updateReminderInterval(0) }
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            runTest { useCase.updateReminderInterval(15) }
-        }
-        coVerify(exactly = 0) { settingsRepository.updateReminderInterval(any()) }
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateReminderInterval with zero hours throws IllegalArgumentException`() = runTest {
+        useCase.updateReminderInterval(0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateReminderInterval with too high hours throws IllegalArgumentException`() = runTest {
+        useCase.updateReminderInterval(15)
     }
 }

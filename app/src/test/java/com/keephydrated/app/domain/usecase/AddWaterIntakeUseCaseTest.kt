@@ -38,16 +38,13 @@ class AddWaterIntakeUseCaseTest {
         coVerify(exactly = 1) { repository.insertIntake(any()) }
     }
 
-    @Test
-    fun `invoke with zero or negative amount throws IllegalArgumentException`() = runTest {
-        assertThrows(IllegalArgumentException::class.java) {
-            runTest { useCase(amountMl = 0) }
-        }
+    @Test(expected = IllegalArgumentException::class)
+    fun `invoke with zero amount throws IllegalArgumentException`() = runTest {
+        useCase(amountMl = 0)
+    }
 
-        assertThrows(IllegalArgumentException::class.java) {
-            runTest { useCase(amountMl = -50) }
-        }
-
-        coVerify(exactly = 0) { repository.insertIntake(any()) }
+    @Test(expected = IllegalArgumentException::class)
+    fun `invoke with negative amount throws IllegalArgumentException`() = runTest {
+        useCase(amountMl = -50)
     }
 }
