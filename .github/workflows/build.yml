@@ -27,21 +27,18 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          if ! ./gradlew assembleDebug --stacktrace --no-daemon > build.log 2>&1; then
+            echo "::error title=Gradle Build Failed::$(tail -n 25 build.log | tr '\n' ' ')"
+            tail -n 120 build.log
+            exit 1
+          fi
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: KeepHydrated-Debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
 
       - name: Run Unit Tests
         run: ./gradlew test
-
-      - name: Upload Test Reports
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: unit-test-reports
-          path: app/build/reports/tests/
