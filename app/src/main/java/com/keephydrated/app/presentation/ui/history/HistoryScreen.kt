@@ -244,7 +244,7 @@ fun DailySummaryCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             LinearProgressIndicator(
-                progress = summary.progressPercentage.coerceIn(0f, 1f),
+                progress = { summary.progressPercentage.coerceIn(0f, 1f) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
