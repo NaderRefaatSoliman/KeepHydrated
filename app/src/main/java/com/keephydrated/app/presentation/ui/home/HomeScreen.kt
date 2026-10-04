@@ -143,7 +143,7 @@ fun HomeScreen(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertizontally
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Today's Logs (${uiState.todayIntakes.size})",

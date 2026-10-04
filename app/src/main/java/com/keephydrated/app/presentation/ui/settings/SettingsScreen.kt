@@ -137,9 +137,9 @@ fun SettingsScreen(
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertizontally
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.TrackChanges, contentDescription = null, tint = BluePrimary)
                                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                     Text(
@@ -147,7 +147,7 @@ fun SettingsScreen(
                                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
                                     )
                                 }
-                                Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text = "${uiState.dailyGoalMl} ml",
                                         style = MaterialTheme.typography.titleMedium.copy(
@@ -202,9 +202,9 @@ fun SettingsScreen(
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertizontally
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Notifications, contentDescription = null, tint = BluePrimary)
                                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                     Text(
@@ -233,7 +233,7 @@ fun SettingsScreen(
 
                             if (uiState.remindersEnabled) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                                Row(verticalAlignment = Alignment.CenterVertizontally) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Alarm, contentDescription = null, tint = BluePrimary)
                                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                     Text(
@@ -275,7 +275,7 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertizontally) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
                                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                 Text(

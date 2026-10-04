@@ -192,7 +192,7 @@ fun DailySummaryCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertizontally
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = summary.date.format(dateFormatter),
@@ -202,7 +202,7 @@ fun DailySummaryCard(
                 )
 
                 if (summary.isGoalAchieved) {
-                    Row(verticalAlignment = Alignment.CenterVertizontally) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = "Achieved",
