@@ -28,11 +28,23 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          if ! ./gradlew assembleDebug --stacktrace --no-daemon > build.log 2>&1; then
-            echo "::error title=Gradle Build Failed::$(tail -n 25 build.log | tr '\n' ' ')"
-            tail -n 120 build.log
-            exit 1
-          fi
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
+
+      - name: Post Summary on Failure
+        if: failure()
+        run: |
+          echo "## Build Failure Output" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          tail -n 80 build.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Build Log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gradle-build-log
+          path: build.log
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
