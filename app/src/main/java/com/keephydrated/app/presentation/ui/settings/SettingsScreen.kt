@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -311,6 +312,43 @@ fun SettingsScreen(
                                         )
                                     )
                                     Spacer(modifier = Modifier.height(10.dp))
+
+                                    Text(
+                                        text = "Quick Presets:",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    FlowRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = { viewModel.setCustomReminderHours(setOf(9, 11, 13, 15, 17)) },
+                                            modifier = Modifier.height(34.dp),
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+                                        ) {
+                                            Text("💼 Work Day", fontSize = 12.sp)
+                                        }
+                                        OutlinedButton(
+                                            onClick = { viewModel.setCustomReminderHours(setOf(8, 10, 12, 14, 16, 18, 20, 22)) },
+                                            modifier = Modifier.height(34.dp),
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+                                        ) {
+                                            Text("☀️ All Day", fontSize = 12.sp)
+                                        }
+                                        OutlinedButton(
+                                            onClick = { viewModel.setCustomReminderHours(setOf(8, 12, 16, 20)) },
+                                            modifier = Modifier.height(34.dp),
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+                                        ) {
+                                            Text("⚡ Every 4h", fontSize = 12.sp)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
 
                                     // Display hours with clean responsive AM/PM format
                                     val candidateHours = listOf(7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)

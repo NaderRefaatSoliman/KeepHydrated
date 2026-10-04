@@ -139,4 +139,20 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(setOf(9, 12, 15, 18)) }
     }
+
+    @Test
+    fun `setCustomReminderHours updates custom hours and userMessage`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        val preset = setOf(9, 11, 13, 15, 17)
+        viewModel.setCustomReminderHours(preset)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(preset) }
+        assertEquals("Preset routine applied (5 reminders)", viewModel.uiState.value.userMessage)
+    }
 }

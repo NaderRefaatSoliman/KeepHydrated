@@ -109,6 +109,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun setCustomReminderHours(hours: Set<Int>) {
+        if (hours.isEmpty()) return
+        viewModelScope.launch {
+            try {
+                saveUserSettingsUseCase.updateCustomReminderHours(hours)
+                _uiState.update { it.copy(userMessage = "Preset routine applied (${hours.size} reminders)") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to set routine") }
+            }
+        }
+    }
+
     fun toggleCustomReminderHour(hour: Int) {
         viewModelScope.launch {
             try {
