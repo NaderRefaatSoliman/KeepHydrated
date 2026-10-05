@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
@@ -37,6 +38,7 @@ class UserPreferencesDataStore @Inject constructor(
         val REMINDER_MODE = stringPreferencesKey("reminder_mode")
         val CUSTOM_REMINDER_HOURS = stringSetPreferencesKey("custom_reminder_hours")
         val NOTIFICATION_SOUND = stringPreferencesKey("notification_sound")
+        val CELEBRATION_SOUND = stringPreferencesKey("celebration_sound")
         val DEFAULT_QUICK_ADD_ML = intPreferencesKey("default_quick_add_ml")
         val QUICK_ADD_ON_NOTIFICATION_CLICK = booleanPreferencesKey("quick_add_on_notification_click")
     }
@@ -67,8 +69,9 @@ class UserPreferencesDataStore @Inject constructor(
             val hoursSet = preferences[PreferencesKeys.CUSTOM_REMINDER_HOURS] ?: setOf("9", "12", "15", "18", "21")
             val customHours = hoursSet.mapNotNull { it.toIntOrNull() }.toSet()
             val soundId = preferences[PreferencesKeys.NOTIFICATION_SOUND] ?: NotificationSound.WATER_DROP.id
+            val celebrationSoundId = preferences[PreferencesKeys.CELEBRATION_SOUND] ?: CelebrationSound.CHIME_FANFARE.id
             val defaultQuickAddMl = preferences[PreferencesKeys.DEFAULT_QUICK_ADD_ML] ?: 250
-            val quickAddOnClick = preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] ?: false
+            val quickAddOnClick = preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] ?: true
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
@@ -80,6 +83,7 @@ class UserPreferencesDataStore @Inject constructor(
                 reminderMode = mode,
                 customReminderHours = if (customHours.isNotEmpty()) customHours else setOf(9, 12, 15, 18, 21),
                 notificationSound = soundId,
+                celebrationSound = celebrationSoundId,
                 defaultQuickAddMl = defaultQuickAddMl,
                 quickAddOnNotificationClick = quickAddOnClick
             )
@@ -133,6 +137,12 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun updateNotificationSound(soundId: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.NOTIFICATION_SOUND] = soundId
+        }
+    }
+
+    suspend fun updateCelebrationSound(soundId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CELEBRATION_SOUND] = soundId
         }
     }
 

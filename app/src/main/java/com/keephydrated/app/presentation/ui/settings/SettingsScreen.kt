@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
@@ -75,6 +76,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
@@ -435,14 +437,6 @@ fun SettingsScreen(
                                         ) {
                                             Text("☀️ All Day", fontSize = 12.sp)
                                         }
-
-                                        OutlinedButton(
-                                            onClick = { viewModel.setCustomReminderHours(setOf(8, 12, 16, 20)) },
-                                            modifier = Modifier.height(34.dp),
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-                                        ) {
-                                            Text("⚡ Every 4h", fontSize = 12.sp)
-                                        }
                                     }
 
                                     Spacer(modifier = Modifier.height(14.dp))
@@ -616,6 +610,82 @@ fun SettingsScreen(
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
+                            // Goal Celebration Sound Selector
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Celebration, contentDescription = null, tint = BluePrimary)
+                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                    Text(
+                                        text = "Goal Celebration Tone",
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Triumphant sound played when you reach your daily hydration target:",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // List of celebration sounds
+                            CelebrationSound.entries.forEach { sound ->
+                                val isSelected = uiState.celebrationSound == sound.id
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { viewModel.updateCelebrationSound(sound.id) }
+                                        .padding(vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        RadioButton(
+                                            selected = isSelected,
+                                            onClick = { viewModel.updateCelebrationSound(sound.id) }
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Column {
+                                            Text(
+                                                text = sound.displayName,
+                                                style = MaterialTheme.typography.bodyMedium.copy(
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                                )
+                                            )
+                                            Text(
+                                                text = sound.description,
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    IconButton(
+                                        onClick = { viewModel.previewCelebrationSound(context, sound) },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.PlayArrow,
+                                            contentDescription = "Preview ${sound.displayName}",
+                                            tint = BluePrimary
+                                        )
+                                    }
+                                }
+                            }
+
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
                             // Smartwatch & Notification Quick Log Settings
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -633,7 +703,7 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Predefined amount logged when tapping quick action on your phone or smartwatch:",
+                                text = "Predefined amount logged when clicking the notification or quick action on your phone or smartwatch:",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -681,7 +751,7 @@ fun SettingsScreen(
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                     Text(
-                                        text = "Tapping the notification immediately logs ${uiState.defaultQuickAddMl} ml in background",
+                                        text = "Tapping notification body immediately logs ${uiState.defaultQuickAddMl} ml in the background silently",
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -723,7 +793,7 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Version 1.3.0 (Smartwatch Actions, Dropdown Logging & Celebrations)",
+                                text = "Version 1.4.0 (Silent Logging, Celebration Sounds & Enhanced Audio)",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

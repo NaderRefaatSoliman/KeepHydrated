@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation.settings
 
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
@@ -61,6 +62,7 @@ class SettingsViewModelTest {
             reminderMode = ReminderMode.CUSTOM_ROUTINE,
             customReminderHours = setOf(8, 12, 16, 20),
             notificationSound = NotificationSound.WATER_POUR.id,
+            celebrationSound = CelebrationSound.VICTORY_SPLASH.id,
             defaultQuickAddMl = 350,
             quickAddOnNotificationClick = true
         )
@@ -83,6 +85,7 @@ class SettingsViewModelTest {
         assertEquals(ReminderMode.CUSTOM_ROUTINE, state.reminderMode)
         assertEquals(setOf(8, 12, 16, 20), state.customReminderHours)
         assertEquals(NotificationSound.WATER_POUR.id, state.notificationSound)
+        assertEquals(CelebrationSound.VICTORY_SPLASH.id, state.celebrationSound)
         assertEquals(350, state.defaultQuickAddMl)
         assertEquals(true, state.quickAddOnNotificationClick)
     }
@@ -214,6 +217,21 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateNotificationSound(NotificationSound.OCEAN_WAVE.id) }
         assertEquals("Notification sound: Ocean Wave", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `updateCelebrationSound updates sound in usecase and sets message`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateCelebrationSound(CelebrationSound.VICTORY_SPLASH.id)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCelebrationSound(CelebrationSound.VICTORY_SPLASH.id) }
+        assertEquals("Celebration tone: Victory Splash", viewModel.uiState.value.userMessage)
     }
 
     @Test

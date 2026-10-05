@@ -1,5 +1,6 @@
 package com.keephydrated.app.domain.usecase
 
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
@@ -89,8 +90,17 @@ class SaveUserSettingsUseCaseTest {
 
     @Test
     fun `updateNotificationSound updates repository with valid sound id`() = runTest {
-        useCase.updateNotificationSound(NotificationSound.WATER_POUR.id)
-        coVerify(exactly = 1) { settingsRepository.updateNotificationSound(NotificationSound.WATER_POUR.id) }
+        useCase.updateNotificationSound(NotificationSound.WATER_SPILL.id)
+        coVerify(exactly = 1) { settingsRepository.updateNotificationSound(NotificationSound.WATER_SPILL.id) }
+
+        useCase.updateNotificationSound(NotificationSound.BOTTLE_FILL.id)
+        coVerify(exactly = 1) { settingsRepository.updateNotificationSound(NotificationSound.BOTTLE_FILL.id) }
+    }
+
+    @Test
+    fun `updateCelebrationSound updates repository with valid celebration sound`() = runTest {
+        useCase.updateCelebrationSound(CelebrationSound.VICTORY_SPLASH.id)
+        coVerify(exactly = 1) { settingsRepository.updateCelebrationSound(CelebrationSound.VICTORY_SPLASH.id) }
     }
 
     @Test

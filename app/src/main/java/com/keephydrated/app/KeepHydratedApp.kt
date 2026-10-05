@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -33,8 +34,10 @@ class KeepHydratedApp : Application(), Configuration.Provider {
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = "hydration_reminders_channel"
+        const val SILENT_ACK_CHANNEL_ID = "hydration_silent_ack_channel"
         const val CELEBRATION_CHANNEL_ID = "hydration_celebration_channel"
         const val CHANNEL_PREFIX = "hydration_channel_"
+        const val CELEBRATION_CHANNEL_PREFIX = "hydration_celebration_"
 
         const val REMINDER_NOTIFICATION_ID = 1001
         const val CELEBRATION_NOTIFICATION_ID = 1002
@@ -46,8 +49,27 @@ class KeepHydratedApp : Application(), Configuration.Provider {
             return "${CHANNEL_PREFIX}${soundId}"
         }
 
+        fun getCelebrationChannelIdForSound(soundId: String?): String {
+            if (soundId.isNullOrBlank() || soundId == CelebrationSound.SYSTEM_DEFAULT.id) {
+                return CELEBRATION_CHANNEL_ID
+            }
+            return "${CELEBRATION_CHANNEL_PREFIX}${soundId}"
+        }
+
         fun getSoundUri(context: Context, sound: NotificationSound): Uri? {
             if (sound == NotificationSound.SYSTEM_DEFAULT || sound.resName.isBlank()) {
+                return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            }
+            val resId = context.resources.getIdentifier(sound.resName, "raw", context.packageName)
+            return if (resId != 0) {
+                Uri.parse("${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/$resId")
+            } else {
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            }
+        }
+
+        fun getCelebrationSoundUri(context: Context, sound: CelebrationSound): Uri? {
+            if (sound == CelebrationSound.SYSTEM_DEFAULT || sound.resName.isBlank()) {
                 return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             }
             val resId = context.resources.getIdentifier(sound.resName, "raw", context.packageName)
@@ -79,7 +101,19 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                 }
                 notificationManager.createNotificationChannel(defaultChannel)
 
-                // Dedicated channels per custom sound
+                // Dedicated silent acknowledgment channel (for logged intake confirmations)
+                val silentAckChannel = NotificationChannel(
+                    SILENT_ACK_CHANNEL_ID,
+                    "Intake Confirmations",
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    description = "Silent confirmations when water intake is logged"
+                    enableVibration(false)
+                    setSound(null, null)
+                }
+                notificationManager.createNotificationChannel(silentAckChannel)
+
+                // Dedicated reminder channels per custom water sound
                 NotificationSound.entries.forEach { sound ->
                     val channelId = getChannelIdForSound(sound.id)
                     if (channelId != NOTIFICATION_CHANNEL_ID) {
@@ -100,8 +134,8 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                     }
                 }
 
-                // Dedicated channel for Goal Celebration notifications
-                val celebrationChannel = NotificationChannel(
+                // Default celebration channel
+                val defaultCelebrationChannel = NotificationChannel(
                     CELEBRATION_CHANNEL_ID,
                     "Goal Celebrations",
                     NotificationManager.IMPORTANCE_HIGH
@@ -116,7 +150,29 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                         setSound(celebrationSoundUri, audioAttributes)
                     }
                 }
-                notificationManager.createNotificationChannel(celebrationChannel)
+                notificationManager.createNotificationChannel(defaultCelebrationChannel)
+
+                // Celebration channels per celebration sound
+                CelebrationSound.entries.forEach { sound ->
+                    val channelId = getCelebrationChannelIdForSound(sound.id)
+                    if (channelId != CELEBRATION_CHANNEL_ID) {
+                        val channelName = "Goal Celebration - ${sound.displayName}"
+                        val channel = NotificationChannel(
+                            channelId,
+                            channelName,
+                            NotificationManager.IMPORTANCE_HIGH
+                        ).apply {
+                            description = sound.description
+                            enableVibration(true)
+                            vibrationPattern = longArrayOf(0, 250, 150, 250, 150, 400)
+                            val soundUri = getCelebrationSoundUri(context, sound)
+                            if (soundUri != null) {
+                                setSound(soundUri, audioAttributes)
+                            }
+                        }
+                        notificationManager.createNotificationChannel(channel)
+                    }
+                }
             }
         }
     }

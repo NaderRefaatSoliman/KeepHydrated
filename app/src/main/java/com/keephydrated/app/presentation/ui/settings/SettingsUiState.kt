@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation.ui.settings
 
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 
@@ -13,8 +14,9 @@ data class SettingsUiState(
     val reminderMode: ReminderMode = ReminderMode.INTERVAL,
     val customReminderHours: Set<Int> = setOf(9, 12, 15, 18, 21),
     val notificationSound: String = NotificationSound.WATER_DROP.id,
+    val celebrationSound: String = CelebrationSound.CHIME_FANFARE.id,
     val defaultQuickAddMl: Int = 250,
-    val quickAddOnNotificationClick: Boolean = false,
+    val quickAddOnNotificationClick: Boolean = true,
     val isLoading: Boolean = true,
     val userMessage: String? = null
 )

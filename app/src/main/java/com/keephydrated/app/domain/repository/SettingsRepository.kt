@@ -14,6 +14,7 @@ interface SettingsRepository {
     suspend fun updateReminderMode(mode: ReminderMode)
     suspend fun updateCustomReminderHours(hours: Set<Int>)
     suspend fun updateNotificationSound(soundId: String)
+    suspend fun updateCelebrationSound(soundId: String)
     suspend fun updateDefaultQuickAddMl(amountMl: Int)
     suspend fun updateQuickAddOnNotificationClick(enabled: Boolean)
 }

@@ -1,5 +1,6 @@
 package com.keephydrated.app.domain.usecase
 
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
@@ -44,6 +45,11 @@ class SaveUserSettingsUseCase @Inject constructor(
     suspend fun updateNotificationSound(soundId: String) {
         val sound = NotificationSound.fromId(soundId)
         settingsRepository.updateNotificationSound(sound.id)
+    }
+
+    suspend fun updateCelebrationSound(soundId: String) {
+        val sound = CelebrationSound.fromId(soundId)
+        settingsRepository.updateCelebrationSound(sound.id)
     }
 
     suspend fun updateDefaultQuickAddMl(amountMl: Int) {

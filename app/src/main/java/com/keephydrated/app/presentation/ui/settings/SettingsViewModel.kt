@@ -7,6 +7,7 @@ import android.media.RingtoneManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keephydrated.app.KeepHydratedApp
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
@@ -53,6 +54,7 @@ class SettingsViewModel @Inject constructor(
                         reminderMode = settings.reminderMode,
                         customReminderHours = settings.customReminderHours,
                         notificationSound = settings.notificationSound,
+                        celebrationSound = settings.celebrationSound,
                         defaultQuickAddMl = settings.defaultQuickAddMl,
                         quickAddOnNotificationClick = settings.quickAddOnNotificationClick,
                         isLoading = false
@@ -243,6 +245,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCelebrationSound(soundId: String) {
+        viewModelScope.launch {
+            try {
+                val sound = CelebrationSound.fromId(soundId)
+                saveUserSettingsUseCase.updateCelebrationSound(sound.id)
+                _uiState.update { it.copy(userMessage = "Celebration tone: ${sound.displayName}") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to update celebration tone") }
+            }
+        }
+    }
+
     fun updateDefaultQuickAddMl(amountMl: Int) {
         viewModelScope.launch {
             try {
@@ -292,6 +306,32 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun previewCelebrationSound(context: Context, sound: CelebrationSound) {
+        try {
+            previewPlayer?.release()
+            previewPlayer = null
+
+            if (sound == CelebrationSound.SYSTEM_DEFAULT || sound.resName.isBlank()) {
+                val defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val ringtone = RingtoneManager.getRingtone(context, defaultUri)
+                ringtone?.play()
+            } else {
+                val resId = context.resources.getIdentifier(sound.resName, "raw", context.packageName)
+                if (resId != 0) {
+                    previewPlayer = MediaPlayer.create(context, resId)?.apply {
+                        setOnCompletionListener {
+                            it.release()
+                            previewPlayer = null
+                        }
+                        start()
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Graceful fallback
+        }
+    }
+
     fun sendTestNotification(context: Context) {
         try {
             val sound = NotificationSound.fromId(_uiState.value.notificationSound)
@@ -305,6 +345,7 @@ class SettingsViewModel @Inject constructor(
                 reminderMode = _uiState.value.reminderMode,
                 customReminderHours = _uiState.value.customReminderHours,
                 notificationSound = sound.id,
+                celebrationSound = _uiState.value.celebrationSound,
                 defaultQuickAddMl = _uiState.value.defaultQuickAddMl,
                 quickAddOnNotificationClick = _uiState.value.quickAddOnNotificationClick
             )
