@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Check
@@ -35,7 +36,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
@@ -517,7 +517,7 @@ fun SettingsScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.VolumeUp, contentDescription = null, tint = BluePrimary)
+                                    Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null, tint = BluePrimary)
                                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                     Text(
                                         text = "Reminder Tone",

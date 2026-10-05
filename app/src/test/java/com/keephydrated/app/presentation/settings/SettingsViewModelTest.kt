@@ -246,7 +246,7 @@ class SettingsViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateDefaultQuickAddMl(350) }
-        assertEquals("Notification quick-add amount: 350 ml", viewModel.uiState.value.userMessage)
+        assertEquals("Quick-add amount set to 350 ml", viewModel.uiState.value.userMessage)
     }
 
     @Test
