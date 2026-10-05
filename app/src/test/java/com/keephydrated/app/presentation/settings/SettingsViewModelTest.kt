@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation.settings
 
+import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.usecase.GetUserSettingsUseCase
@@ -53,9 +54,13 @@ class SettingsViewModelTest {
         val userSettings = UserSettings(
             dailyGoalMl = 2500,
             reminderIntervalHours = 3,
+            reminderIntervalMinutes = 180,
             remindersEnabled = true,
+            startHour = 7,
+            endHour = 23,
             reminderMode = ReminderMode.CUSTOM_ROUTINE,
-            customReminderHours = setOf(8, 12, 16, 20)
+            customReminderHours = setOf(8, 12, 16, 20),
+            notificationSound = NotificationSound.WATER_POUR.id
         )
         settingsFlow.emit(userSettings)
 
@@ -69,9 +74,13 @@ class SettingsViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(2500, state.dailyGoalMl)
         assertEquals(3, state.reminderIntervalHours)
+        assertEquals(180, state.reminderIntervalMinutes)
         assertEquals(true, state.remindersEnabled)
+        assertEquals(7, state.startHour)
+        assertEquals(23, state.endHour)
         assertEquals(ReminderMode.CUSTOM_ROUTINE, state.reminderMode)
         assertEquals(setOf(8, 12, 16, 20), state.customReminderHours)
+        assertEquals(NotificationSound.WATER_POUR.id, state.notificationSound)
     }
 
     @Test
@@ -87,6 +96,38 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateGoal(2800) }
         assertEquals("Goal updated to 2800 ml", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `updateReminderInterval delegates to usecase and reschedules reminders`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateReminderInterval(4)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateReminderInterval(4) }
+        verify(exactly = 1) { reminderScheduler.scheduleReminders(240, any(), any()) }
+        assertEquals("Reminder interval updated to 4 hours", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `updateReminderIntervalMinutes delegates to usecase and reschedules reminders`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateReminderIntervalMinutes(45)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateReminderIntervalMinutes(45) }
+        verify(exactly = 1) { reminderScheduler.scheduleReminders(45, any(), any()) }
+        assertEquals("Reminder interval updated to 45 minutes", viewModel.uiState.value.userMessage)
     }
 
     @Test
@@ -154,5 +195,38 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(preset) }
         assertEquals("Preset routine applied (5 reminders)", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `updateNotificationSound updates sound in usecase and sets message`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateNotificationSound(NotificationSound.OCEAN_WAVE.id)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateNotificationSound(NotificationSound.OCEAN_WAVE.id) }
+        assertEquals("Notification sound: Ocean Wave", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `applyWakingDayPreset updates active hours and custom reminder routine`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        // Wake at 7 AM, sleep at 11 PM (23), every 2h
+        viewModel.applyWakingDayPreset(wakeHour = 7, sleepHour = 23, stepHours = 2)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateActiveHours(7, 23) }
+        val expectedHours = setOf(7, 9, 11, 13, 15, 17, 19, 21, 23)
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(expectedHours) }
+        assertEquals("Awake schedule applied: 9 reminders set", viewModel.uiState.value.userMessage)
     }
 }

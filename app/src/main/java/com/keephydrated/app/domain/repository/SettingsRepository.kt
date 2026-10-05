@@ -8,8 +8,10 @@ interface SettingsRepository {
     fun getUserSettings(): Flow<UserSettings>
     suspend fun updateDailyGoal(goalMl: Int)
     suspend fun updateReminderInterval(hours: Int)
+    suspend fun updateReminderIntervalMinutes(minutes: Int)
     suspend fun updateRemindersEnabled(enabled: Boolean)
     suspend fun updateActiveHours(startHour: Int, endHour: Int)
     suspend fun updateReminderMode(mode: ReminderMode)
     suspend fun updateCustomReminderHours(hours: Set<Int>)
+    suspend fun updateNotificationSound(soundId: String)
 }

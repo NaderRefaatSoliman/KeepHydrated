@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -29,11 +30,13 @@ class UserPreferencesDataStore @Inject constructor(
     private object PreferencesKeys {
         val DAILY_GOAL = intPreferencesKey("daily_goal_ml")
         val REMINDER_INTERVAL = intPreferencesKey("reminder_interval_hours")
+        val REMINDER_INTERVAL_MINUTES = intPreferencesKey("reminder_interval_minutes")
         val REMINDERS_ENABLED = booleanPreferencesKey("reminders_enabled")
         val START_HOUR = intPreferencesKey("start_hour")
         val END_HOUR = intPreferencesKey("end_hour")
         val REMINDER_MODE = stringPreferencesKey("reminder_mode")
         val CUSTOM_REMINDER_HOURS = stringSetPreferencesKey("custom_reminder_hours")
+        val NOTIFICATION_SOUND = stringPreferencesKey("notification_sound")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -46,7 +49,10 @@ class UserPreferencesDataStore @Inject constructor(
         }
         .map { preferences ->
             val dailyGoal = preferences[PreferencesKeys.DAILY_GOAL] ?: 2000
-            val reminderInterval = preferences[PreferencesKeys.REMINDER_INTERVAL] ?: 2
+            val legacyHours = preferences[PreferencesKeys.REMINDER_INTERVAL] ?: 2
+            val reminderIntervalMinutes = preferences[PreferencesKeys.REMINDER_INTERVAL_MINUTES]
+                ?: (legacyHours * 60)
+            val reminderIntervalHours = (reminderIntervalMinutes / 60).coerceAtLeast(1)
             val remindersEnabled = preferences[PreferencesKeys.REMINDERS_ENABLED] ?: true
             val startHour = preferences[PreferencesKeys.START_HOUR] ?: 8
             val endHour = preferences[PreferencesKeys.END_HOUR] ?: 22
@@ -58,15 +64,18 @@ class UserPreferencesDataStore @Inject constructor(
             }
             val hoursSet = preferences[PreferencesKeys.CUSTOM_REMINDER_HOURS] ?: setOf("9", "12", "15", "18", "21")
             val customHours = hoursSet.mapNotNull { it.toIntOrNull() }.toSet()
+            val soundId = preferences[PreferencesKeys.NOTIFICATION_SOUND] ?: NotificationSound.WATER_DROP.id
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
-                reminderIntervalHours = reminderInterval,
+                reminderIntervalHours = reminderIntervalHours,
+                reminderIntervalMinutes = reminderIntervalMinutes,
                 remindersEnabled = remindersEnabled,
                 startHour = startHour,
                 endHour = endHour,
                 reminderMode = mode,
-                customReminderHours = if (customHours.isNotEmpty()) customHours else setOf(9, 12, 15, 18, 21)
+                customReminderHours = if (customHours.isNotEmpty()) customHours else setOf(9, 12, 15, 18, 21),
+                notificationSound = soundId
             )
         }
 
@@ -79,6 +88,14 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun updateReminderInterval(hours: Int) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.REMINDER_INTERVAL] = hours
+            preferences[PreferencesKeys.REMINDER_INTERVAL_MINUTES] = hours * 60
+        }
+    }
+
+    suspend fun updateReminderIntervalMinutes(minutes: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REMINDER_INTERVAL_MINUTES] = minutes
+            preferences[PreferencesKeys.REMINDER_INTERVAL] = (minutes / 60).coerceAtLeast(1)
         }
     }
 
@@ -104,6 +121,12 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun updateCustomReminderHours(hours: Set<Int>) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.CUSTOM_REMINDER_HOURS] = hours.map { it.toString() }.toSet()
+        }
+    }
+
+    suspend fun updateNotificationSound(soundId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATION_SOUND] = soundId
         }
     }
 }

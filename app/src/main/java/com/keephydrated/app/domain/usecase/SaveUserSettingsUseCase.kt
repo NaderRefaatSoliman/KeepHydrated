@@ -1,5 +1,6 @@
 package com.keephydrated.app.domain.usecase
 
+import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
 import javax.inject.Inject
@@ -15,6 +16,11 @@ class SaveUserSettingsUseCase @Inject constructor(
     suspend fun updateReminderInterval(hours: Int) {
         require(hours in 1..12) { "Reminder interval must be between 1 and 12 hours" }
         settingsRepository.updateReminderInterval(hours)
+    }
+
+    suspend fun updateReminderIntervalMinutes(minutes: Int) {
+        require(minutes in 15..720) { "Reminder interval must be between 15 minutes and 12 hours (720 minutes)" }
+        settingsRepository.updateReminderIntervalMinutes(minutes)
     }
 
     suspend fun updateRemindersEnabled(enabled: Boolean) {
@@ -33,5 +39,10 @@ class SaveUserSettingsUseCase @Inject constructor(
     suspend fun updateCustomReminderHours(hours: Set<Int>) {
         require(hours.all { it in 0..23 }) { "All selected hours must be between 0 and 23" }
         settingsRepository.updateCustomReminderHours(hours)
+    }
+
+    suspend fun updateNotificationSound(soundId: String) {
+        val sound = NotificationSound.fromId(soundId)
+        settingsRepository.updateNotificationSound(sound.id)
     }
 }

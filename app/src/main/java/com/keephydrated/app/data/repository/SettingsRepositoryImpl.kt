@@ -25,6 +25,10 @@ class SettingsRepositoryImpl @Inject constructor(
         preferencesDataStore.updateReminderInterval(hours)
     }
 
+    override suspend fun updateReminderIntervalMinutes(minutes: Int) {
+        preferencesDataStore.updateReminderIntervalMinutes(minutes)
+    }
+
     override suspend fun updateRemindersEnabled(enabled: Boolean) {
         preferencesDataStore.updateRemindersEnabled(enabled)
     }
@@ -39,5 +43,9 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updateCustomReminderHours(hours: Set<Int>) {
         preferencesDataStore.updateCustomReminderHours(hours)
+    }
+
+    override suspend fun updateNotificationSound(soundId: String) {
+        preferencesDataStore.updateNotificationSound(soundId)
     }
 }

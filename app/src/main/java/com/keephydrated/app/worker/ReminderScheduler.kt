@@ -15,7 +15,7 @@ class ReminderScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     fun scheduleReminders(
-        intervalHours: Int,
+        intervalMinutes: Int,
         enabled: Boolean,
         mode: ReminderMode = ReminderMode.INTERVAL
     ) {
@@ -27,14 +27,14 @@ class ReminderScheduler @Inject constructor(
         }
 
         val repeatInterval = if (mode == ReminderMode.CUSTOM_ROUTINE) {
-            1L // Hourly checks for custom schedule
+            60L // Hourly checks for custom schedule
         } else {
-            intervalHours.coerceAtLeast(1).toLong()
+            intervalMinutes.coerceAtLeast(15).toLong()
         }
 
         val reminderRequest = PeriodicWorkRequestBuilder<WaterReminderWorker>(
             repeatInterval,
-            TimeUnit.HOURS
+            TimeUnit.MINUTES
         ).build()
 
         workManager.enqueueUniquePeriodicWork(

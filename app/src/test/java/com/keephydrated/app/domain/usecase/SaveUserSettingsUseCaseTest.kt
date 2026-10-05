@@ -1,5 +1,6 @@
 package com.keephydrated.app.domain.usecase
 
+import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
 import io.mockk.coVerify
@@ -52,21 +53,43 @@ class SaveUserSettingsUseCaseTest {
     }
 
     @Test
+    fun `updateReminderIntervalMinutes with valid minutes calls repository`() = runTest {
+        useCase.updateReminderIntervalMinutes(45)
+        coVerify(exactly = 1) { settingsRepository.updateReminderIntervalMinutes(45) }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateReminderIntervalMinutes below 15 throws IllegalArgumentException`() = runTest {
+        useCase.updateReminderIntervalMinutes(10)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateReminderIntervalMinutes above 720 throws IllegalArgumentException`() = runTest {
+        useCase.updateReminderIntervalMinutes(800)
+    }
+
+    @Test
     fun `updateReminderMode updates mode in repository`() = runTest {
         useCase.updateReminderMode(ReminderMode.CUSTOM_ROUTINE)
         coVerify(exactly = 1) { settingsRepository.updateReminderMode(ReminderMode.CUSTOM_ROUTINE) }
     }
 
     @Test
-    fun `updateCustomReminderHours with valid hours updates repository`() = runTest {
-        val validHours = setOf(8, 12, 16, 20)
-        useCase.updateCustomReminderHours(validHours)
-        coVerify(exactly = 1) { settingsRepository.updateCustomReminderHours(validHours) }
+    fun `updateCustomReminderHours with valid 24h range updates repository`() = runTest {
+        val all24Hours = (0..23).toSet()
+        useCase.updateCustomReminderHours(all24Hours)
+        coVerify(exactly = 1) { settingsRepository.updateCustomReminderHours(all24Hours) }
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `updateCustomReminderHours with invalid hour throws IllegalArgumentException`() = runTest {
-        val invalidHours = setOf(8, 12, 25) // 25 is invalid
+        val invalidHours = setOf(8, 12, 24) // 24 is invalid (valid range is 0..23)
         useCase.updateCustomReminderHours(invalidHours)
+    }
+
+    @Test
+    fun `updateNotificationSound updates repository with valid sound id`() = runTest {
+        useCase.updateNotificationSound(NotificationSound.WATER_POUR.id)
+        coVerify(exactly = 1) { settingsRepository.updateNotificationSound(NotificationSound.WATER_POUR.id) }
     }
 }

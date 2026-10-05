@@ -10,6 +10,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.keephydrated.app.KeepHydratedApp
 import com.keephydrated.app.R
+import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.presentation.MainActivity
@@ -55,11 +56,11 @@ class WaterReminderWorker @AssistedInject constructor(
             }
         }
 
-        showReminderNotification()
+        showReminderNotification(settings.notificationSound)
         return Result.success()
     }
 
-    private fun showReminderNotification() {
+    private fun showReminderNotification(soundId: String) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -70,13 +71,22 @@ class WaterReminderWorker @AssistedInject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, KeepHydratedApp.NOTIFICATION_CHANNEL_ID)
+        val sound = NotificationSound.fromId(soundId)
+        val channelId = KeepHydratedApp.getChannelIdForSound(sound.id)
+        val soundUri = KeepHydratedApp.getSoundUri(context, sound)
+
+        val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(context.getString(R.string.reminder_title))
             .setContentText(context.getString(R.string.reminder_message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            .apply {
+                if (soundUri != null) {
+                    setSound(soundUri)
+                }
+            }
             .build()
 
         val notificationManager =
