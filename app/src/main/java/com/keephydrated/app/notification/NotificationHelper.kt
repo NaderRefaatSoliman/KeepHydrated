@@ -50,15 +50,21 @@ object NotificationHelper {
             quickAddPendingIntent
         ).build()
 
-        // WearableExtender for Smartwatches
+        // WearableExtender optimized for Smartwatches
         val wearableExtender = NotificationCompat.WearableExtender()
             .addAction(quickAddAction)
+            .setContentAction(0)
+            .setHintShowBackgroundOnly(false)
+            .setBridgeTag("keephydrated_water_reminder")
 
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(context.getString(R.string.reminder_title))
             .setContentText("Tap to log ${settings.defaultQuickAddMl} ml water intake")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setVibrate(longArrayOf(0, 350, 200, 350))
             .setAutoCancel(true)
             .setContentIntent(contentPendingIntent)
             .addAction(quickAddAction)
@@ -91,6 +97,8 @@ object NotificationHelper {
             .setContentTitle("💧 $amountMl ml Logged")
             .setContentText("Today: $newTotalMl / $goalMl ml ($percent%)")
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSilent(true)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -118,15 +126,21 @@ object NotificationHelper {
         val channelId = KeepHydratedApp.getCelebrationChannelIdForSound(sound.id)
         val soundUri = KeepHydratedApp.getCelebrationSoundUri(context, sound)
 
+        val wearableExtender = NotificationCompat.WearableExtender()
+            .setHintShowBackgroundOnly(false)
+            .setBridgeTag("keephydrated_goal_celebration")
+
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("🎉 Daily Goal Achieved!")
             .setContentText("Congratulations! You've reached your daily hydration goal of $goalMl ml! 🏆💧")
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_EVENT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setVibrate(longArrayOf(0, 250, 150, 250, 150, 400))
+            .setVibrate(longArrayOf(0, 300, 150, 300, 150, 450))
+            .extend(wearableExtender)
             .apply {
                 if (soundUri != null) {
                     setSound(soundUri)

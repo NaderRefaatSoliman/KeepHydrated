@@ -5,6 +5,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Exact Alarm and Background Execution permissions for real-time reminders -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <application
         android:name=".KeepHydratedApp"
         android:allowBackup="true"
@@ -25,9 +32,25 @@
             </intent-filter>
         </activity>
 
+        <!-- Receiver for 1-tap notification intake logging -->
         <receiver
             android:name=".receiver.WaterIntakeNotificationReceiver"
             android:exported="false" />
+
+        <!-- Receiver for exact real-time alarm execution -->
+        <receiver
+            android:name=".receiver.ReminderAlarmReceiver"
+            android:exported="false" />
+
+        <!-- Receiver for rescheduling alarms on device boot or update -->
+        <receiver
+            android:name=".receiver.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

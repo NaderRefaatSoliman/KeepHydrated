@@ -15,11 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.presentation.navigation.Screen
 import com.keephydrated.app.presentation.ui.history.HistoryScreen
 import com.keephydrated.app.presentation.ui.history.HistoryViewModel
@@ -29,13 +31,39 @@ import com.keephydrated.app.presentation.ui.settings.SettingsScreen
 import com.keephydrated.app.presentation.ui.settings.SettingsViewModel
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.KeepHydratedTheme
+import com.keephydrated.app.worker.ReminderScheduler
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject
+    lateinit var reminderScheduler: ReminderScheduler
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            try {
+                val settings = settingsRepository.getUserSettings().first()
+                if (settings.remindersEnabled) {
+                    reminderScheduler.scheduleReminders(
+                        intervalMinutes = settings.reminderIntervalMinutes,
+                        enabled = true,
+                        mode = settings.reminderMode
+                    )
+                }
+            } catch (_: Exception) {
+                // Graceful fallback
+            }
+        }
+
         setContent {
             KeepHydratedTheme {
                 KeepHydratedMain()
