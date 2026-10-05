@@ -60,7 +60,9 @@ class SettingsViewModelTest {
             endHour = 23,
             reminderMode = ReminderMode.CUSTOM_ROUTINE,
             customReminderHours = setOf(8, 12, 16, 20),
-            notificationSound = NotificationSound.WATER_POUR.id
+            notificationSound = NotificationSound.WATER_POUR.id,
+            defaultQuickAddMl = 350,
+            quickAddOnNotificationClick = true
         )
         settingsFlow.emit(userSettings)
 
@@ -81,6 +83,8 @@ class SettingsViewModelTest {
         assertEquals(ReminderMode.CUSTOM_ROUTINE, state.reminderMode)
         assertEquals(setOf(8, 12, 16, 20), state.customReminderHours)
         assertEquals(NotificationSound.WATER_POUR.id, state.notificationSound)
+        assertEquals(350, state.defaultQuickAddMl)
+        assertEquals(true, state.quickAddOnNotificationClick)
     }
 
     @Test
@@ -228,5 +232,35 @@ class SettingsViewModelTest {
         val expectedHours = setOf(7, 9, 11, 13, 15, 17, 19, 21, 23)
         coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(expectedHours) }
         assertEquals("Awake schedule applied: 9 reminders set", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `updateDefaultQuickAddMl updates amount in usecase and sets message`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateDefaultQuickAddMl(350)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateDefaultQuickAddMl(350) }
+        assertEquals("Notification quick-add amount: 350 ml", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
+    fun `updateQuickAddOnNotificationClick updates flag in usecase and sets message`() = runTest {
+        val viewModel = SettingsViewModel(
+            getUserSettingsUseCase,
+            saveUserSettingsUseCase,
+            reminderScheduler
+        )
+
+        viewModel.updateQuickAddOnNotificationClick(true)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { saveUserSettingsUseCase.updateQuickAddOnNotificationClick(true) }
+        assertEquals("One-tap log on notification click enabled", viewModel.uiState.value.userMessage)
     }
 }

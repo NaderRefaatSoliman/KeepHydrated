@@ -1,20 +1,18 @@
 package com.keephydrated.app.presentation.ui.settings
 
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.media.MediaPlayer
 import android.media.RingtoneManager
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keephydrated.app.KeepHydratedApp
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
+import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.usecase.GetUserSettingsUseCase
 import com.keephydrated.app.domain.usecase.SaveUserSettingsUseCase
-import com.keephydrated.app.presentation.MainActivity
+import com.keephydrated.app.notification.NotificationHelper
 import com.keephydrated.app.worker.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +53,8 @@ class SettingsViewModel @Inject constructor(
                         reminderMode = settings.reminderMode,
                         customReminderHours = settings.customReminderHours,
                         notificationSound = settings.notificationSound,
+                        defaultQuickAddMl = settings.defaultQuickAddMl,
+                        quickAddOnNotificationClick = settings.quickAddOnNotificationClick,
                         isLoading = false
                     )
                 }
@@ -243,6 +243,29 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateDefaultQuickAddMl(amountMl: Int) {
+        viewModelScope.launch {
+            try {
+                saveUserSettingsUseCase.updateDefaultQuickAddMl(amountMl)
+                _uiState.update { it.copy(userMessage = "Quick-add amount set to $amountMl ml") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to update quick-add amount") }
+            }
+        }
+    }
+
+    fun updateQuickAddOnNotificationClick(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                saveUserSettingsUseCase.updateQuickAddOnNotificationClick(enabled)
+                val msg = if (enabled) "One-tap log on notification click enabled" else "One-tap log on notification click disabled"
+                _uiState.update { it.copy(userMessage = msg) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update notification click setting") }
+            }
+        }
+    }
+
     fun previewSound(context: Context, sound: NotificationSound) {
         try {
             previewPlayer?.release()
@@ -272,33 +295,21 @@ class SettingsViewModel @Inject constructor(
     fun sendTestNotification(context: Context) {
         try {
             val sound = NotificationSound.fromId(_uiState.value.notificationSound)
-            val channelId = KeepHydratedApp.getChannelIdForSound(sound.id)
-            val soundUri = KeepHydratedApp.getSoundUri(context, sound)
-
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            val testSettings = UserSettings(
+                dailyGoalMl = _uiState.value.dailyGoalMl,
+                reminderIntervalHours = _uiState.value.reminderIntervalHours,
+                reminderIntervalMinutes = _uiState.value.reminderIntervalMinutes,
+                remindersEnabled = _uiState.value.remindersEnabled,
+                startHour = _uiState.value.startHour,
+                endHour = _uiState.value.endHour,
+                reminderMode = _uiState.value.reminderMode,
+                customReminderHours = _uiState.value.customReminderHours,
+                notificationSound = sound.id,
+                defaultQuickAddMl = _uiState.value.defaultQuickAddMl,
+                quickAddOnNotificationClick = _uiState.value.quickAddOnNotificationClick
             )
 
-            val notification = NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle("KeepHydrated Test")
-                .setContentText("💧 Sip time! Sound: ${sound.displayName}")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
-                .apply {
-                    if (soundUri != null) {
-                        setSound(soundUri)
-                    }
-                }
-                .build()
-
+            val notification = NotificationHelper.buildReminderNotification(context, testSettings)
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.notify(TEST_NOTIFICATION_ID, notification)

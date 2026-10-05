@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -91,6 +92,7 @@ fun SettingsScreen(
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
     var showWakingDayDialog by remember { mutableStateOf(false) }
+    var showQuickAddAmountDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -492,7 +494,7 @@ fun SettingsScreen(
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-                    // Section 3: Notification & Sound Configuration
+                    // Section 3: Notification, Sounds & Smartwatch Actions
                     Text(
                         text = "Notification & Sounds",
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -611,6 +613,86 @@ fun SettingsScreen(
                                     }
                                 }
                             }
+
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                            // Smartwatch & Notification Quick Log Settings
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Watch, contentDescription = null, tint = BluePrimary)
+                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                    Text(
+                                        text = "Smartwatch & Shade Quick-Add",
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Predefined amount logged when tapping quick action on your phone or smartwatch:",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            val predefinedAmounts = listOf(150, 200, 250, 300, 350, 500)
+                            val isCustomAmount = uiState.defaultQuickAddMl !in predefinedAmounts
+
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                predefinedAmounts.forEach { amount ->
+                                    FilterChip(
+                                        selected = uiState.defaultQuickAddMl == amount,
+                                        onClick = { viewModel.updateDefaultQuickAddMl(amount) },
+                                        label = { Text("${amount} ml") }
+                                    )
+                                }
+
+                                FilterChip(
+                                    selected = isCustomAmount,
+                                    onClick = { showQuickAddAmountDialog = true },
+                                    label = {
+                                        Text(if (isCustomAmount) "${uiState.defaultQuickAddMl} ml" else "Custom...")
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    }
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "One-Tap Add on Notification Click",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                    )
+                                    Text(
+                                        text = "Tapping the notification immediately logs ${uiState.defaultQuickAddMl} ml in background",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Switch(
+                                    checked = uiState.quickAddOnNotificationClick,
+                                    onCheckedChange = { viewModel.updateQuickAddOnNotificationClick(it) }
+                                )
+                            }
                         }
                     }
 
@@ -641,7 +723,7 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Version 1.2.0 (Custom Reminders, Water Sounds & 24h Routine)",
+                                text = "Version 1.3.0 (Smartwatch Actions, Dropdown Logging & Celebrations)",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -684,6 +766,17 @@ fun SettingsScreen(
             onConfirm = { wakeHour, sleepHour, stepHours ->
                 viewModel.applyWakingDayPreset(wakeHour, sleepHour, stepHours)
                 showWakingDayDialog = false
+            }
+        )
+    }
+
+    if (showQuickAddAmountDialog) {
+        QuickAddAmountDialog(
+            currentAmount = uiState.defaultQuickAddMl,
+            onDismiss = { showQuickAddAmountDialog = false },
+            onConfirm = { amount ->
+                viewModel.updateDefaultQuickAddMl(amount)
+                showQuickAddAmountDialog = false
             }
         )
     }
@@ -744,6 +837,60 @@ fun DailyGoalDialog(
                 onClick = {
                     val amount = textValue.toIntOrNull()
                     if (amount != null && amount in 500..10000) {
+                        onConfirm(amount)
+                    } else {
+                        isError = true
+                    }
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun QuickAddAmountDialog(
+    currentAmount: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var textValue by remember { mutableStateOf(currentAmount.toString()) }
+    var isError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Predefined Quick-Add Amount") },
+        text = {
+            Column {
+                Text("Enter amount in ml (50 - 2000 ml) for one-tap notification & smartwatch logging:")
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = textValue,
+                    onValueChange = {
+                        textValue = it
+                        isError = false
+                    },
+                    isError = isError,
+                    label = { Text("Amount (ml)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    supportingText = {
+                        if (isError) Text("Must be between 50 and 2000 ml")
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val amount = textValue.toIntOrNull()
+                    if (amount != null && amount in 50..2000) {
                         onConfirm(amount)
                     } else {
                         isError = true

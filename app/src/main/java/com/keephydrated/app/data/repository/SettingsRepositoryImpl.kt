@@ -48,4 +48,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateNotificationSound(soundId: String) {
         preferencesDataStore.updateNotificationSound(soundId)
     }
+
+    override suspend fun updateDefaultQuickAddMl(amountMl: Int) {
+        preferencesDataStore.updateDefaultQuickAddMl(amountMl)
+    }
+
+    override suspend fun updateQuickAddOnNotificationClick(enabled: Boolean) {
+        preferencesDataStore.updateQuickAddOnNotificationClick(enabled)
+    }
 }

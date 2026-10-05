@@ -92,4 +92,26 @@ class SaveUserSettingsUseCaseTest {
         useCase.updateNotificationSound(NotificationSound.WATER_POUR.id)
         coVerify(exactly = 1) { settingsRepository.updateNotificationSound(NotificationSound.WATER_POUR.id) }
     }
+
+    @Test
+    fun `updateDefaultQuickAddMl with valid amount updates repository`() = runTest {
+        useCase.updateDefaultQuickAddMl(350)
+        coVerify(exactly = 1) { settingsRepository.updateDefaultQuickAddMl(350) }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateDefaultQuickAddMl with too low amount throws IllegalArgumentException`() = runTest {
+        useCase.updateDefaultQuickAddMl(20)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `updateDefaultQuickAddMl with too high amount throws IllegalArgumentException`() = runTest {
+        useCase.updateDefaultQuickAddMl(3000)
+    }
+
+    @Test
+    fun `updateQuickAddOnNotificationClick updates repository`() = runTest {
+        useCase.updateQuickAddOnNotificationClick(true)
+        coVerify(exactly = 1) { settingsRepository.updateQuickAddOnNotificationClick(true) }
+    }
 }

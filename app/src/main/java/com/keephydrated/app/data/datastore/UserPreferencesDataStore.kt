@@ -37,6 +37,8 @@ class UserPreferencesDataStore @Inject constructor(
         val REMINDER_MODE = stringPreferencesKey("reminder_mode")
         val CUSTOM_REMINDER_HOURS = stringSetPreferencesKey("custom_reminder_hours")
         val NOTIFICATION_SOUND = stringPreferencesKey("notification_sound")
+        val DEFAULT_QUICK_ADD_ML = intPreferencesKey("default_quick_add_ml")
+        val QUICK_ADD_ON_NOTIFICATION_CLICK = booleanPreferencesKey("quick_add_on_notification_click")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -65,6 +67,8 @@ class UserPreferencesDataStore @Inject constructor(
             val hoursSet = preferences[PreferencesKeys.CUSTOM_REMINDER_HOURS] ?: setOf("9", "12", "15", "18", "21")
             val customHours = hoursSet.mapNotNull { it.toIntOrNull() }.toSet()
             val soundId = preferences[PreferencesKeys.NOTIFICATION_SOUND] ?: NotificationSound.WATER_DROP.id
+            val defaultQuickAddMl = preferences[PreferencesKeys.DEFAULT_QUICK_ADD_ML] ?: 250
+            val quickAddOnClick = preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] ?: false
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
@@ -75,7 +79,9 @@ class UserPreferencesDataStore @Inject constructor(
                 endHour = endHour,
                 reminderMode = mode,
                 customReminderHours = if (customHours.isNotEmpty()) customHours else setOf(9, 12, 15, 18, 21),
-                notificationSound = soundId
+                notificationSound = soundId,
+                defaultQuickAddMl = defaultQuickAddMl,
+                quickAddOnNotificationClick = quickAddOnClick
             )
         }
 
@@ -127,6 +133,18 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun updateNotificationSound(soundId: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.NOTIFICATION_SOUND] = soundId
+        }
+    }
+
+    suspend fun updateDefaultQuickAddMl(amountMl: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DEFAULT_QUICK_ADD_ML] = amountMl
+        }
+    }
+
+    suspend fun updateQuickAddOnNotificationClick(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] = enabled
         }
     }
 }

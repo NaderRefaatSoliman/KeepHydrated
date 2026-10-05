@@ -33,7 +33,11 @@ class KeepHydratedApp : Application(), Configuration.Provider {
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = "hydration_reminders_channel"
+        const val CELEBRATION_CHANNEL_ID = "hydration_celebration_channel"
         const val CHANNEL_PREFIX = "hydration_channel_"
+
+        const val REMINDER_NOTIFICATION_ID = 1001
+        const val CELEBRATION_NOTIFICATION_ID = 1002
 
         fun getChannelIdForSound(soundId: String?): String {
             if (soundId.isNullOrBlank() || soundId == NotificationSound.SYSTEM_DEFAULT.id) {
@@ -95,6 +99,24 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                         notificationManager.createNotificationChannel(channel)
                     }
                 }
+
+                // Dedicated channel for Goal Celebration notifications
+                val celebrationChannel = NotificationChannel(
+                    CELEBRATION_CHANNEL_ID,
+                    "Goal Celebrations",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Celebrations when daily water intake goal is reached"
+                    enableVibration(true)
+                    vibrationPattern = longArrayOf(0, 250, 150, 250, 150, 400)
+                    val resId = context.resources.getIdentifier("celebration", "raw", context.packageName)
+                    if (resId != 0) {
+                        val celebrationSoundUri =
+                            Uri.parse("${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/$resId")
+                        setSound(celebrationSoundUri, audioAttributes)
+                    }
+                }
+                notificationManager.createNotificationChannel(celebrationChannel)
             }
         }
     }

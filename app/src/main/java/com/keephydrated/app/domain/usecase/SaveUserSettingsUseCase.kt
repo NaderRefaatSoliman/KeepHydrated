@@ -45,4 +45,13 @@ class SaveUserSettingsUseCase @Inject constructor(
         val sound = NotificationSound.fromId(soundId)
         settingsRepository.updateNotificationSound(sound.id)
     }
+
+    suspend fun updateDefaultQuickAddMl(amountMl: Int) {
+        require(amountMl in 50..2000) { "Quick-add amount must be between 50ml and 2000ml" }
+        settingsRepository.updateDefaultQuickAddMl(amountMl)
+    }
+
+    suspend fun updateQuickAddOnNotificationClick(enabled: Boolean) {
+        settingsRepository.updateQuickAddOnNotificationClick(enabled)
+    }
 }

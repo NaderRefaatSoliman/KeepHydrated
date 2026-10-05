@@ -13,6 +13,8 @@ data class SettingsUiState(
     val reminderMode: ReminderMode = ReminderMode.INTERVAL,
     val customReminderHours: Set<Int> = setOf(9, 12, 15, 18, 21),
     val notificationSound: String = NotificationSound.WATER_DROP.id,
+    val defaultQuickAddMl: Int = 250,
+    val quickAddOnNotificationClick: Boolean = false,
     val isLoading: Boolean = true,
     val userMessage: String? = null
 )

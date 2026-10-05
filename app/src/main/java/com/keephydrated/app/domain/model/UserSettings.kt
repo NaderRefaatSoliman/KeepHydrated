@@ -34,5 +34,7 @@ data class UserSettings(
     val endHour: Int = 22,    // 10:00 PM (Bedtime / sleep time)
     val reminderMode: ReminderMode = ReminderMode.INTERVAL,
     val customReminderHours: Set<Int> = setOf(9, 12, 15, 18, 21),
-    val notificationSound: String = NotificationSound.WATER_DROP.id
+    val notificationSound: String = NotificationSound.WATER_DROP.id,
+    val defaultQuickAddMl: Int = 250,
+    val quickAddOnNotificationClick: Boolean = false
 )
