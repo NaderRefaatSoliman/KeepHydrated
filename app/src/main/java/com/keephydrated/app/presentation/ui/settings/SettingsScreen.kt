@@ -549,7 +549,7 @@ fun SettingsScreen(
                             if (isBatteryOptimized) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(
-                                    onClick = { BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(context) },
+                                    onClick = { BatteryOptimizationHelper.requestIgnoreBatteryOptimization(context) },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100))
                                 ) {
                                     Text(stringResource(R.string.disable_battery_optimization), fontSize = 12.sp)

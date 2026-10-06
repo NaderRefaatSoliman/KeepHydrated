@@ -4,6 +4,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -509,7 +510,3 @@ fun DailySummaryCard(
         }
     }
 }
-
-// Background extension import helper
-private fun Modifier.background(color: Color, shape: androidx.compose.ui.graphics.Shape): Modifier =
-    this.then(androidx.compose.foundation.background(color, shape))
