@@ -92,7 +92,7 @@ class SettingsRepositoryImpl @Inject constructor(
         weightKg: Float,
         heightCm: Float,
         activityLevel: String,
-        recommendedGoalMl: Int? = null
+        recommendedGoalMl: Int?
     ) {
         preferencesDataStore.updateUserProfile(
             name, age, sex, weightKg, heightCm, activityLevel, recommendedGoalMl

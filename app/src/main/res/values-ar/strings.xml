@@ -117,6 +117,7 @@
     <string name="onboarding_welcome_subtitle">رفيقك اللطيف للترطيب الصحي. دعنا نحسب احتياجك اليومي المثالي من الماء وفق قياسات جسمك ونشاطك.</string>
     <string name="step_profile_title">بياناتك الصحية الشخصية</string>
     <string name="step_profile_desc">أخبر قطورة ببعض المعلومات عنك:</string>
+    <string name="step_metrics_title">قياسات الجسم</string>
     <string name="label_name">الاسم أو اللقب</string>
     <string name="label_age">العمر (بالسنوات)</string>
     <string name="label_sex">الجنس</string>

@@ -117,6 +117,7 @@
     <string name="onboarding_welcome_subtitle">Your friendly clinical hydration companion. Let\'s calculate your ideal daily water intake based on your unique body metrics.</string>
     <string name="step_profile_title">Personal Health Details</string>
     <string name="step_profile_desc">Tell Droppy a little bit about yourself:</string>
+    <string name="step_metrics_title">Body Metrics</string>
     <string name="label_name">Name or Nickname</string>
     <string name="label_age">Age (years)</string>
     <string name="label_sex">Biological Sex</string>
