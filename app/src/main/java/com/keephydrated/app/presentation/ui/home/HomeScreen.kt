@@ -226,6 +226,7 @@ fun HomeScreen(
             }
         )
     }
+    }
 }
 
 @Composable
