@@ -12,13 +12,59 @@ enum class NotificationSound(
     val resName: String
 ) {
     WATER_DROP("water_drop", "Water Droplet", "Crisp, refreshing single water drop", "water_drop"),
-    WATER_POUR("water_pour", "Pouring Water", "Fresh stream pouring into a glass", "water_pour"),
-    WATER_SPILL("water_spill", "Spilling Water", "Dynamic splash of spilling water", "water_spill"),
-    BOTTLE_FILL("bottle_fill", "Fill a Bottle", "Rising liquid pitch filling a bottle", "bottle_fill"),
+    WATER_DROP_ECHO("water_drop_echo", "Water Drop Echo", "Resonant droplet with serene cavern echoes", "water_drop_echo"),
+    WATER_FLOW("water_flow", "Natural Water Flow", "Continuous peaceful stream flowing over smooth pebbles", "water_flow"),
+    BOTTLE_FILL("bottle_fill", "Bottle Filling", "Rising water pitch filling a bottle", "bottle_fill"),
     GENTLE_STREAM("gentle_stream", "Gentle Stream", "Peaceful flowing brook", "gentle_stream"),
     WATER_BUBBLE("water_bubble", "Water Bubbles", "Playful rising water bubbles", "water_bubble"),
+    WATER_RAIN("water_rain", "Rainfall Drops", "Soothing raindrops tapping on fresh water", "water_rain"),
+    WATER_POUR("water_pour", "Pouring Water", "Fresh stream pouring into a glass", "water_pour"),
+    WATER_SPLASH("water_splash", "Water Splash", "Dynamic refreshing water splash", "water_splash"),
+    WATER_SPILL("water_spill", "Spilling Water", "Dynamic splash of spilling water", "water_spill"),
     OCEAN_WAVE("ocean_wave", "Ocean Wave", "Soothing coastal wave surge", "ocean_wave"),
     SYSTEM_DEFAULT("system_default", "System Default", "Standard device alert tone", "");
+
+    fun getLocalizedDisplayName(isArabic: Boolean): String {
+        return if (isArabic) {
+            when (this) {
+                WATER_DROP -> "قطرة ماء"
+                WATER_DROP_ECHO -> "صدى قطرة ماء"
+                WATER_FLOW -> "تدفق الماء الطبيعي"
+                BOTTLE_FILL -> "تعبئة القارورة بالماء"
+                GENTLE_STREAM -> "جدول ماء هادئ"
+                WATER_BUBBLE -> "فقاعات الماء"
+                WATER_RAIN -> "قطرات المطر"
+                WATER_POUR -> "صب الماء في الكوب"
+                WATER_SPLASH -> "رذاذ الماء المنعش"
+                WATER_SPILL -> "تدفق الماء المنسكب"
+                OCEAN_WAVE -> "أمواج المحيط"
+                SYSTEM_DEFAULT -> "نغمة النظام الافتراضية"
+            }
+        } else {
+            displayName
+        }
+    }
+
+    fun getLocalizedDescription(isArabic: Boolean): String {
+        return if (isArabic) {
+            when (this) {
+                WATER_DROP -> "صوت نقي وواضح لقطرة ماء منعشة"
+                WATER_DROP_ECHO -> "قطرة ماء رنانة مع صدى هادئ وجميل"
+                WATER_FLOW -> "خرير ماء رقراق متدفق بين الحصى"
+                BOTTLE_FILL -> "صوت تصاعدي طبيعي لملء قارورة بالماء"
+                GENTLE_STREAM -> "مجرى مائي لطيف وهادئ في الطبيعة"
+                WATER_BUBBLE -> "فقاعات مائية متصاعدة ومرحة"
+                WATER_RAIN -> "زخات مطر هادئة تتساقط على الماء"
+                WATER_POUR -> "تدفق منعش يصب الماء في الكوب"
+                WATER_SPLASH -> "رذاذ ماء متناثر وحيوي"
+                WATER_SPILL -> "صوت تدفق ماء منسكب ومتحرك"
+                OCEAN_WAVE -> "مد وجزر ساحلي مهدئ للأعصاب"
+                SYSTEM_DEFAULT -> "نغمة الإشعارات القياسية للهاتف"
+            }
+        } else {
+            description
+        }
+    }
 
     companion object {
         fun fromId(id: String?): NotificationSound {
@@ -59,14 +105,11 @@ data class UserSettings(
     val celebrationSound: String = CelebrationSound.CHIME_FANFARE.id,
     val defaultQuickAddMl: Int = 250,
     val quickAddOnNotificationClick: Boolean = true,
-    // Language: "en" for English, "ar" for Arabic, or "system"
     val language: String = "en",
-    // Frequent drinking amount to highlight on circular progress (150, 250, 330, 500)
     val frequentIntakeMl: Int = 250,
-    // Bottle filling tracking mode
     val bottleModeEnabled: Boolean = false,
     val bottleVolumeMl: Int = 750,
-    val bottleTargetDurationMinutes: Int = 180, // e.g. 3 hours to drink the full bottle
+    val bottleTargetDurationMinutes: Int = 180,
     val bottleStartTimeMillis: Long = 0L,
     val bottleDrankMl: Int = 0,
     val bottleRefillCount: Int = 0

@@ -292,6 +292,7 @@ fun SettingsScreen(
                             item {
                                 SoundsSettingsDetail(
                                     uiState = uiState,
+                                    isArabic = isArabic,
                                     context = context,
                                     onSelectSound = { viewModel.updateNotificationSound(it) },
                                     onPreviewSound = { viewModel.previewSound(context, it) },
