@@ -107,7 +107,15 @@ class MainActivity : ComponentActivity() {
                 LocalContext provides localizedContext
             ) {
                 KeepHydratedTheme {
-                    KeepHydratedMain()
+                    if (userSettings != null && !userSettings!!.isOnboardingCompleted) {
+                        val onboardingViewModel: com.keephydrated.app.presentation.ui.onboarding.OnboardingViewModel = hiltViewModel()
+                        com.keephydrated.app.presentation.ui.onboarding.OnboardingScreen(
+                            viewModel = onboardingViewModel,
+                            onFinished = {}
+                        )
+                    } else {
+                        KeepHydratedMain()
+                    }
                 }
             }
         }

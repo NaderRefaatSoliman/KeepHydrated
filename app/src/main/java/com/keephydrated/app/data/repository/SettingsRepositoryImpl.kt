@@ -84,4 +84,22 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun refillBottle() {
         preferencesDataStore.refillBottle()
     }
+
+    override suspend fun updateUserProfile(
+        name: String,
+        age: Int,
+        sex: String,
+        weightKg: Float,
+        heightCm: Float,
+        activityLevel: String,
+        recommendedGoalMl: Int? = null
+    ) {
+        preferencesDataStore.updateUserProfile(
+            name, age, sex, weightKg, heightCm, activityLevel, recommendedGoalMl
+        )
+    }
+
+    override suspend fun completeOnboarding(completed: Boolean) {
+        preferencesDataStore.completeOnboarding(completed)
+    }
 }

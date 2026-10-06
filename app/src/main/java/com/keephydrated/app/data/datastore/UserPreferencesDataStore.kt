@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -52,6 +53,15 @@ class UserPreferencesDataStore @Inject constructor(
         val BOTTLE_START_TIME_MILLIS = longPreferencesKey("bottle_start_time_millis")
         val BOTTLE_DRANK_ML = intPreferencesKey("bottle_drank_ml")
         val BOTTLE_REFILL_COUNT = intPreferencesKey("bottle_refill_count")
+
+        // Personalized Profile & Onboarding
+        val USER_NAME = stringPreferencesKey("user_name")
+        val USER_AGE = intPreferencesKey("user_age")
+        val USER_SEX = stringPreferencesKey("user_sex")
+        val USER_WEIGHT_KG = floatPreferencesKey("user_weight_kg")
+        val USER_HEIGHT_CM = floatPreferencesKey("user_height_cm")
+        val USER_ACTIVITY_LEVEL = stringPreferencesKey("user_activity_level")
+        val IS_ONBOARDING_COMPLETED = booleanPreferencesKey("is_onboarding_completed")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -84,7 +94,6 @@ class UserPreferencesDataStore @Inject constructor(
             val defaultQuickAddMl = preferences[PreferencesKeys.DEFAULT_QUICK_ADD_ML] ?: 250
             val quickAddOnClick = preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] ?: true
 
-            // New settings mapping
             val language = preferences[PreferencesKeys.LANGUAGE] ?: "en"
             val frequentIntakeMl = preferences[PreferencesKeys.FREQUENT_INTAKE_ML] ?: 250
             val bottleModeEnabled = preferences[PreferencesKeys.BOTTLE_MODE_ENABLED] ?: false
@@ -93,6 +102,14 @@ class UserPreferencesDataStore @Inject constructor(
             val bottleStartTimeMillis = preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] ?: 0L
             val bottleDrankMl = preferences[PreferencesKeys.BOTTLE_DRANK_ML] ?: 0
             val bottleRefillCount = preferences[PreferencesKeys.BOTTLE_REFILL_COUNT] ?: 0
+
+            val userName = preferences[PreferencesKeys.USER_NAME] ?: ""
+            val userAge = preferences[PreferencesKeys.USER_AGE] ?: 28
+            val userSex = preferences[PreferencesKeys.USER_SEX] ?: "male"
+            val userWeightKg = preferences[PreferencesKeys.USER_WEIGHT_KG] ?: 70f
+            val userHeightCm = preferences[PreferencesKeys.USER_HEIGHT_CM] ?: 175f
+            val userActivityLevel = preferences[PreferencesKeys.USER_ACTIVITY_LEVEL] ?: "moderate"
+            val isOnboardingCompleted = preferences[PreferencesKeys.IS_ONBOARDING_COMPLETED] ?: false
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
@@ -114,7 +131,14 @@ class UserPreferencesDataStore @Inject constructor(
                 bottleTargetDurationMinutes = bottleTargetDurationMinutes,
                 bottleStartTimeMillis = bottleStartTimeMillis,
                 bottleDrankMl = bottleDrankMl,
-                bottleRefillCount = bottleRefillCount
+                bottleRefillCount = bottleRefillCount,
+                userName = userName,
+                userAge = userAge,
+                userSex = userSex,
+                userWeightKg = userWeightKg,
+                userHeightCm = userHeightCm,
+                userActivityLevel = userActivityLevel,
+                isOnboardingCompleted = isOnboardingCompleted
             )
         }
 
@@ -233,6 +257,34 @@ class UserPreferencesDataStore @Inject constructor(
             preferences[PreferencesKeys.BOTTLE_REFILL_COUNT] = refills + 1
             preferences[PreferencesKeys.BOTTLE_DRANK_ML] = 0
             preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] = System.currentTimeMillis()
+        }
+    }
+
+    suspend fun updateUserProfile(
+        name: String,
+        age: Int,
+        sex: String,
+        weightKg: Float,
+        heightCm: Float,
+        activityLevel: String,
+        recommendedGoalMl: Int? = null
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USER_NAME] = name
+            preferences[PreferencesKeys.USER_AGE] = age
+            preferences[PreferencesKeys.USER_SEX] = sex
+            preferences[PreferencesKeys.USER_WEIGHT_KG] = weightKg
+            preferences[PreferencesKeys.USER_HEIGHT_CM] = heightCm
+            preferences[PreferencesKeys.USER_ACTIVITY_LEVEL] = activityLevel
+            if (recommendedGoalMl != null && recommendedGoalMl > 0) {
+                preferences[PreferencesKeys.DAILY_GOAL] = recommendedGoalMl
+            }
+        }
+    }
+
+    suspend fun completeOnboarding(completed: Boolean = true) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_ONBOARDING_COMPLETED] = completed
         }
     }
 }

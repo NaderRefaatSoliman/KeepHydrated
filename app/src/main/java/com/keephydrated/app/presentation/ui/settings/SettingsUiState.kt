@@ -3,6 +3,7 @@ package com.keephydrated.app.presentation.ui.settings
 import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
+import com.keephydrated.app.domain.model.UserSettings
 
 data class SettingsUiState(
     val dailyGoalMl: Int = 2000,
@@ -22,6 +23,42 @@ data class SettingsUiState(
     val bottleModeEnabled: Boolean = false,
     val bottleVolumeMl: Int = 750,
     val bottleTargetDurationMinutes: Int = 180,
+    val userName: String = "",
+    val userAge: Int = 28,
+    val userSex: String = "male",
+    val userWeightKg: Float = 70f,
+    val userHeightCm: Float = 175f,
+    val userActivityLevel: String = "moderate",
+    val isOnboardingCompleted: Boolean = true,
     val isLoading: Boolean = true,
     val userMessage: String? = null
-)
+) {
+    fun toUserSettings(): UserSettings {
+        return UserSettings(
+            dailyGoalMl = dailyGoalMl,
+            reminderIntervalHours = reminderIntervalHours,
+            reminderIntervalMinutes = reminderIntervalMinutes,
+            remindersEnabled = remindersEnabled,
+            startHour = startHour,
+            endHour = endHour,
+            reminderMode = reminderMode,
+            customReminderHours = customReminderHours,
+            notificationSound = notificationSound,
+            celebrationSound = celebrationSound,
+            defaultQuickAddMl = defaultQuickAddMl,
+            quickAddOnNotificationClick = quickAddOnNotificationClick,
+            language = language,
+            frequentIntakeMl = frequentIntakeMl,
+            bottleModeEnabled = bottleModeEnabled,
+            bottleVolumeMl = bottleVolumeMl,
+            bottleTargetDurationMinutes = bottleTargetDurationMinutes,
+            userName = userName,
+            userAge = userAge,
+            userSex = userSex,
+            userWeightKg = userWeightKg,
+            userHeightCm = userHeightCm,
+            userActivityLevel = userActivityLevel,
+            isOnboardingCompleted = isOnboardingCompleted
+        )
+    }
+}

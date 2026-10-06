@@ -59,7 +59,8 @@ class HomeViewModel @Inject constructor(
                     userMessage = _uiState.value.userMessage,
                     frequentIntakeMl = settings.frequentIntakeMl,
                     bottleStatus = bottleStatus,
-                    isBottleMode = settings.bottleModeEnabled
+                    isBottleMode = settings.bottleModeEnabled,
+                    userSettings = settings
                 )
             }.collectLatest { state ->
                 _uiState.value = state

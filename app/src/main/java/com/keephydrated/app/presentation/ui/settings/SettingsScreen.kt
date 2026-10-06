@@ -104,6 +104,8 @@ enum class SettingsCategory(
     @StringRes val descResId: Int,
     val icon: ImageVector
 ) {
+    PROFILE(R.string.category_profile, R.string.desc_category_profile, Icons.Default.Tune),
+    GUIDE(R.string.category_guide, R.string.desc_category_guide, Icons.Default.Info),
     GOAL(R.string.category_goal, R.string.desc_category_goal, Icons.Default.TrackChanges),
     BOTTLE(R.string.category_bottle, R.string.desc_category_bottle, Icons.Default.LocalDrink),
     REMINDERS(R.string.category_reminders, R.string.desc_category_reminders, Icons.Default.Schedule),
@@ -239,6 +241,26 @@ fun SettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     when (selectedCategory!!) {
+                        SettingsCategory.PROFILE -> {
+                            item {
+                                ProfileSettingsDetail(
+                                    uiState = uiState,
+                                    isArabic = isArabic,
+                                    onSaveProfile = { name, age, sex, weight, height, activity, goal ->
+                                        viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
+                                        selectedCategory = null
+                                    }
+                                )
+                            }
+                        }
+                        SettingsCategory.GUIDE -> {
+                            item {
+                                com.keephydrated.app.presentation.ui.guide.HealthGuideScreen(
+                                    userSettings = uiState.toUserSettings(),
+                                    onBackClick = { selectedCategory = null }
+                                )
+                            }
+                        }
                         SettingsCategory.GOAL -> {
                             item {
                                 GoalSettingsDetail(
@@ -422,6 +444,16 @@ fun getCategorySummary(
     isArabic: Boolean
 ): String {
     return when (category) {
+        SettingsCategory.PROFILE -> {
+            val weight = LocalizationUtils.formatNumber(uiState.userWeightKg.toInt(), isArabic)
+            val age = LocalizationUtils.formatNumber(uiState.userAge, isArabic)
+            val wUnit = if (isArabic) "كجم" else "kg"
+            val aUnit = if (isArabic) "سنة" else "yrs"
+            "$weight $wUnit • $age $aUnit"
+        }
+        SettingsCategory.GUIDE -> {
+            if (isArabic) "نصائح الجفاف وأمان التسمم المائي" else "Dehydration & Toxicity Safety"
+        }
         SettingsCategory.GOAL -> {
             val goal = LocalizationUtils.formatNumber(uiState.dailyGoalMl, isArabic)
             val frequent = LocalizationUtils.formatNumber(uiState.frequentIntakeMl, isArabic)
@@ -467,6 +499,146 @@ fun getCategorySummary(
         }
         SettingsCategory.ABOUT -> {
             "KeepHydrated v2.0.0"
+        }
+    }
+}
+
+@Composable
+fun ProfileSettingsDetail(
+    uiState: SettingsUiState,
+    isArabic: Boolean,
+    onSaveProfile: (name: String, age: Int, sex: String, weight: Float, height: Float, activity: String, goal: Int) -> Unit
+) {
+    var name by remember { mutableStateOf(uiState.userName) }
+    var ageStr by remember { mutableStateOf(uiState.userAge.toString()) }
+    var sex by remember { mutableStateOf(uiState.userSex) }
+    var weightStr by remember { mutableStateOf(uiState.userWeightKg.toInt().toString()) }
+    var heightStr by remember { mutableStateOf(uiState.userHeightCm.toInt().toString()) }
+    var activity by remember { mutableStateOf(uiState.userActivityLevel) }
+
+    val age = ageStr.toIntOrNull() ?: 28
+    val weight = weightStr.toFloatOrNull() ?: 70f
+    val height = heightStr.toFloatOrNull() ?: 175f
+
+    val rec = com.keephydrated.app.domain.util.HydrationCalculator.calculate(
+        age = age,
+        sex = sex,
+        weightKg = weight,
+        heightCm = height,
+        activityLevel = activity
+    )
+    val formattedGoal = LocalizationUtils.formatNumber(rec.recommendedDailyMl, isArabic)
+
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.step_profile_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = BluePrimary)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(stringResource(R.string.label_name)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = ageStr,
+                    onValueChange = { ageStr = it },
+                    label = { Text(stringResource(R.string.label_age)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+                OutlinedTextField(
+                    value = weightStr,
+                    onValueChange = { weightStr = it },
+                    label = { Text(stringResource(R.string.label_weight)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = heightStr,
+                onValueChange = { heightStr = it },
+                label = { Text(stringResource(R.string.label_height)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(text = stringResource(R.string.label_sex), fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                FilterChip(
+                    selected = sex == "male",
+                    onClick = { sex = "male" },
+                    label = { Text("👨 ${stringResource(R.string.sex_male)}") },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = sex == "female",
+                    onClick = { sex = "female" },
+                    label = { Text("👩 ${stringResource(R.string.sex_female)}") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = stringResource(R.string.label_activity), fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(6.dp))
+
+            listOf(
+                "sedentary" to stringResource(R.string.activity_sedentary),
+                "light" to stringResource(R.string.activity_light),
+                "moderate" to stringResource(R.string.activity_moderate),
+                "intense" to stringResource(R.string.activity_intense)
+            ).forEach { (key, label) ->
+                FilterChip(
+                    selected = activity == key,
+                    onClick = { activity = key },
+                    label = { Text(label, fontSize = 12.sp) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
+
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = CyanSecondary.copy(alpha = 0.15f),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = stringResource(R.string.recalculated_goal_label, formattedGoal),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = BluePrimary)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = {
+                    onSaveProfile(name, age, sex, weight, height, activity, rec.recommendedDailyMl)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+            ) {
+                Text(stringResource(R.string.dialog_save), fontWeight = FontWeight.Bold)
+            }
         }
     }
 }

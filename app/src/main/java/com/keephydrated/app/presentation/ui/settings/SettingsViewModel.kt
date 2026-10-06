@@ -62,9 +62,35 @@ class SettingsViewModel @Inject constructor(
                         bottleModeEnabled = settings.bottleModeEnabled,
                         bottleVolumeMl = settings.bottleVolumeMl,
                         bottleTargetDurationMinutes = settings.bottleTargetDurationMinutes,
+                        userName = settings.userName,
+                        userAge = settings.userAge,
+                        userSex = settings.userSex,
+                        userWeightKg = settings.userWeightKg,
+                        userHeightCm = settings.userHeightCm,
+                        userActivityLevel = settings.userActivityLevel,
+                        isOnboardingCompleted = settings.isOnboardingCompleted,
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    fun updateUserProfile(
+        name: String,
+        age: Int,
+        sex: String,
+        weightKg: Float,
+        heightCm: Float,
+        activityLevel: String,
+        recommendedGoalMl: Int? = null
+    ) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateUserProfile(name, age, sex, weightKg, heightCm, activityLevel, recommendedGoalMl)
+                _uiState.update { it.copy(userMessage = "Health Profile updated") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update profile") }
             }
         }
     }

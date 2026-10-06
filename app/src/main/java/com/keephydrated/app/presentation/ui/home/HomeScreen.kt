@@ -63,6 +63,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showCustomDialog by remember { mutableStateOf(false) }
+    var showHealthGuide by remember { mutableStateOf(false) }
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
@@ -73,26 +74,39 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.app_name),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                actions = {
-                    if (uiState.todayIntakes.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.undoLastIntake() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Undo,
-                                contentDescription = stringResource(R.string.undo_intake),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+    if (showHealthGuide) {
+        com.keephydrated.app.presentation.ui.guide.HealthGuideScreen(
+            userSettings = uiState.userSettings,
+            onBackClick = { showHealthGuide = false }
+        )
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            stringResource(R.string.app_name),
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { showHealthGuide = true }) {
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_droppy_guide),
+                                contentDescription = stringResource(R.string.guide_tour_title),
+                                modifier = Modifier.size(32.dp)
                             )
                         }
-                    }
-                },
+                        if (uiState.todayIntakes.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.undoLastIntake() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Undo,
+                                    contentDescription = stringResource(R.string.undo_intake),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

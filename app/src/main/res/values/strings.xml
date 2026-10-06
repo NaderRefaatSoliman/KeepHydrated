@@ -70,6 +70,10 @@
 
     <!-- Settings Categories -->
     <string name="settings">Settings</string>
+    <string name="category_profile">Personal Health Profile &amp; Calculator</string>
+    <string name="desc_category_profile">Age, weight, sports activity &amp; personalized goal</string>
+    <string name="category_guide">Droppy\'s Health Guide &amp; Warnings</string>
+    <string name="desc_category_guide">Dehydration hazards &amp; water toxicity safety</string>
     <string name="category_goal">Hydration Target &amp; Quick Add</string>
     <string name="desc_category_goal">Daily goal, frequent sip amount &amp; quick-add options</string>
     <string name="category_bottle">Bottle Tracking Mode</string>
@@ -107,6 +111,52 @@
     <string name="disable_battery_optimization">Disable Battery Optimization</string>
     <string name="battery_unrestricted_title">Background Execution: Unrestricted</string>
     <string name="battery_unrestricted_desc">Battery optimization disabled. Real-time alerts and smartwatch syncing active.</string>
+
+    <!-- Onboarding & Personalized Health Calculator -->
+    <string name="onboarding_welcome_title">Meet Droppy!</string>
+    <string name="onboarding_welcome_subtitle">Your friendly clinical hydration companion. Let\'s calculate your ideal daily water intake based on your unique body metrics.</string>
+    <string name="step_profile_title">Personal Health Details</string>
+    <string name="step_profile_desc">Tell Droppy a little bit about yourself:</string>
+    <string name="label_name">Name or Nickname</string>
+    <string name="label_age">Age (years)</string>
+    <string name="label_sex">Biological Sex</string>
+    <string name="sex_male">Male</string>
+    <string name="sex_female">Female</string>
+    <string name="label_weight">Weight (kg)</string>
+    <string name="label_height">Height (cm)</string>
+    <string name="label_activity">Rate of Practicing Sports</string>
+    <string name="activity_sedentary">Sedentary (Little or no workout)</string>
+    <string name="activity_light">Light (1–2 days/week, ~30m)</string>
+    <string name="activity_moderate">Moderate (3–5 days/week, ~45m)</string>
+    <string name="activity_intense">Intense (6–7 days/week or athlete)</string>
+    <string name="step_recommendation_title">Your Personalized Daily Target</string>
+    <string name="droppy_recommendation_msg">Hi %1$s! Based on European and American medical hydration guidelines, here is your calculated hydration prescription:</string>
+    <string name="recalculated_goal_label">Advised Daily Intake: %1$s ml</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_finish_onboarding">Apply Target &amp; Start 💧</string>
+    <string name="btn_recalculate">Recalculate Target</string>
+
+    <!-- Health Guide Tour & Medical Advices -->
+    <string name="guide_tour_title">Droppy\'s Hydration &amp; Health Guide</string>
+    <string name="guide_dehydration_title">Dangers &amp; Bad Effects of Dehydration</string>
+    <string name="dehydration_intro">Not drinking enough water triggers significant strain on human physiology:</string>
+    <string name="dehydration_point1_title">1. Mild Dehydration (1–2% loss):</string>
+    <string name="dehydration_point1_desc">Causes chronic fatigue, throbbing headaches, dry mouth, impaired concentration, and mental brain fog.</string>
+    <string name="dehydration_point2_title">2. Moderate Dehydration (3–5% loss):</string>
+    <string name="dehydration_point2_desc">Elevates resting heart rate, causes dizziness upon standing, dark amber urine, and severe muscle cramps during movement.</string>
+    <string name="dehydration_point3_title">3. Chronic Low Intake Hazards:</string>
+    <string name="dehydration_point3_desc">Significantly increases the clinical risk of painful kidney stones, recurrent urinary tract infections (UTIs), constipation, and premature skin aging.</string>
+
+    <!-- Water Toxicity (Hyponatremia) Warning -->
+    <string name="guide_toxicity_title">⚠️ Water Toxicity &amp; Hyponatremia Warning</string>
+    <string name="toxicity_subtitle">Can you drink too much water? YES! Overhydration can be fatal.</string>
+    <string name="toxicity_kidney_limit_title">The Kidney Excretion Limit:</string>
+    <string name="toxicity_kidney_limit_desc">A healthy adult kidney can only filter and excrete approximately 800 to 1,000 ml (0.8 - 1.0 L) of water per hour. Never chug more than 1 liter in a single hour!</string>
+    <string name="toxicity_safe_ceiling_title">Safe Daily Upper Limit:</string>
+    <string name="toxicity_safe_ceiling_desc">Your personal safe maximum intake is %1$s ml per day. Exceeding this dilutes essential blood electrolytes.</string>
+    <string name="toxicity_symptoms_title">Symptoms of Water Toxicity (Hyponatremia):</string>
+    <string name="toxicity_symptoms_desc">• Early Warning: Persistent headache, nausea, bloating, muscle cramps, and excessive clear urination.\n• Severe / Critical: Confusion, drowsiness, disorientation, seizures, cerebral edema, and coma. (Requires urgent emergency hospital care).</string>
 
     <!-- Dialog Strings -->
     <string name="dialog_custom_water_desc">Enter the water amount in milliliters (ml):</string>

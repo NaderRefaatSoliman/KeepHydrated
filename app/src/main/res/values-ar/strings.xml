@@ -70,6 +70,10 @@
 
     <!-- Settings Categories -->
     <string name="settings">الإعدادات</string>
+    <string name="category_profile">الملف الصحي الشخصي وحساب الهدف</string>
+    <string name="desc_category_profile">العمر، الوزن، النشاط الرياضي وحساب الهدف المثالي</string>
+    <string name="category_guide">دليل قطورة الصحي والتحذيرات</string>
+    <string name="desc_category_guide">أضرار الجفاف وحدود الأمان من التسمم المائي</string>
     <string name="category_goal">هدف الترطيب والإضافة السريعة</string>
     <string name="desc_category_goal">الهدف اليومي، كمية الشرب المفضلة وخيارات الإضافة</string>
     <string name="category_bottle">وضع تتبع زجاجة الماء</string>
@@ -107,6 +111,52 @@
     <string name="disable_battery_optimization">تعطيل تحسين البطارية للتطبيق</string>
     <string name="battery_unrestricted_title">التشغيل في الخلفية: غير مقيد</string>
     <string name="battery_unrestricted_desc">تم استثناء البطارية. التنبيهات اللحظية ومزامنة الساعة الذكية نشطة.</string>
+
+    <!-- Onboarding & Personalized Health Calculator -->
+    <string name="onboarding_welcome_title">تعرّف على قطورة!</string>
+    <string name="onboarding_welcome_subtitle">رفيقك اللطيف للترطيب الصحي. دعنا نحسب احتياجك اليومي المثالي من الماء وفق قياسات جسمك ونشاطك.</string>
+    <string name="step_profile_title">بياناتك الصحية الشخصية</string>
+    <string name="step_profile_desc">أخبر قطورة ببعض المعلومات عنك:</string>
+    <string name="label_name">الاسم أو اللقب</string>
+    <string name="label_age">العمر (بالسنوات)</string>
+    <string name="label_sex">الجنس</string>
+    <string name="sex_male">ذكر</string>
+    <string name="sex_female">أنثى</string>
+    <string name="label_weight">الوزن (كجم)</string>
+    <string name="label_height">الطول (سم)</string>
+    <string name="label_activity">معدل ممارسة الرياضة والنشاط</string>
+    <string name="activity_sedentary">قليل النشاط (لا توجد تمارين دورية)</string>
+    <string name="activity_light">نشاط خفيف (١-٢ يوم أسبوعياً، ~٣٠ دقيقة)</string>
+    <string name="activity_moderate">نشاط معتدل (٣-٥ أيام أسبوعياً، ~٤٥ دقيقة)</string>
+    <string name="activity_intense">نشاط مكثف (٦-٧ أيام أسبوعياً أو رياضي محترف)</string>
+    <string name="step_recommendation_title">هدفك اليومي الموصى به طبياً</string>
+    <string name="droppy_recommendation_msg">أهلاً بك يا %1$s! استناداً إلى المعايير الطبية المعتمدة، هذه هي وصفتك اليومية المثالية للترطيب:</string>
+    <string name="recalculated_goal_label">الاحتياج اليومي المنصوح به: %1$s مل</string>
+    <string name="btn_next">التالي</string>
+    <string name="btn_back">السابق</string>
+    <string name="btn_finish_onboarding">اعتماد الهدف والبدء 💧</string>
+    <string name="btn_recalculate">إعادة حساب الهدف</string>
+
+    <!-- Health Guide Tour & Medical Advices -->
+    <string name="guide_tour_title">دليل قطورة الصحي للترطيب</string>
+    <string name="guide_dehydration_title">مخاطر وأضرار قلة شرب الماء (الجفاف)</string>
+    <string name="dehydration_intro">يؤدي عدم شرب كمية كافية من الماء إلى إجهاد فوري ومضاعفات صحية متعددة:</string>
+    <string name="dehydration_point1_title">١. الجفاف الخفيف (فقدان ١-٢٪ من سوائل الجسم):</string>
+    <string name="dehydration_point1_desc">يسبب الصداع المزمن، الخمول، جفاف الفم، تشتت الذهن، وضعف سرعة الاستيعاب والتركيز.</string>
+    <string name="dehydration_point2_title">٢. الجفاف المعتدل (فقدان ٣-٥٪ من سوائل الجسم):</string>
+    <string name="dehydration_point2_desc">يتسبب في تسارع نبضات القلب، الدوار عند الوقوف، تحول لون البول للأصفر الداكن، وتقلصات عضلية مؤلمة.</string>
+    <string name="dehydration_point3_title">٣. مخاطر نقص الترطيب المزمن على المدى البعيد:</string>
+    <string name="dehydration_point3_desc">يرفع احتمالية تكون حصى الكلى، التهابات المسالك البولية المتكررة، الإمساك، وتسارع شيخوخة وجفاف الجلد.</string>
+
+    <!-- Water Toxicity (Hyponatremia) Warning -->
+    <string name="guide_toxicity_title">⚠️ تحذير التسمم المائي وهبوط الصوديوم (Hyponatremia)</string>
+    <string name="toxicity_subtitle">هل يمكن أن يكون شرب الكثير من الماء ضاراً؟ نعم! الإفراط المائي قد يكون مميتاً.</string>
+    <string name="toxicity_kidney_limit_title">معدل الترشيح الكلوي الأقصى:</string>
+    <string name="toxicity_kidney_limit_desc">تستطيع كلى الإنسان الطبيعية إخراج ما يقارب ٨٠٠ إلى ١٠٠٠ مل (حوالي ١ لتر) كحد أقصى في الساعة الواحدة. تجنب شرب أكثر من لتر واحد في ساعة واحدة إطلاقاً!</string>
+    <string name="toxicity_safe_ceiling_title">الحد الأقصى اليومي الآمن لجسمك:</string>
+    <string name="toxicity_safe_ceiling_desc">حد الأمان الأقصى لجسمك هو %1$s مل يومياً. تجاوز هذا الحد يسبب تخفيفاً خطيراً للأملاح والمعادن بالدم.</string>
+    <string name="toxicity_symptoms_title">أعراض التسمم المائي ونقص صوديوم الدم:</string>
+    <string name="toxicity_symptoms_desc">• الإنذارات المبكرة: صداع نابض، غثيان، انتفاخ، تشنج عضلي، وكثرة التبول شديد الشفافية.\n• الأعراض الحرجة: تورم خلايا المخ (الوذمة الدماغية)، تشوش ذهني، دوار شديد، نوبات تشنج، وغيبوبة (حالة طوارئ طبية خطيرة تستدعي الإسعاف فوراً).</string>
 
     <!-- Dialog Strings -->
     <string name="dialog_custom_water_desc">أدخل كمية الماء بالمليلتر (مل):</string>

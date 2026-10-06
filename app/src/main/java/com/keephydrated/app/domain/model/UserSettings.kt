@@ -112,7 +112,15 @@ data class UserSettings(
     val bottleTargetDurationMinutes: Int = 180,
     val bottleStartTimeMillis: Long = 0L,
     val bottleDrankMl: Int = 0,
-    val bottleRefillCount: Int = 0
+    val bottleRefillCount: Int = 0,
+    // Personalized Profile & Onboarding
+    val userName: String = "",
+    val userAge: Int = 28,
+    val userSex: String = "male", // "male" or "female"
+    val userWeightKg: Float = 70f,
+    val userHeightCm: Float = 175f,
+    val userActivityLevel: String = "moderate", // "sedentary", "light", "moderate", "intense"
+    val isOnboardingCompleted: Boolean = false
 ) {
     fun toBottleStatus(): BottleStatus {
         return BottleStatus(

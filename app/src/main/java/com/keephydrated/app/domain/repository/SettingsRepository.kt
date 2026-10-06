@@ -27,4 +27,16 @@ interface SettingsRepository {
     suspend fun updateBottleConfig(volumeMl: Int, durationMinutes: Int)
     suspend fun recordBottleDrink(drankAmountMl: Int)
     suspend fun refillBottle()
+
+    // Personalized Profile & Onboarding
+    suspend fun updateUserProfile(
+        name: String,
+        age: Int,
+        sex: String,
+        weightKg: Float,
+        heightCm: Float,
+        activityLevel: String,
+        recommendedGoalMl: Int? = null
+    )
+    suspend fun completeOnboarding(completed: Boolean = true)
 }
