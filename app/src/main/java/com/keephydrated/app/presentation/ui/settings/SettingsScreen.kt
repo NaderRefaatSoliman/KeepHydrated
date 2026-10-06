@@ -842,6 +842,7 @@ fun RemindersSettingsDetail(
 @Composable
 fun SoundsSettingsDetail(
     uiState: SettingsUiState,
+    isArabic: Boolean,
     context: android.content.Context,
     onSelectSound: (String) -> Unit,
     onPreviewSound: (NotificationSound) -> Unit,
@@ -873,9 +874,9 @@ fun SoundsSettingsDetail(
                         onClick = { onSelectSound(sound.id) }
                     )
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = sound.displayName, fontWeight = FontWeight.SemiBold)
+                        Text(text = sound.getLocalizedDisplayName(isArabic), fontWeight = FontWeight.SemiBold)
                         Text(
-                            text = sound.description,
+                            text = sound.getLocalizedDescription(isArabic),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
