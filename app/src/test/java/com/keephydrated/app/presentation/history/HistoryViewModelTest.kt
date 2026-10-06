@@ -21,6 +21,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelTest {
@@ -103,5 +105,22 @@ class HistoryViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(HistoryPeriod.YEAR, state.selectedPeriod)
         assertEquals(12, state.chartData.size) // 12 months
+    }
+
+    @Test
+    fun `Arabic language setting formats chart day labels in Arabic`() = runTest {
+        val summaries = listOf(
+            DailyHydrationSummary(date = LocalDate.now(), totalIntakeMl = 2000, goalMl = 2000)
+        )
+        historyFlow.emit(summaries)
+        settingsFlow.emit(UserSettings(dailyGoalMl = 2000, language = "ar"))
+
+        val viewModel = HistoryViewModel(getHydrationHistoryUseCase, settingsRepository)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(7, state.chartData.size)
+        val expectedDay = LocalDate.now().format(DateTimeFormatter.ofPattern("EEE", Locale("ar")))
+        assertEquals(expectedDay, state.chartData.last().label)
     }
 }

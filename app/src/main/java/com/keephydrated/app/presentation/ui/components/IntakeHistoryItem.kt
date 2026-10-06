@@ -22,11 +22,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.WaterIntake
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
+import com.keephydrated.app.util.LocalizationUtils
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun IntakeHistoryItem(
@@ -34,7 +40,12 @@ fun IntakeHistoryItem(
     onDelete: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val locale = if (isArabic) Locale("ar") else Locale.ENGLISH
+    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a", locale)
+
+    val formattedAmount = LocalizationUtils.formatNumber(intake.amountMl, isArabic)
+    val unitMl = stringResource(R.string.unit_ml)
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -63,7 +74,7 @@ fun IntakeHistoryItem(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "+${intake.amountMl} ml",
+                        text = stringResource(R.string.action_plus_ml, formattedAmount, unitMl),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         )

@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,17 +17,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
 import com.keephydrated.app.presentation.ui.theme.BlueOnPrimaryContainer
 import com.keephydrated.app.presentation.ui.theme.BluePrimaryContainer
+import com.keephydrated.app.util.LocalizationUtils
 
 data class ContainerOption(
-    val title: String,
+    @StringRes val titleResId: Int,
     val amountMl: Int,
     val emoji: String
 )
@@ -36,12 +40,11 @@ fun QuickAddSection(
     onAddWater: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Strictly restricted to 150ml .. 500ml as requested
     val containers = listOf(
-        ContainerOption("Cup", 150, "☕"),
-        ContainerOption("Glass", 250, "🥛"),
-        ContainerOption("Can", 330, "🥤"),
-        ContainerOption("Bottle", 500, "🍶")
+        ContainerOption(R.string.container_cup, 150, "☕"),
+        ContainerOption(R.string.container_glass, 250, "🥛"),
+        ContainerOption(R.string.container_can, 330, "🥤"),
+        ContainerOption(R.string.container_bottle, 500, "🍶")
     )
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -74,6 +77,9 @@ fun QuickAddCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val formattedAmount = LocalizationUtils.formatNumber(container.amountMl, isArabic)
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -94,7 +100,7 @@ fun QuickAddCard(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${container.amountMl}ml",
+                text = stringResource(R.string.ml_format, formattedAmount),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = BlueOnPrimaryContainer
@@ -104,7 +110,7 @@ fun QuickAddCard(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = container.title,
+                text = stringResource(container.titleResId),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 11.sp,
                     color = BlueOnPrimaryContainer.copy(alpha = 0.85f)

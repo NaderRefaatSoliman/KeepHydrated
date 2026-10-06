@@ -7,6 +7,7 @@ import com.keephydrated.app.domain.model.DailyHydrationSummary
 import com.keephydrated.app.domain.model.HistoryPeriod
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.domain.usecase.GetHydrationHistoryUseCase
+import com.keephydrated.app.util.LocalizationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +34,7 @@ class HistoryViewModel @Inject constructor(
 
     private var allSummariesCache: List<DailyHydrationSummary> = emptyList()
     private var defaultGoalCache: Int = 2000
+    private var languageCache: String = "en"
 
     init {
         loadHistory()
@@ -46,6 +48,7 @@ class HistoryViewModel @Inject constructor(
             ) { summaries, settings ->
                 allSummariesCache = summaries
                 defaultGoalCache = settings.dailyGoalMl
+                languageCache = settings.language
                 computeStateForPeriod(_uiState.value.selectedPeriod)
             }.collectLatest { newState ->
                 _uiState.value = newState
@@ -62,6 +65,8 @@ class HistoryViewModel @Inject constructor(
     private fun computeStateForPeriod(period: HistoryPeriod): HistoryUiState {
         val today = LocalDate.now()
         val summaryByDate = allSummariesCache.associateBy { it.date }
+        val isArabic = languageCache == "ar"
+        val locale = if (isArabic) Locale("ar") else Locale.ENGLISH
 
         when (period) {
             HistoryPeriod.WEEK -> {
@@ -75,7 +80,7 @@ class HistoryViewModel @Inject constructor(
                     )
                 }
 
-                val dayFormatter = DateTimeFormatter.ofPattern("EEE", Locale.getDefault())
+                val dayFormatter = DateTimeFormatter.ofPattern("EEE", locale)
                 val chartData = weekSummaries.map { s ->
                     ChartBarData(
                         label = s.date.format(dayFormatter),
@@ -116,7 +121,7 @@ class HistoryViewModel @Inject constructor(
                     )
                 }
 
-                // Chunk into 5 6-day periods or display days
+                // Chunk into 5 6-day periods
                 val chartData = (0 until 5).map { i ->
                     val chunk = monthSummaries.subList(i * 6, (i + 1) * 6)
                     val startDay = chunk.first().date.dayOfMonth
@@ -129,8 +134,11 @@ class HistoryViewModel @Inject constructor(
                         total > 0 -> AchievementStatus.PARTIAL
                         else -> AchievementStatus.ZERO
                     }
+                    val startStr = LocalizationUtils.formatNumber(startDay, isArabic)
+                    val endStr = LocalizationUtils.formatNumber(endDay, isArabic)
+
                     ChartBarData(
-                        label = "$startDay-$endDay",
+                        label = "$startStr-$endStr",
                         amountMl = total / chunk.size,
                         goalMl = defaultGoalCache,
                         percentage = pct,
@@ -171,7 +179,7 @@ class HistoryViewModel @Inject constructor(
                         avg > 0 -> AchievementStatus.PARTIAL
                         else -> AchievementStatus.ZERO
                     }
-                    val label = month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                    val label = month.getDisplayName(TextStyle.SHORT, locale)
 
                     ChartBarData(
                         label = label,

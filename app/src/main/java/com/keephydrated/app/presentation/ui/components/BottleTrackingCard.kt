@@ -38,14 +38,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.BottleStatus
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
+import com.keephydrated.app.util.LocalizationUtils
 
 @Composable
 fun BottleTrackingCard(
@@ -61,6 +64,13 @@ fun BottleTrackingCard(
         animationSpec = tween(600, easing = FastOutSlowInEasing),
         label = "bottleProgress"
     )
+
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val formattedRemaining = LocalizationUtils.formatNumber(bottleStatus.remainingMl, isArabic)
+    val formattedVolume = LocalizationUtils.formatNumber(bottleStatus.volumeMl, isArabic)
+    val formattedRefills = LocalizationUtils.formatNumber(bottleStatus.refillCount, isArabic)
+    val formattedTimeLeft = LocalizationUtils.formatNumber(bottleStatus.remainingMinutes, isArabic)
+    val formattedSip = LocalizationUtils.formatNumber(frequentAmountMl, isArabic)
 
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -103,7 +113,7 @@ fun BottleTrackingCard(
                     color = CyanSecondary.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = stringResource(R.string.bottle_refilled_today, bottleStatus.refillCount),
+                        text = stringResource(R.string.bottle_refilled_today, formattedRefills),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = BluePrimary
@@ -172,8 +182,8 @@ fun BottleTrackingCard(
                     Text(
                         text = stringResource(
                             R.string.bottle_remaining,
-                            bottleStatus.remainingMl,
-                            bottleStatus.volumeMl
+                            formattedRemaining,
+                            formattedVolume
                         ),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
@@ -205,7 +215,7 @@ fun BottleTrackingCard(
                         }
                     } else {
                         Text(
-                            text = stringResource(R.string.bottle_time_left, bottleStatus.remainingMinutes),
+                            text = stringResource(R.string.bottle_time_left, formattedTimeLeft),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -243,7 +253,7 @@ fun BottleTrackingCard(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = stringResource(R.string.bottle_drink_sip, frequentAmountMl),
+                        text = stringResource(R.string.bottle_drink_sip, formattedSip),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )

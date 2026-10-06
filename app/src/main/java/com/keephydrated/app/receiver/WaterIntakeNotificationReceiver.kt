@@ -9,6 +9,7 @@ import com.keephydrated.app.domain.model.WaterIntake
 import com.keephydrated.app.domain.repository.HydrationRepository
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.notification.NotificationHelper
+import com.keephydrated.app.util.LocalizationUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,27 +35,29 @@ class WaterIntakeNotificationReceiver : BroadcastReceiver() {
             try {
                 val action = intent.action
                 val settings = settingsRepository.getUserSettings().first()
+                val isArabic = settings.language == "ar"
 
                 if (action == ACTION_REFILL_BOTTLE) {
-                    // Refill the bottle session
                     settingsRepository.refillBottle()
 
-                    // Clear any lingering bottle refill reminder notification
                     val notificationManager =
                         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.cancel(KeepHydratedApp.BOTTLE_NOTIFICATION_ID)
 
-                    // Show confirmation in tray
+                    val formattedVolume = LocalizationUtils.formatNumber(settings.bottleVolumeMl, isArabic)
+                    val title = if (isArabic) "🔄 تمت إعادة تعبئة الزجاجة!" else "🔄 Bottle Refilled!"
+                    val msg = if (isArabic) "جاهز لشرب $formattedVolume مل ماء منعش." else "Fresh ${settings.bottleVolumeMl} ml ready to drink."
+
                     NotificationHelper.showIntakeLoggedConfirmation(
                         context = context,
                         amountMl = 0,
                         newTotalMl = settings.bottleVolumeMl,
                         goalMl = settings.dailyGoalMl,
-                        customTitle = "🔄 Bottle Refilled!",
-                        customMessage = "Fresh ${settings.bottleVolumeMl} ml ready to drink."
+                        customTitle = title,
+                        customMessage = msg,
+                        language = settings.language
                     )
                 } else {
-                    // Quick-add intake logging
                     val explicitAmount = intent.getIntExtra(EXTRA_AMOUNT, 0)
                     val amount = if (explicitAmount > 0) explicitAmount else settings.defaultQuickAddMl
 
@@ -64,7 +67,6 @@ class WaterIntakeNotificationReceiver : BroadcastReceiver() {
                         val previousTotal = existingIntakes.sumOf { it.amountMl }
                         val goal = settings.dailyGoalMl
 
-                        // Insert the logged intake
                         hydrationRepository.insertIntake(
                             WaterIntake(
                                 amountMl = amount,
@@ -72,24 +74,27 @@ class WaterIntakeNotificationReceiver : BroadcastReceiver() {
                             )
                         )
 
-                        // If bottle tracking mode is active, also register drink from bottle
                         if (settings.bottleModeEnabled) {
                             settingsRepository.recordBottleDrink(amount)
                         }
 
                         val newTotal = previousTotal + amount
 
-                        // Push celebration notification if daily goal was reached
                         if (previousTotal < goal && newTotal >= goal && goal > 0) {
-                            NotificationHelper.showCelebrationNotification(context, goal, settings.celebrationSound)
+                            NotificationHelper.showCelebrationNotification(
+                                context = context,
+                                goalMl = goal,
+                                celebrationSoundId = settings.celebrationSound,
+                                language = settings.language
+                            )
                         }
 
-                        // Show silent confirmation in notification tray
                         NotificationHelper.showIntakeLoggedConfirmation(
                             context = context,
                             amountMl = amount,
                             newTotalMl = newTotal,
-                            goalMl = goal
+                            goalMl = goal,
+                            language = settings.language
                         )
                     }
                 }

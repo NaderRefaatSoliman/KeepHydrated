@@ -6,11 +6,13 @@
     <string name="nav_settings">Settings</string>
 
     <!-- General Units & Formatting -->
-    <string name="ml_format">%1$d ml</string>
-    <string name="progress_percentage">%1$d%%</string>
-    <string name="hours_format">%1$d hours</string>
-    <string name="minutes_format">%1$d minutes</string>
-    <string name="days_count">%1$d days</string>
+    <string name="ml_format">%1$s ml</string>
+    <string name="progress_percentage">%1$s%%</string>
+    <string name="hours_format">%1$s hours</string>
+    <string name="minutes_format">%1$s minutes</string>
+    <string name="days_count">%1$s days</string>
+    <string name="unit_ml">ml</string>
+    <string name="intake_progress_format">%1$s / %2$s ml</string>
 
     <!-- Home Screen -->
     <string name="daily_goal">Daily Goal</string>
@@ -19,12 +21,19 @@
     <string name="quick_add">Quick Add</string>
     <string name="custom_add">Custom Amount</string>
     <string name="undo_intake">Undo last intake</string>
-    <string name="todays_logs">Today\'s Logs (%1$d)</string>
+    <string name="todays_logs">Today\'s Logs (%1$s)</string>
     <string name="no_water_logged">No water logged yet today. Take a refreshing sip! 💧</string>
-    <string name="add_water_success">Added %1$d ml of water!</string>
-    <string name="undo_success">Removed %1$d ml entry.</string>
-    <string name="frequent_sip_badge">Frequent: %1$d ml</string>
-    <string name="tap_to_log_frequent">Tap center to log %1$d ml</string>
+    <string name="add_water_success">Added %1$s ml of water!</string>
+    <string name="undo_success">Removed %1$s ml entry.</string>
+    <string name="frequent_sip_badge">Frequent: %1$s ml</string>
+    <string name="tap_to_log_frequent">Tap center to log %1$s ml</string>
+    <string name="goal_achieved_badge">Goal Achieved! 🏆</string>
+
+    <!-- Containers -->
+    <string name="container_cup">Cup</string>
+    <string name="container_glass">Glass</string>
+    <string name="container_can">Can</string>
+    <string name="container_bottle">Bottle</string>
 
     <!-- Bottle Tracking Mode -->
     <string name="bottle_mode_title">Bottle Tracking Mode</string>
@@ -32,12 +41,12 @@
     <string name="bottle_status_active">Bottle Session Active</string>
     <string name="bottle_capacity">Bottle Capacity</string>
     <string name="bottle_target_duration">Target Drink Duration</string>
-    <string name="bottle_remaining">Remaining in bottle: %1$d / %2$d ml</string>
-    <string name="bottle_time_left">Time left: %1$d mins</string>
+    <string name="bottle_remaining">Remaining in bottle: %1$s / %2$s ml</string>
+    <string name="bottle_time_left">Time left: %1$s mins</string>
     <string name="bottle_time_up">Time up! Finish bottle and refill 💧</string>
-    <string name="bottle_drink_sip">Drink Sip (%1$d ml)</string>
+    <string name="bottle_drink_sip">Drink Sip (%1$s ml)</string>
     <string name="bottle_refill_action">Refill Bottle 🔄</string>
-    <string name="bottle_refilled_today">Refilled %1$d times today</string>
+    <string name="bottle_refilled_today">Refilled %1$s times today</string>
     <string name="bottle_empty">Bottle is empty! Great job! Refill it now.</string>
 
     <!-- History Screen -->
@@ -55,6 +64,7 @@
     <string name="legend_done">Target Met (Done)</string>
     <string name="legend_partial">Partially Met</string>
     <string name="legend_zero">No Intake (Zero)</string>
+    <string name="chart_title">Intake Tracking Chart (%1$s)</string>
 
     <!-- Settings Categories -->
     <string name="settings">Settings</string>
@@ -75,7 +85,7 @@
     <string name="mode_interval">Periodic Interval</string>
     <string name="mode_routine">Daily Routine Hours</string>
     <string name="remind_every">Remind me every:</string>
-    <string name="routine_hours">Routine Hours (%1$d/24 set):</string>
+    <string name="routine_hours">Routine Hours (%1$s/24 set):</string>
     <string name="waking_day_preset">Waking Day Schedule</string>
     <string name="work_day_preset">Work Day</string>
     <string name="all_day_preset">All Day</string>
@@ -89,6 +99,29 @@
     <string name="disable_battery_optimization">Disable Battery Optimization</string>
     <string name="battery_unrestricted_title">Background Execution: Unrestricted</string>
     <string name="battery_unrestricted_desc">Battery optimization disabled. Real-time alerts and smartwatch syncing active.</string>
+
+    <!-- Dialog Strings -->
+    <string name="dialog_custom_water_desc">Enter the water amount in milliliters (ml):</string>
+    <string name="dialog_amount_label">Amount (ml)</string>
+    <string name="dialog_invalid_amount">Please enter a valid amount greater than 0</string>
+    <string name="dialog_daily_goal_desc">Enter target daily intake in ml (500 - 10000):</string>
+    <string name="dialog_daily_goal_label">Target Goal (ml)</string>
+    <string name="dialog_daily_goal_error">Must be between 500 and 10000 ml</string>
+    <string name="dialog_custom_interval_title">Custom Reminder Interval</string>
+    <string name="dialog_custom_interval_desc">Specify how often you want to be reminded:</string>
+    <string name="unit_minutes">Minutes</string>
+    <string name="unit_hours">Hours</string>
+    <string name="dialog_interval_min_error">Minimum interval is 15 minutes (Android system limit)</string>
+    <string name="dialog_interval_max_error">Maximum interval is 12 hours (720 minutes)</string>
+    <string name="dialog_waking_schedule_desc">Define your sleep and awake schedule to automatically generate routine reminder hours:</string>
+    <string name="label_wake_time">Wake-up Time:</string>
+    <string name="label_sleep_time">Bedtime / Sleep:</string>
+    <string name="label_reminder_frequency">Reminder Frequency:</string>
+    <string name="freq_every_1h">Every 1h</string>
+    <string name="freq_every_2h">Every 2h</string>
+    <string name="freq_every_3h">Every 3h</string>
+    <string name="custom_chip">Custom...</string>
+    <string name="action_plus_ml">+ %1$s %2$s 💧</string>
 
     <!-- Language Selector -->
     <string name="app_language">App Language</string>
@@ -104,15 +137,15 @@
     <string name="channel_description">Reminders to drink water throughout the day</string>
     <string name="reminder_title">Time to drink water! 💧</string>
     <string name="reminder_message">Stay hydrated and healthy! Take a sip of water now.</string>
-    <string name="reminder_tap_text">Tap to log %1$d ml water intake</string>
+    <string name="reminder_tap_text">Tap to log %1$s ml water intake</string>
     <string name="bottle_reminder_title">Bottle Sip Reminder 💧</string>
-    <string name="bottle_reminder_msg">Take a sip from your %1$d ml bottle! %2$d ml remaining.</string>
+    <string name="bottle_reminder_msg">Take a sip from your %1$s ml bottle! %2$s ml remaining.</string>
     <string name="bottle_refill_title">Time to Refill Your Bottle! 🔄</string>
     <string name="bottle_refill_msg">Target time reached! Drink up the rest and refill your bottle to keep hydrating.</string>
-    <string name="logged_confirmation_title">💧 %1$d ml Logged</string>
-    <string name="logged_confirmation_body">Today: %1$d / %2$d ml (%3$d%%)</string>
+    <string name="logged_confirmation_title">💧 %1$s ml Logged</string>
+    <string name="logged_confirmation_body">Today: %1$s / %2$s ml (%3$s%%)</string>
     <string name="celebration_title">🎉 Daily Goal Achieved!</string>
-    <string name="celebration_body">Congratulations! You\'ve reached your daily hydration goal of %1$d ml! 🏆💧</string>
+    <string name="celebration_body">Congratulations! You\'ve reached your daily hydration goal of %1$s ml! 🏆💧</string>
 
     <!-- Dialogs -->
     <string name="dialog_save">Save</string>

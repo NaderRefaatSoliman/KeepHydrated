@@ -33,14 +33,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
+import com.keephydrated.app.util.LocalizationUtils
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -63,6 +66,12 @@ fun CircularHydrationProgress(
     )
 
     val percentage = if (goalMl > 0) ((currentMl.toFloat() / goalMl.toFloat()) * 100).toInt() else 0
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    val formattedPercent = LocalizationUtils.formatNumber(percentage, isArabic)
+    val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
+    val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
+    val formattedFrequent = LocalizationUtils.formatNumber(frequentIntakeMl, isArabic)
 
     // Animated water wave transition
     val infiniteTransition = rememberInfiniteTransition(label = "waveTransition")
@@ -90,7 +99,6 @@ fun CircularHydrationProgress(
                 val width = this.size.width
                 val height = this.size.height
 
-                // Water fill level
                 val waterLevelY = height * (1f - animatedProgress)
 
                 if (animatedProgress > 0f) {
@@ -175,7 +183,6 @@ fun CircularHydrationProgress(
                 val markerX = (centerX + radius * cos(angleRad)).toFloat()
                 val markerY = (centerY + radius * sin(angleRad)).toFloat()
 
-                // Draw frequent drinking marker indicator dot
                 drawCircle(
                     color = Color.White,
                     radius = stroke * 0.38f,
@@ -197,7 +204,7 @@ fun CircularHydrationProgress(
             }
         ) {
             Text(
-                text = "$percentage%",
+                text = stringResource(R.string.progress_percentage, formattedPercent),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = BluePrimary,
@@ -206,7 +213,7 @@ fun CircularHydrationProgress(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "$currentMl / $goalMl ml",
+                text = stringResource(R.string.intake_progress_format, formattedCurrent, formattedGoal),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -221,7 +228,7 @@ fun CircularHydrationProgress(
                 modifier = Modifier.padding(horizontal = 4.dp)
             ) {
                 Text(
-                    text = "💧 ${stringResource(R.string.frequent_sip_badge, frequentIntakeMl)}",
+                    text = "💧 ${stringResource(R.string.frequent_sip_badge, formattedFrequent)}",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         color = BluePrimary
@@ -233,7 +240,7 @@ fun CircularHydrationProgress(
             if (currentMl >= goalMl && goalMl > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Goal Achieved! 🏆",
+                    text = stringResource(R.string.goal_achieved_badge),
                     style = MaterialTheme.typography.labelMedium.copy(
                         color = Color(0xFF2E7D32),
                         fontWeight = FontWeight.Bold

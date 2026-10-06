@@ -40,9 +40,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.keephydrated.app.R
 import com.keephydrated.app.presentation.ui.components.BottleTrackingCard
@@ -50,6 +52,7 @@ import com.keephydrated.app.presentation.ui.components.CircularHydrationProgress
 import com.keephydrated.app.presentation.ui.components.IntakeHistoryItem
 import com.keephydrated.app.presentation.ui.components.QuickAddSection
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
+import com.keephydrated.app.util.LocalizationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +63,8 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showCustomDialog by remember { mutableStateOf(false) }
+
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     LaunchedEffect(uiState.userMessage) {
         uiState.userMessage?.let { msg ->
@@ -125,7 +130,6 @@ fun HomeScreen(
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Water View: Circular progress with wave animation & frequent intake marker
                     CircularHydrationProgress(
                         currentMl = uiState.currentIntakeMl,
                         goalMl = uiState.dailyGoalMl,
@@ -137,7 +141,6 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 
-                // If Bottle Tracking Mode is active, show the interactive Bottle Card
                 if (uiState.isBottleMode) {
                     item {
                         BottleTrackingCard(
@@ -150,7 +153,6 @@ fun HomeScreen(
                     }
                 }
 
-                // Quick Add Section (150ml, 250ml, 330ml, 500ml)
                 item {
                     QuickAddSection(
                         onAddWater = { amount -> viewModel.addWater(amount) }
@@ -158,15 +160,15 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 
-                // Today's Logs header
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val formattedCount = LocalizationUtils.formatNumber(uiState.todayIntakes.size, isArabic)
                         Text(
-                            text = stringResource(R.string.todays_logs, uiState.todayIntakes.size),
+                            text = stringResource(R.string.todays_logs, formattedCount),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             )
@@ -195,7 +197,7 @@ fun HomeScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(80.dp)) // Padding for FAB
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }
@@ -225,7 +227,7 @@ fun CustomAmountDialog(
         title = { Text(stringResource(R.string.custom_add)) },
         text = {
             Column {
-                Text("Enter the water amount in milliliters (ml):")
+                Text(stringResource(R.string.dialog_custom_water_desc))
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = textValue,
@@ -234,11 +236,11 @@ fun CustomAmountDialog(
                         isError = false
                     },
                     isError = isError,
-                    label = { Text("Amount (ml)") },
+                    label = { Text(stringResource(R.string.dialog_amount_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     supportingText = {
-                        if (isError) Text("Please enter a valid amount greater than 0")
+                        if (isError) Text(stringResource(R.string.dialog_invalid_amount))
                     }
                 )
             }

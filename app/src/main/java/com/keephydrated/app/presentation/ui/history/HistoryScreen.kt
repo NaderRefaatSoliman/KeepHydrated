@@ -1,8 +1,5 @@
 package com.keephydrated.app.presentation.ui.history
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -47,8 +44,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
@@ -56,7 +55,7 @@ import com.keephydrated.app.domain.model.AchievementStatus
 import com.keephydrated.app.domain.model.DailyHydrationSummary
 import com.keephydrated.app.domain.model.HistoryPeriod
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
-import com.keephydrated.app.presentation.ui.theme.CyanSecondary
+import com.keephydrated.app.util.LocalizationUtils
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -67,6 +66,7 @@ fun HistoryScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Scaffold(
         topBar = {
@@ -127,14 +127,17 @@ fun HistoryScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        val formattedAvg = LocalizationUtils.formatNumber(uiState.averageIntakeMl, isArabic)
+                        val formattedDays = LocalizationUtils.formatNumber(uiState.daysGoalMetCount, isArabic)
+
                         StatCard(
                             title = stringResource(R.string.daily_average),
-                            value = "${uiState.averageIntakeMl} ml",
+                            value = stringResource(R.string.ml_format, formattedAvg),
                             modifier = Modifier.weight(1f)
                         )
                         StatCard(
                             title = stringResource(R.string.goals_reached),
-                            value = "${uiState.daysGoalMetCount} days",
+                            value = stringResource(R.string.days_count, formattedDays),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -160,17 +163,17 @@ fun HistoryScreen(
                         ) {
                             StatusCountChip(
                                 label = stringResource(R.string.status_done),
-                                count = uiState.doneCount,
+                                count = LocalizationUtils.formatNumber(uiState.doneCount, isArabic),
                                 color = Color(0xFF2E7D32)
                             )
                             StatusCountChip(
                                 label = stringResource(R.string.status_partial),
-                                count = uiState.partialCount,
+                                count = LocalizationUtils.formatNumber(uiState.partialCount, isArabic),
                                 color = Color(0xFFF57C00)
                             )
                             StatusCountChip(
                                 label = stringResource(R.string.status_zero),
-                                count = uiState.zeroCount,
+                                count = LocalizationUtils.formatNumber(uiState.zeroCount, isArabic),
                                 color = Color(0xFF757575)
                             )
                         }
@@ -189,12 +192,13 @@ fun HistoryScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
+                            val periodLabel = when (uiState.selectedPeriod) {
+                                HistoryPeriod.WEEK -> stringResource(R.string.period_week)
+                                HistoryPeriod.MONTH -> stringResource(R.string.period_month)
+                                HistoryPeriod.YEAR -> stringResource(R.string.period_year)
+                            }
                             Text(
-                                text = "Intake Tracking Chart (${when (uiState.selectedPeriod) {
-                                    HistoryPeriod.WEEK -> stringResource(R.string.period_week)
-                                    HistoryPeriod.MONTH -> stringResource(R.string.period_month)
-                                    HistoryPeriod.YEAR -> stringResource(R.string.period_year)
-                                }})",
+                                text = stringResource(R.string.chart_title, periodLabel),
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = BluePrimary
@@ -264,7 +268,7 @@ fun HistoryScreen(
 @Composable
 fun StatusCountChip(
     label: String,
-    count: Int,
+    count: String,
     color: Color
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -279,7 +283,7 @@ fun StatusCountChip(
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
         )
         Text(
-            text = "$count",
+            text = count,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = color
@@ -333,7 +337,6 @@ fun HydrationBarChart(
                 AchievementStatus.ZERO -> Color(0xFFE0E0E0)
             }
 
-            // Draw Bar
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(left, top),
@@ -403,7 +406,9 @@ fun DailySummaryCard(
     summary: DailyHydrationSummary,
     modifier: Modifier = Modifier
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy", Locale.getDefault())
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val locale = if (isArabic) Locale("ar") else Locale.ENGLISH
+    val dateFormatter = DateTimeFormatter.ofPattern("EEEE، d MMMM yyyy", locale)
 
     val (statusLabel, statusColor, statusIcon) = when (summary.status) {
         AchievementStatus.DONE -> Triple(
@@ -422,6 +427,10 @@ fun DailySummaryCard(
             Icons.Default.RemoveCircleOutline
         )
     }
+
+    val formattedTotal = LocalizationUtils.formatNumber(summary.totalIntakeMl, isArabic)
+    val formattedGoal = LocalizationUtils.formatNumber(summary.goalMl, isArabic)
+    val formattedPercent = LocalizationUtils.formatNumber((summary.progressPercentage * 100).toInt(), isArabic)
 
     Card(
         shape = RoundedCornerShape(14.dp),
@@ -448,7 +457,6 @@ fun DailySummaryCard(
                     )
                 )
 
-                // Achievement Status Sign (Done / Partial / Zero)
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = statusColor.copy(alpha = 0.12f)
@@ -482,14 +490,14 @@ fun DailySummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${summary.totalIntakeMl} / ${summary.goalMl} ml",
+                    text = stringResource(R.string.intake_progress_format, formattedTotal, formattedGoal),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = BluePrimary
                     )
                 )
                 Text(
-                    text = "${(summary.progressPercentage * 100).toInt()}%",
+                    text = stringResource(R.string.progress_percentage, formattedPercent),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

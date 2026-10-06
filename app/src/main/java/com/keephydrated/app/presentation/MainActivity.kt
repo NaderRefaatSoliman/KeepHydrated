@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,9 +14,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
@@ -37,6 +42,7 @@ import com.keephydrated.app.presentation.ui.settings.SettingsViewModel
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.KeepHydratedTheme
 import com.keephydrated.app.util.LocaleHelper
+import com.keephydrated.app.util.LocalizationUtils
 import com.keephydrated.app.worker.ReminderScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
@@ -58,7 +64,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 val settings = settingsRepository.getUserSettings().first()
-                // Set initial locale
                 LocaleHelper.setLocale(this@MainActivity, settings.language)
 
                 if (settings.remindersEnabled) {
@@ -75,10 +80,32 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val userSettings by settingsRepository.getUserSettings().collectAsState(initial = null)
-            val isArabic = userSettings?.language == "ar"
+            val language = userSettings?.language ?: "en"
+            val isArabic = language == "ar"
             val layoutDirection = if (isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr
 
-            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+            val targetLocale = remember(language) { LocalizationUtils.getAppLocale(language) }
+            val currentConfig = LocalConfiguration.current
+            val localizedConfig = remember(language, currentConfig) {
+                Configuration(currentConfig).apply {
+                    setLocale(targetLocale)
+                    setLayoutDirection(targetLocale)
+                }
+            }
+            val baseContext = LocalContext.current
+            val localizedContext = remember(language, baseContext) {
+                baseContext.createConfigurationContext(localizedConfig)
+            }
+
+            LaunchedEffect(language) {
+                LocaleHelper.setLocale(this@MainActivity, language)
+            }
+
+            CompositionLocalProvider(
+                LocalConfiguration provides localizedConfig,
+                LocalLayoutDirection provides layoutDirection,
+                LocalContext provides localizedContext
+            ) {
                 KeepHydratedTheme {
                     KeepHydratedMain()
                 }

@@ -23,6 +23,7 @@ import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.presentation.MainActivity
 import com.keephydrated.app.receiver.WaterIntakeNotificationReceiver
+import com.keephydrated.app.util.LocalizationUtils
 
 object NotificationHelper {
 
@@ -46,12 +47,14 @@ object NotificationHelper {
     }
 
     /**
-     * Creates a horizontal glass tube / cylinder filled with water dynamically based on target percentage.
+     * Creates a horizontal glass tube / cylinder filled with water dynamically based on target percentage,
+     * supporting localized Arabic-Indic numerals and typography.
      */
     fun createWaterTubeBitmap(
         currentMl: Int,
         goalMl: Int,
-        percent: Int
+        percent: Int,
+        isArabic: Boolean = false
     ): Bitmap {
         val width = 720
         val height = 180
@@ -142,7 +145,7 @@ object NotificationHelper {
         }
         canvas.drawLine(tubeLeft + tubeCornerRadius, tubeTop + 6f, tubeRight - tubeCornerRadius, tubeTop + 6f, reflectionPaint)
 
-        // 6. Text Overlay: Total Intake / Target Amount & Percentage
+        // 6. Localized Text Overlay
         val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             textSize = 28f
@@ -151,12 +154,23 @@ object NotificationHelper {
             setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
         }
         val textY = tubeTop + (tubeHeight / 2f) + (textPaint.textSize / 3f)
-        canvas.drawText("$currentMl / $goalMl ml ($percent%)", width / 2f, textY, textPaint)
+
+        val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
+        val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
+        val formattedPercent = LocalizationUtils.formatNumber(percent, isArabic)
+        val unit = if (isArabic) "مل" else "ml"
+        val pctSign = if (isArabic) "٪" else "%"
+        val text = "$formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
+
+        canvas.drawText(text, width / 2f, textY, textPaint)
 
         return bitmap
     }
 
     fun buildReminderNotification(context: Context, settings: UserSettings): Notification {
+        val isArabic = settings.language == "ar"
+        val localizedContext = LocalizationUtils.getLocalizedContext(context, settings.language)
+
         val sound = NotificationSound.fromId(settings.notificationSound)
         val channelId = KeepHydratedApp.getChannelIdForSound(sound.id)
         val soundUri = KeepHydratedApp.getSoundUri(context, sound)
@@ -167,6 +181,7 @@ object NotificationHelper {
         } else {
             settings.defaultQuickAddMl
         }
+        val formattedQuickAmount = LocalizationUtils.formatNumber(quickAddAmount, isArabic)
 
         val quickAddIntent = Intent(context, WaterIntakeNotificationReceiver::class.java).apply {
             action = WaterIntakeNotificationReceiver.ACTION_QUICK_ADD
@@ -189,9 +204,11 @@ object NotificationHelper {
             quickAddActionIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
+        val actionTitle = if (isArabic) "+ $formattedQuickAmount مل 💧" else "+ $quickAddAmount ml 💧"
         val quickAddAction = NotificationCompat.Action.Builder(
             R.drawable.ic_notification_water_cup,
-            "+ $quickAddAmount ml 💧",
+            actionTitle,
             quickAddPendingIntent
         ).build()
 
@@ -200,15 +217,17 @@ object NotificationHelper {
 
         if (settings.bottleModeEnabled) {
             val bottleStatus = settings.toBottleStatus()
-            title = context.getString(R.string.bottle_reminder_title)
-            bodyText = context.getString(
+            val formattedVol = LocalizationUtils.formatNumber(bottleStatus.volumeMl, isArabic)
+            val formattedRem = LocalizationUtils.formatNumber(bottleStatus.remainingMl, isArabic)
+            title = localizedContext.getString(R.string.bottle_reminder_title)
+            bodyText = localizedContext.getString(
                 R.string.bottle_reminder_msg,
-                bottleStatus.volumeMl,
-                bottleStatus.remainingMl
+                formattedVol,
+                formattedRem
             )
         } else {
-            title = context.getString(R.string.reminder_title)
-            bodyText = context.getString(R.string.reminder_tap_text, quickAddAmount)
+            title = localizedContext.getString(R.string.reminder_title)
+            bodyText = localizedContext.getString(R.string.reminder_tap_text, formattedQuickAmount)
         }
 
         val wearableExtender = NotificationCompat.WearableExtender()
@@ -243,6 +262,9 @@ object NotificationHelper {
      * Dedicated reminder when the bottle drinking duration has elapsed and the bottle must be refilled.
      */
     fun showBottleRefillReminder(context: Context, settings: UserSettings) {
+        val isArabic = settings.language == "ar"
+        val localizedContext = LocalizationUtils.getLocalizedContext(context, settings.language)
+
         val sound = NotificationSound.fromId(settings.notificationSound)
         val soundUri = KeepHydratedApp.getSoundUri(context, sound)
         val cupBitmap = getWaterCupBitmap(context)
@@ -259,7 +281,7 @@ object NotificationHelper {
 
         val refillAction = NotificationCompat.Action.Builder(
             R.drawable.ic_notification_water_cup,
-            context.getString(R.string.bottle_refill_action),
+            localizedContext.getString(R.string.bottle_refill_action),
             refillPendingIntent
         ).build()
 
@@ -280,8 +302,8 @@ object NotificationHelper {
         val builder = NotificationCompat.Builder(context, KeepHydratedApp.BOTTLE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setColor(WATER_COLOR)
-            .setContentTitle(context.getString(R.string.bottle_refill_title))
-            .setContentText(context.getString(R.string.bottle_refill_msg))
+            .setContentTitle(localizedContext.getString(R.string.bottle_refill_title))
+            .setContentText(localizedContext.getString(R.string.bottle_refill_msg))
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -310,8 +332,12 @@ object NotificationHelper {
         newTotalMl: Int,
         goalMl: Int,
         customTitle: String? = null,
-        customMessage: String? = null
+        customMessage: String? = null,
+        language: String = "en"
     ) {
+        val isArabic = language == "ar"
+        val localizedContext = LocalizationUtils.getLocalizedContext(context, language)
+
         val percent = if (goalMl > 0) ((newTotalMl.toFloat() / goalMl) * 100).toInt() else 0
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -323,10 +349,15 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val title = customTitle ?: context.getString(R.string.logged_confirmation_title, amountMl)
-        val text = customMessage ?: context.getString(R.string.logged_confirmation_body, newTotalMl, goalMl, percent)
+        val formattedAmount = LocalizationUtils.formatNumber(amountMl, isArabic)
+        val formattedTotal = LocalizationUtils.formatNumber(newTotalMl, isArabic)
+        val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
+        val formattedPercent = LocalizationUtils.formatNumber(percent, isArabic)
+
+        val title = customTitle ?: localizedContext.getString(R.string.logged_confirmation_title, formattedAmount)
+        val text = customMessage ?: localizedContext.getString(R.string.logged_confirmation_body, formattedTotal, formattedGoal, formattedPercent)
         val cupBitmap = getWaterCupBitmap(context)
-        val tubeBitmap = createWaterTubeBitmap(newTotalMl, goalMl, percent)
+        val tubeBitmap = createWaterTubeBitmap(newTotalMl, goalMl, percent, isArabic)
 
         val notification = NotificationCompat.Builder(context, KeepHydratedApp.SILENT_ACK_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_water_cup)
@@ -339,13 +370,11 @@ object NotificationHelper {
             .setSilent(true)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            // Native horizontal progress bar
             .setProgress(100, percent.coerceIn(0, 100), false)
-            // Visual horizontal water tube graphic
             .setStyle(
                 NotificationCompat.BigPictureStyle()
                     .bigPicture(tubeBitmap)
-                    .setSummaryText("$newTotalMl / $goalMl ml ($percent%)")
+                    .setSummaryText(text)
             )
             .apply { cupBitmap?.let { setLargeIcon(it) } }
             .build()
@@ -357,7 +386,15 @@ object NotificationHelper {
     /**
      * Pushes a celebratory notification with custom celebration sound when the daily limit/goal is hit.
      */
-    fun showCelebrationNotification(context: Context, goalMl: Int, celebrationSoundId: String? = null) {
+    fun showCelebrationNotification(
+        context: Context,
+        goalMl: Int,
+        celebrationSoundId: String? = null,
+        language: String = "en"
+    ) {
+        val isArabic = language == "ar"
+        val localizedContext = LocalizationUtils.getLocalizedContext(context, language)
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -376,11 +413,13 @@ object NotificationHelper {
         val wearableExtender = NotificationCompat.WearableExtender()
             .setBridgeTag("keephydrated_goal_celebration")
 
+        val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
+
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setColor(WATER_COLOR)
-            .setContentTitle(context.getString(R.string.celebration_title))
-            .setContentText(context.getString(R.string.celebration_body, goalMl))
+            .setContentTitle(localizedContext.getString(R.string.celebration_title))
+            .setContentText(localizedContext.getString(R.string.celebration_body, formattedGoal))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_EVENT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

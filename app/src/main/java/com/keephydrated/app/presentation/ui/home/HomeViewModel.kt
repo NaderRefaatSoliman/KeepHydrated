@@ -81,7 +81,13 @@ class HomeViewModel @Inject constructor(
 
                 if (previousTotal < goal && newTotal >= goal && goal > 0) {
                     context?.let { ctx ->
-                        NotificationHelper.showCelebrationNotification(ctx, goal)
+                        val settings = settingsRepository.getUserSettings().first()
+                        NotificationHelper.showCelebrationNotification(
+                            ctx,
+                            goal,
+                            settings.celebrationSound,
+                            settings.language
+                        )
                     }
                 }
 

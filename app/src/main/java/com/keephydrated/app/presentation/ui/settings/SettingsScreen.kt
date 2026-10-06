@@ -24,12 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.BatteryAlert
-import androidx.compose.material.icons.filled.Bedtime
-import androidx.compose.material.icons.filled.Celebration
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
@@ -41,7 +36,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -79,21 +73,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.keephydrated.app.R
-import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.util.BatteryOptimizationHelper
+import com.keephydrated.app.util.LocalizationUtils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -105,6 +101,8 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
@@ -204,8 +202,9 @@ fun SettingsScreen(
                                         text = stringResource(R.string.daily_target),
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
+                                    val formattedGoal = LocalizationUtils.formatNumber(uiState.dailyGoalMl, isArabic)
                                     Text(
-                                        text = "${uiState.dailyGoalMl} ml",
+                                        text = stringResource(R.string.ml_format, formattedGoal),
                                         style = MaterialTheme.typography.titleLarge.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = BluePrimary
@@ -237,10 +236,11 @@ fun SettingsScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 listOf(150, 250, 330, 500).forEach { amount ->
+                                    val formattedAmount = LocalizationUtils.formatNumber(amount, isArabic)
                                     FilterChip(
                                         selected = uiState.frequentIntakeMl == amount,
                                         onClick = { viewModel.updateFrequentIntakeMl(amount) },
-                                        label = { Text("${amount}ml", fontSize = 12.sp) },
+                                        label = { Text(stringResource(R.string.ml_format, formattedAmount), fontSize = 12.sp) },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -259,8 +259,9 @@ fun SettingsScreen(
                                         text = stringResource(R.string.one_tap_notification),
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
+                                    val formattedDefaultQuick = LocalizationUtils.formatNumber(uiState.defaultQuickAddMl, isArabic)
                                     Text(
-                                        text = "Tapping notification body directly logs ${uiState.defaultQuickAddMl} ml",
+                                        text = stringResource(R.string.reminder_tap_text, formattedDefaultQuick),
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -330,10 +331,11 @@ fun SettingsScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     listOf(500, 750, 1000, 1500).forEach { vol ->
+                                        val formattedVol = LocalizationUtils.formatNumber(vol, isArabic)
                                         FilterChip(
                                             selected = uiState.bottleVolumeMl == vol,
                                             onClick = { viewModel.updateBottleConfig(vol, uiState.bottleTargetDurationMinutes) },
-                                            label = { Text("${vol}ml", fontSize = 11.sp) },
+                                            label = { Text(stringResource(R.string.ml_format, formattedVol), fontSize = 11.sp) },
                                             modifier = Modifier.weight(1f)
                                         )
                                     }
@@ -351,11 +353,12 @@ fun SettingsScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    listOf(60 to "1h", 120 to "2h", 180 to "3h", 240 to "4h").forEach { (mins, label) ->
+                                    listOf(60 to 1, 120 to 2, 180 to 3, 240 to 4).forEach { (mins, hours) ->
+                                        val formattedHours = LocalizationUtils.formatNumber(hours, isArabic)
                                         FilterChip(
                                             selected = uiState.bottleTargetDurationMinutes == mins,
                                             onClick = { viewModel.updateBottleConfig(uiState.bottleVolumeMl, mins) },
-                                            label = { Text(label, fontSize = 11.sp) },
+                                            label = { Text(stringResource(R.string.hours_format, formattedHours), fontSize = 11.sp) },
                                             modifier = Modifier.weight(1f)
                                         )
                                     }
@@ -393,10 +396,6 @@ fun SettingsScreen(
                                     Text(
                                         text = stringResource(R.string.enable_reminders),
                                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                                    )
-                                    Text(
-                                        text = "Exact real-time alarms waking through Doze mode",
-                                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     )
                                 }
                                 Switch(
@@ -457,7 +456,14 @@ fun SettingsScreen(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                                         verticalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
-                                        listOf(30 to "30m", 45 to "45m", 60 to "1h", 90 to "1.5h", 120 to "2h", 180 to "3h").forEach { (mins, label) ->
+                                        listOf(
+                                            30 to stringResource(R.string.minutes_format, LocalizationUtils.formatNumber(30, isArabic)),
+                                            45 to stringResource(R.string.minutes_format, LocalizationUtils.formatNumber(45, isArabic)),
+                                            60 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(1, isArabic)),
+                                            90 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(1.5, isArabic)),
+                                            120 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(2, isArabic)),
+                                            180 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(3, isArabic))
+                                        ).forEach { (mins, label) ->
                                             FilterChip(
                                                 selected = uiState.reminderIntervalMinutes == mins,
                                                 onClick = { viewModel.updateReminderIntervalMinutes(mins) },
@@ -467,7 +473,7 @@ fun SettingsScreen(
                                         FilterChip(
                                             selected = uiState.reminderIntervalMinutes !in listOf(30, 45, 60, 90, 120, 180),
                                             onClick = { showCustomIntervalDialog = true },
-                                            label = { Text("Custom...") },
+                                            label = { Text(stringResource(R.string.custom_chip)) },
                                             leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp)) }
                                         )
                                     }
@@ -478,8 +484,9 @@ fun SettingsScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        val formattedHoursCount = LocalizationUtils.formatNumber(uiState.customReminderHours.size, isArabic)
                                         Text(
-                                            text = stringResource(R.string.routine_hours, uiState.customReminderHours.size),
+                                            text = stringResource(R.string.routine_hours, formattedHoursCount),
                                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                         )
                                         OutlinedButton(
@@ -503,7 +510,7 @@ fun SettingsScreen(
                                             FilterChip(
                                                 selected = isSelected,
                                                 onClick = { viewModel.toggleCustomReminderHour(hour) },
-                                                label = { Text(formatHourToAmPm(hour), fontSize = 11.sp) },
+                                                label = { Text(LocalizationUtils.formatHour(hour, isArabic), fontSize = 11.sp) },
                                                 modifier = Modifier.height(30.dp)
                                             )
                                         }
@@ -575,7 +582,6 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            // Reminder Tone
                             Text(
                                 text = stringResource(R.string.reminder_tone),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
@@ -611,7 +617,6 @@ fun SettingsScreen(
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
-                            // Test Notification Button
                             Button(
                                 onClick = { viewModel.sendTestNotification(context) },
                                 modifier = Modifier.fillMaxWidth(),
@@ -777,15 +782,6 @@ fun CategoryHeader(
     }
 }
 
-private fun formatHourToAmPm(hour: Int): String {
-    return when {
-        hour == 0 -> "12 AM"
-        hour == 12 -> "12 PM"
-        hour < 12 -> "$hour AM"
-        else -> "${hour - 12} PM"
-    }
-}
-
 @Composable
 fun DailyGoalDialog(
     currentGoal: Int,
@@ -800,7 +796,7 @@ fun DailyGoalDialog(
         title = { Text(stringResource(R.string.daily_target)) },
         text = {
             Column {
-                Text("Enter target daily intake in ml (500 - 10000):")
+                Text(stringResource(R.string.dialog_daily_goal_desc))
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = textValue,
@@ -809,11 +805,11 @@ fun DailyGoalDialog(
                         isError = false
                     },
                     isError = isError,
-                    label = { Text("Target Goal (ml)") },
+                    label = { Text(stringResource(R.string.dialog_daily_goal_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     supportingText = {
-                        if (isError) Text("Must be between 500 and 10000 ml")
+                        if (isError) Text(stringResource(R.string.dialog_daily_goal_error))
                     }
                 )
             }
@@ -854,14 +850,16 @@ fun CustomIntervalDialog(
         )
     }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val minError = stringResource(R.string.dialog_interval_min_error)
+    val maxError = stringResource(R.string.dialog_interval_max_error)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Custom Reminder Interval") },
+        title = { Text(stringResource(R.string.dialog_custom_interval_title)) },
         text = {
             Column {
                 Text(
-                    text = "Specify how often you want to be reminded:",
+                    text = stringResource(R.string.dialog_custom_interval_desc),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -880,7 +878,7 @@ fun CustomIntervalDialog(
                                 errorMessage = null
                             }
                         },
-                        label = { Text("Minutes") },
+                        label = { Text(stringResource(R.string.unit_minutes)) },
                         modifier = Modifier.weight(1f)
                     )
                     FilterChip(
@@ -893,7 +891,7 @@ fun CustomIntervalDialog(
                                 errorMessage = null
                             }
                         },
-                        label = { Text("Hours") },
+                        label = { Text(stringResource(R.string.unit_hours)) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -907,12 +905,11 @@ fun CustomIntervalDialog(
                         errorMessage = null
                     },
                     isError = errorMessage != null,
-                    label = { Text(if (isHoursUnit) "Interval in Hours (1 - 12)" else "Interval in Minutes (15 - 720)") },
+                    label = { Text(if (isHoursUnit) stringResource(R.string.unit_hours) else stringResource(R.string.unit_minutes)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     supportingText = {
                         errorMessage?.let { Text(it) }
-                            ?: Text(if (isHoursUnit) "1 to 12 hours" else "15 to 720 minutes (Min 15 min by Android)")
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -923,17 +920,17 @@ fun CustomIntervalDialog(
                 onClick = {
                     val parsed = inputValue.toIntOrNull()
                     if (parsed == null) {
-                        errorMessage = "Please enter a valid number"
+                        errorMessage = minError
                         return@Button
                     }
 
                     val totalMinutes = if (isHoursUnit) parsed * 60 else parsed
                     if (totalMinutes < 15) {
-                        errorMessage = "Minimum interval is 15 minutes (Android system limit)"
+                        errorMessage = minError
                         return@Button
                     }
                     if (totalMinutes > 720) {
-                        errorMessage = "Maximum interval is 12 hours (720 minutes)"
+                        errorMessage = maxError
                         return@Button
                     }
 
@@ -963,6 +960,8 @@ fun WakingDayScheduleDialog(
     var sleepHour by remember { mutableIntStateOf(currentEndHour) }
     var stepHours by remember { mutableIntStateOf(2) }
 
+    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -975,7 +974,7 @@ fun WakingDayScheduleDialog(
         text = {
             Column {
                 Text(
-                    text = "Define your sleep and awake schedule to automatically generate routine reminder hours:",
+                    text = stringResource(R.string.dialog_waking_schedule_desc),
                     style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                 )
                 Spacer(modifier = Modifier.height(14.dp))
@@ -985,8 +984,8 @@ fun WakingDayScheduleDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Wake-up Time:", fontWeight = FontWeight.SemiBold)
-                    Text(formatHourToAmPm(wakeHour), fontWeight = FontWeight.Bold, color = BluePrimary)
+                    Text(stringResource(R.string.label_wake_time), fontWeight = FontWeight.SemiBold)
+                    Text(LocalizationUtils.formatHour(wakeHour, isArabic), fontWeight = FontWeight.Bold, color = BluePrimary)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
@@ -997,7 +996,7 @@ fun WakingDayScheduleDialog(
                         FilterChip(
                             selected = wakeHour == h,
                             onClick = { wakeHour = h },
-                            label = { Text(formatHourToAmPm(h), fontSize = 11.sp) },
+                            label = { Text(LocalizationUtils.formatHour(h, isArabic), fontSize = 11.sp) },
                             modifier = Modifier.height(30.dp)
                         )
                     }
@@ -1010,8 +1009,8 @@ fun WakingDayScheduleDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Bedtime / Sleep:", fontWeight = FontWeight.SemiBold)
-                    Text(formatHourToAmPm(sleepHour), fontWeight = FontWeight.Bold, color = BluePrimary)
+                    Text(stringResource(R.string.label_sleep_time), fontWeight = FontWeight.SemiBold)
+                    Text(LocalizationUtils.formatHour(sleepHour, isArabic), fontWeight = FontWeight.Bold, color = BluePrimary)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
@@ -1022,7 +1021,7 @@ fun WakingDayScheduleDialog(
                         FilterChip(
                             selected = sleepHour == h,
                             onClick = { sleepHour = h },
-                            label = { Text(formatHourToAmPm(h), fontSize = 11.sp) },
+                            label = { Text(LocalizationUtils.formatHour(h, isArabic), fontSize = 11.sp) },
                             modifier = Modifier.height(30.dp)
                         )
                     }
@@ -1031,7 +1030,7 @@ fun WakingDayScheduleDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = "Reminder Frequency:",
+                    text = stringResource(R.string.label_reminder_frequency),
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -1040,7 +1039,11 @@ fun WakingDayScheduleDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    listOf(1 to "Every 1h", 2 to "Every 2h", 3 to "Every 3h").forEach { (step, label) ->
+                    listOf(
+                        1 to stringResource(R.string.freq_every_1h),
+                        2 to stringResource(R.string.freq_every_2h),
+                        3 to stringResource(R.string.freq_every_3h)
+                    ).forEach { (step, label) ->
                         FilterChip(
                             selected = stepHours == step,
                             onClick = { stepHours = step },
