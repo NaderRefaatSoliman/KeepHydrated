@@ -4,51 +4,58 @@
     android:viewportWidth="96"
     android:viewportHeight="96">
 
-    <!-- Cup Outline / Glass Body -->
+    <!-- Water Droplet dripping above the cup -->
+    <path
+        android:fillColor="#03A9F4"
+        android:pathData="M48,4 C48,4 39,15 39,21 C39,26 43,30 48,30 C53,30 57,26 57,21 C57,15 48,4 48,4 Z" />
+
+    <!-- Water Droplet Highlight / Shimmer -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.75"
+        android:pathData="M45,15 C45,15 42,19 42,22 C42,24 43.5,25 45,25 C43.5,23 43.5,20 45,15 Z" />
+
+    <!-- Glass Rim Highlight -->
+    <path
+        android:strokeColor="#81D4FA"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M22,34 L74,34" />
+
+    <!-- Glass Cup Body -->
     <path
         android:fillColor="#E1F5FE"
         android:strokeColor="#0288D1"
         android:strokeWidth="3.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M24,18 L32,82 C32.5,86 36,88 40,88 L56,88 C60,88 63.5,86 64,82 L72,18 Z" />
+        android:pathData="M24,34 L32,86 C32.5,90 36,92 40,92 L56,92 C60,92 63.5,90 64,86 L72,34 Z" />
 
     <!-- Water Liquid inside Cup -->
     <path
         android:fillColor="#03A9F4"
-        android:pathData="M27.5,38 C34,42 42,34 48,38 C54,42 62,34 68.5,38 L62.5,80 C62,83 59,85 56,85 L40,85 C37,85 34,83 33.5,80 Z" />
+        android:pathData="M27.5,50 C34,54 42,46 48,50 C54,54 62,46 68.5,50 L62.5,84 C62,87 59,89 56,89 L40,89 C37,89 34,87 33.5,84 Z" />
 
-    <!-- Liquid Top Wave / Surface -->
+    <!-- Liquid Top Wave / Surface Meniscus -->
     <path
         android:fillColor="#4FC3F7"
-        android:pathData="M27.5,38 C34,42 42,34 48,38 C54,42 62,34 68.5,38 C65,40 57,36 48,36 C39,36 31,40 27.5,38 Z" />
-
-    <!-- Glass Rim Highlight -->
-    <path
-        android:strokeColor="#81D4FA"
-        android:strokeWidth="2.5"
-        android:strokeLineCap="round"
-        android:pathData="M22,18 L74,18" />
+        android:pathData="M27.5,50 C34,54 42,46 48,50 C54,54 62,46 68.5,50 C65,52 57,48 48,48 C39,48 31,52 27.5,50 Z" />
 
     <!-- Glass Reflection / Shimmer Line -->
     <path
         android:strokeColor="#FFFFFF"
-        android:strokeAlpha="0.75"
-        android:strokeWidth="2"
+        android:strokeAlpha="0.7"
+        android:strokeWidth="2.5"
         android:strokeLineCap="round"
-        android:pathData="M32,26 L38,76" />
+        android:pathData="M32,40 L37,82" />
 
-    <!-- Small Rising Water Bubbles -->
+    <!-- Rising Bubbles inside Cup -->
     <path
         android:fillColor="#FFFFFF"
         android:fillAlpha="0.8"
-        android:pathData="M48,68 A3,3 0 1,1 48,62 A3,3 0 1,1 48,68 Z" />
+        android:pathData="M48,74 A3,3 0 1,1 48,68 A3,3 0 1,1 48,74 Z" />
     <path
         android:fillColor="#FFFFFF"
         android:fillAlpha="0.8"
-        android:pathData="M54,54 A2,2 0 1,1 54,50 A2,2 0 1,1 54,54 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:fillAlpha="0.8"
-        android:pathData="M42,48 A2.5,2.5 0 1,1 42,43 A2.5,2.5 0 1,1 42,48 Z" />
+        android:pathData="M54,62 A2,2 0 1,1 54,58 A2,2 0 1,1 54,62 Z" />
 </vector>

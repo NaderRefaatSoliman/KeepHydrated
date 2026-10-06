@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Deep Ocean Midnight Canvas -->
+    <path
+        android:fillColor="#01579B"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <!-- Concentric Water Ripple Radiations -->
+    <path
+        android:fillColor="#0288D1"
+        android:pathData="M54,54m-48,0a48,48 0 1,0 96,0a48,48 0 1,0 -96,0" />
+
+    <path
+        android:fillColor="#00B0FF"
+        android:fillAlpha="0.35"
+        android:pathData="M54,54m-38,0a38,38 0 1,0 76,0a38,38 0 1,0 -76,0" />
+
+    <path
+        android:fillColor="#80D8FF"
+        android:fillAlpha="0.25"
+        android:pathData="M54,54m-28,0a28,28 0 1,0 56,0a28,28 0 1,0 -56,0" />
+</vector>

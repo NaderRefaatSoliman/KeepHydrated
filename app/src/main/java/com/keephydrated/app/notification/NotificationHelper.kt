@@ -7,6 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
+import android.graphics.Shader
+import android.graphics.Typeface
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.keephydrated.app.KeepHydratedApp
@@ -38,13 +45,123 @@ object NotificationHelper {
         }
     }
 
+    /**
+     * Creates a horizontal glass tube / cylinder filled with water dynamically based on target percentage.
+     */
+    fun createWaterTubeBitmap(
+        currentMl: Int,
+        goalMl: Int,
+        percent: Int
+    ): Bitmap {
+        val width = 720
+        val height = 180
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        // 1. Dark midnight water background card
+        val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF0D1B2A.toInt()
+        }
+        val bgRect = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        canvas.drawRoundRect(bgRect, 22f, 22f, bgPaint)
+
+        // 2. Tube dimensions & container
+        val tubeLeft = 36f
+        val tubeTop = 44f
+        val tubeRight = width - 36f
+        val tubeBottom = height - 44f
+        val tubeHeight = tubeBottom - tubeTop
+        val tubeCornerRadius = tubeHeight / 2f
+        val tubeRect = RectF(tubeLeft, tubeTop, tubeRight, tubeBottom)
+
+        // 3. Draw glass tube empty interior
+        val tubeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1B3A5B.toInt()
+        }
+        canvas.drawRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, tubeBgPaint)
+
+        // 4. Fill Tube with Water gradient according to loaded percentage
+        val fillFraction = (percent / 100f).coerceIn(0f, 1f)
+        if (fillFraction > 0f) {
+            val fillWidth = (tubeRight - tubeLeft) * fillFraction
+            val waterRect = RectF(tubeLeft, tubeTop, tubeLeft + fillWidth, tubeBottom)
+
+            canvas.save()
+            val clipPath = Path().apply {
+                addRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, Path.Direction.CW)
+            }
+            canvas.clipPath(clipPath)
+
+            val waterShader = LinearGradient(
+                tubeLeft, tubeTop,
+                tubeLeft + fillWidth, tubeBottom,
+                intArrayOf(0xFF00E5FF.toInt(), 0xFF03A9F4.toInt(), 0xFF01579B.toInt()),
+                null,
+                Shader.TileMode.CLAMP
+            )
+            val waterPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                shader = waterShader
+            }
+            canvas.drawRect(waterRect, waterPaint)
+
+            // Surface meniscus / edge highlight
+            val meniscusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = 0xCCFFFFFF.toInt()
+                strokeWidth = 3.5f
+                style = Paint.Style.STROKE
+            }
+            canvas.drawLine(tubeLeft + fillWidth - 2f, tubeTop + 2f, tubeLeft + fillWidth - 2f, tubeBottom - 2f, meniscusPaint)
+
+            // Rising water bubbles
+            val bubblePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = 0x99FFFFFF.toInt()
+            }
+            if (fillWidth > 60f) {
+                canvas.drawCircle(tubeLeft + fillWidth * 0.28f, tubeTop + tubeHeight * 0.38f, 5f, bubblePaint)
+                canvas.drawCircle(tubeLeft + fillWidth * 0.58f, tubeTop + tubeHeight * 0.62f, 6.5f, bubblePaint)
+                canvas.drawCircle(tubeLeft + fillWidth * 0.84f, tubeTop + tubeHeight * 0.34f, 4.5f, bubblePaint)
+            }
+
+            canvas.restore()
+        }
+
+        // 5. Draw Glass Tube Outline & Highlights
+        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF81D4FA.toInt()
+            strokeWidth = 4f
+            style = Paint.Style.STROKE
+        }
+        canvas.drawRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, borderPaint)
+
+        // Glass reflection highlight along the top
+        val reflectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0x77FFFFFF.toInt()
+            strokeWidth = 2.5f
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.ROUND
+        }
+        canvas.drawLine(tubeLeft + tubeCornerRadius, tubeTop + 6f, tubeRight - tubeCornerRadius, tubeTop + 6f, reflectionPaint)
+
+        // 6. Text Overlay: Total Intake / Target Amount & Percentage
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = 28f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
+            setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
+        }
+        val textY = tubeTop + (tubeHeight / 2f) + (textPaint.textSize / 3f)
+        canvas.drawText("$currentMl / $goalMl ml ($percent%)", width / 2f, textY, textPaint)
+
+        return bitmap
+    }
+
     fun buildReminderNotification(context: Context, settings: UserSettings): Notification {
         val sound = NotificationSound.fromId(settings.notificationSound)
         val channelId = KeepHydratedApp.getChannelIdForSound(sound.id)
         val soundUri = KeepHydratedApp.getSoundUri(context, sound)
         val cupBitmap = getWaterCupBitmap(context)
 
-        // Action 1: Predefined quick add amount
         val quickAddAmount = if (settings.bottleModeEnabled) {
             settings.frequentIntakeMl
         } else {
@@ -73,12 +190,11 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val quickAddAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_water_cup,
+            R.drawable.ic_notification_water_cup,
             "+ $quickAddAmount ml 💧",
             quickAddPendingIntent
         ).build()
 
-        // Notification title & body (Customized for Bottle Mode if active)
         val title: String
         val bodyText: String
 
@@ -95,14 +211,13 @@ object NotificationHelper {
             bodyText = context.getString(R.string.reminder_tap_text, quickAddAmount)
         }
 
-        // WearableExtender for Smartwatches
         val wearableExtender = NotificationCompat.WearableExtender()
             .addAction(quickAddAction)
             .setContentAction(0)
             .setBridgeTag("keephydrated_water_reminder")
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_water_cup)
+            .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setColor(WATER_COLOR)
             .setContentTitle(title)
             .setContentText(bodyText)
@@ -132,7 +247,6 @@ object NotificationHelper {
         val soundUri = KeepHydratedApp.getSoundUri(context, sound)
         val cupBitmap = getWaterCupBitmap(context)
 
-        // Refill Action Intent
         val refillIntent = Intent(context, WaterIntakeNotificationReceiver::class.java).apply {
             action = WaterIntakeNotificationReceiver.ACTION_REFILL_BOTTLE
         }
@@ -144,7 +258,7 @@ object NotificationHelper {
         )
 
         val refillAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_water_cup,
+            R.drawable.ic_notification_water_cup,
             context.getString(R.string.bottle_refill_action),
             refillPendingIntent
         ).build()
@@ -164,7 +278,7 @@ object NotificationHelper {
             .setBridgeTag("keephydrated_bottle_refill")
 
         val builder = NotificationCompat.Builder(context, KeepHydratedApp.BOTTLE_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_water_cup)
+            .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setColor(WATER_COLOR)
             .setContentTitle(context.getString(R.string.bottle_refill_title))
             .setContentText(context.getString(R.string.bottle_refill_msg))
@@ -188,7 +302,7 @@ object NotificationHelper {
     }
 
     /**
-     * Shows a completely silent notification confirming the logged intake or bottle refill.
+     * Shows a confirmation notification with a horizontal water tube filled according to target percentage.
      */
     fun showIntakeLoggedConfirmation(
         context: Context,
@@ -212,9 +326,10 @@ object NotificationHelper {
         val title = customTitle ?: context.getString(R.string.logged_confirmation_title, amountMl)
         val text = customMessage ?: context.getString(R.string.logged_confirmation_body, newTotalMl, goalMl, percent)
         val cupBitmap = getWaterCupBitmap(context)
+        val tubeBitmap = createWaterTubeBitmap(newTotalMl, goalMl, percent)
 
         val notification = NotificationCompat.Builder(context, KeepHydratedApp.SILENT_ACK_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_water_cup)
+            .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setColor(WATER_COLOR)
             .setContentTitle(title)
             .setContentText(text)
@@ -224,6 +339,14 @@ object NotificationHelper {
             .setSilent(true)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            // Native horizontal progress bar
+            .setProgress(100, percent.coerceIn(0, 100), false)
+            // Visual horizontal water tube graphic
+            .setStyle(
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(tubeBitmap)
+                    .setSummaryText("$newTotalMl / $goalMl ml ($percent%)")
+            )
             .apply { cupBitmap?.let { setLargeIcon(it) } }
             .build()
 
@@ -254,7 +377,7 @@ object NotificationHelper {
             .setBridgeTag("keephydrated_goal_celebration")
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_water_cup)
+            .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setColor(WATER_COLOR)
             .setContentTitle(context.getString(R.string.celebration_title))
             .setContentText(context.getString(R.string.celebration_body, goalMl))
