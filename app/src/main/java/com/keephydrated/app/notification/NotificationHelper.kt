@@ -48,7 +48,7 @@ object NotificationHelper {
 
     /**
      * Creates a horizontal glass tube / cylinder filled with water dynamically based on target percentage,
-     * supporting localized Arabic-Indic numerals and typography.
+     * rendered on a clean full white notification card with water blue filling.
      */
     fun createWaterTubeBitmap(
         currentMl: Int,
@@ -57,33 +57,57 @@ object NotificationHelper {
         isArabic: Boolean = false
     ): Bitmap {
         val width = 720
-        val height = 180
+        val height = 190
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        // 1. Dark midnight water background card
+        // 1. Pure Full White Notification Box
         val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF0D1B2A.toInt()
+            color = Color.WHITE
         }
         val bgRect = RectF(0f, 0f, width.toFloat(), height.toFloat())
-        canvas.drawRoundRect(bgRect, 22f, 22f, bgPaint)
+        canvas.drawRoundRect(bgRect, 20f, 20f, bgPaint)
 
-        // 2. Tube dimensions & container
+        // Subtle Card Outline for contrast on light/dark themes
+        val cardBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFE0E0E0.toInt()
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+        canvas.drawRoundRect(bgRect, 20f, 20f, cardBorderPaint)
+
+        // 2. Header Text: Current Intake vs Goal
+        val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
+        val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
+        val formattedPercent = LocalizationUtils.formatNumber(percent, isArabic)
+        val unit = if (isArabic) "مل" else "ml"
+        val pctSign = if (isArabic) "٪" else "%"
+
+        val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF0277BD.toInt() // Deep water blue
+            textSize = 28f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
+        }
+        val headerText = "💧 $formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
+        canvas.drawText(headerText, width / 2f, 44f, headerPaint)
+
+        // 3. Horizontal Tube Container
         val tubeLeft = 36f
-        val tubeTop = 44f
+        val tubeTop = 68f
         val tubeRight = width - 36f
-        val tubeBottom = height - 44f
+        val tubeBottom = 138f
         val tubeHeight = tubeBottom - tubeTop
         val tubeCornerRadius = tubeHeight / 2f
         val tubeRect = RectF(tubeLeft, tubeTop, tubeRight, tubeBottom)
 
-        // 3. Draw glass tube empty interior
-        val tubeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF1B3A5B.toInt()
+        // Draw glass tube background track (soft pastel water tone)
+        val tubeTrackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFE0F2FE.toInt()
         }
-        canvas.drawRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, tubeBgPaint)
+        canvas.drawRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, tubeTrackPaint)
 
-        // 4. Fill Tube with Water gradient according to loaded percentage
+        // 4. Water-Blue Horizontal Filling
         val fillFraction = (percent / 100f).coerceIn(0f, 1f)
         if (fillFraction > 0f) {
             val fillWidth = (tubeRight - tubeLeft) * fillFraction
@@ -98,7 +122,7 @@ object NotificationHelper {
             val waterShader = LinearGradient(
                 tubeLeft, tubeTop,
                 tubeLeft + fillWidth, tubeBottom,
-                intArrayOf(0xFF00E5FF.toInt(), 0xFF03A9F4.toInt(), 0xFF01579B.toInt()),
+                intArrayOf(0xFF29B6F6.toInt(), 0xFF0288D1.toInt(), 0xFF01579B.toInt()),
                 null,
                 Shader.TileMode.CLAMP
             )
@@ -107,9 +131,9 @@ object NotificationHelper {
             }
             canvas.drawRect(waterRect, waterPaint)
 
-            // Surface meniscus / edge highlight
+            // Meniscus / wave edge line
             val meniscusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0xCCFFFFFF.toInt()
+                color = 0xEEFFFFFF.toInt()
                 strokeWidth = 3.5f
                 style = Paint.Style.STROKE
             }
@@ -117,52 +141,47 @@ object NotificationHelper {
 
             // Rising water bubbles
             val bubblePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0x99FFFFFF.toInt()
+                color = 0xAAFFFFFF.toInt()
             }
-            if (fillWidth > 60f) {
-                canvas.drawCircle(tubeLeft + fillWidth * 0.28f, tubeTop + tubeHeight * 0.38f, 5f, bubblePaint)
-                canvas.drawCircle(tubeLeft + fillWidth * 0.58f, tubeTop + tubeHeight * 0.62f, 6.5f, bubblePaint)
-                canvas.drawCircle(tubeLeft + fillWidth * 0.84f, tubeTop + tubeHeight * 0.34f, 4.5f, bubblePaint)
+            if (fillWidth > 50f) {
+                canvas.drawCircle(tubeLeft + fillWidth * 0.3f, tubeTop + tubeHeight * 0.4f, 5f, bubblePaint)
+                canvas.drawCircle(tubeLeft + fillWidth * 0.6f, tubeTop + tubeHeight * 0.65f, 6.5f, bubblePaint)
+                canvas.drawCircle(tubeLeft + fillWidth * 0.85f, tubeTop + tubeHeight * 0.35f, 4.5f, bubblePaint)
             }
 
             canvas.restore()
         }
 
-        // 5. Draw Glass Tube Outline & Highlights
-        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF81D4FA.toInt()
-            strokeWidth = 4f
+        // 5. Glass Tube Border & Reflection highlights
+        val tubeBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF0288D1.toInt()
+            strokeWidth = 3f
             style = Paint.Style.STROKE
         }
-        canvas.drawRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, borderPaint)
+        canvas.drawRoundRect(tubeRect, tubeCornerRadius, tubeCornerRadius, tubeBorderPaint)
 
-        // Glass reflection highlight along the top
+        // Top edge shimmer reflection
         val reflectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x77FFFFFF.toInt()
+            color = 0x88FFFFFF.toInt()
             strokeWidth = 2.5f
             style = Paint.Style.STROKE
             strokeCap = Paint.Cap.ROUND
         }
         canvas.drawLine(tubeLeft + tubeCornerRadius, tubeTop + 6f, tubeRight - tubeCornerRadius, tubeTop + 6f, reflectionPaint)
 
-        // 6. Localized Text Overlay
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            textSize = 28f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        // 6. Subtext / Progress status
+        val subtextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF546E7A.toInt()
+            textSize = 20f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
-            setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
         }
-        val textY = tubeTop + (tubeHeight / 2f) + (textPaint.textSize / 3f)
-
-        val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
-        val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
-        val formattedPercent = LocalizationUtils.formatNumber(percent, isArabic)
-        val unit = if (isArabic) "مل" else "ml"
-        val pctSign = if (isArabic) "٪" else "%"
-        val text = "$formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
-
-        canvas.drawText(text, width / 2f, textY, textPaint)
+        val statusText = if (percent >= 100) {
+            if (isArabic) "🎉 اكتمل الهدف اليومي للترطيب!" else "🎉 Daily Hydration Goal Completed!"
+        } else {
+            if (isArabic) "متبقي $formattedPercent$pctSign نحو تحقيق الهدف اليومي" else "$formattedPercent$pctSign of daily hydration target reached"
+        }
+        canvas.drawText(statusText, width / 2f, 168f, subtextPaint)
 
         return bitmap
     }

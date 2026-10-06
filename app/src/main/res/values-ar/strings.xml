@@ -4,6 +4,7 @@
     <string name="nav_home">الرئيسية</string>
     <string name="nav_history">السجل</string>
     <string name="nav_settings">الإعدادات</string>
+    <string name="back">رجوع</string>
 
     <!-- General Units & Formatting -->
     <string name="ml_format">%1$s مل</string>
@@ -27,6 +28,7 @@
     <string name="undo_success">تم حذف إدخال %1$s مل.</string>
     <string name="frequent_sip_badge">الشائع: %1$s مل</string>
     <string name="tap_to_log_frequent">اضغط على المركز لتسجيل %1$s مل</string>
+    <string name="tap_to_add_cup">اضغط لإضافة %1$s</string>
     <string name="goal_achieved_badge">تم تحقيق الهدف بنجاح! 🏆</string>
 
     <!-- Containers -->
@@ -69,16 +71,22 @@
     <!-- Settings Categories -->
     <string name="settings">الإعدادات</string>
     <string name="category_goal">هدف الترطيب والإضافة السريعة</string>
+    <string name="desc_category_goal">الهدف اليومي، كمية الشرب المفضلة وخيارات الإضافة</string>
     <string name="category_bottle">وضع تتبع زجاجة الماء</string>
+    <string name="desc_category_bottle">سعة الزجاجة، مهلة الشرب وتنبيهات إعادة التعبئة</string>
     <string name="category_reminders">التذكيرات والجدول الزمني</string>
+    <string name="desc_category_reminders">الفترات الزمنية الدورية وساعات الروتين وإعدادات البطارية</string>
     <string name="category_sounds">الإشعارات والأصوات</string>
+    <string name="desc_category_sounds">نغمات التذكير وصوت الاحتفال وتجربة التنبيه</string>
     <string name="category_language">اللغة / Language</string>
+    <string name="desc_category_language">التبديل الفوري بين اللغتين العربية والإنجليزية</string>
     <string name="category_about">حول التطبيق</string>
+    <string name="desc_category_about">إصدار التطبيق ومعلومات موجزة عنه</string>
 
     <!-- Settings Options -->
     <string name="daily_target">الهدف اليومي</string>
     <string name="frequent_drink_amount">كمية الشرب المتكررة المفضلة</string>
-    <string name="frequent_drink_desc">تظهر مميزة على دائرة التقدم اليومية للتسجيل السريع بلمسة واحدة.</string>
+    <string name="frequent_drink_desc">تظهر في دائرة التقدم لتسجيل الشرب بلمسة واحدة.</string>
     <string name="enable_bottle_mode">تفعيل وضع تتبع الزجاجة</string>
     <string name="enable_reminders">تذكيرات شرب الماء</string>
     <string name="reminder_mode">نوع جدول التذكير</string>

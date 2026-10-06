@@ -3,8 +3,10 @@ package com.keephydrated.app.presentation.ui.settings
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,9 +23,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
@@ -55,6 +61,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -88,10 +95,24 @@ import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
+import com.keephydrated.app.presentation.ui.theme.CyanSecondary
 import com.keephydrated.app.util.BatteryOptimizationHelper
 import com.keephydrated.app.util.LocalizationUtils
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+enum class SettingsCategory(
+    @StringRes val titleResId: Int,
+    @StringRes val descResId: Int,
+    val icon: ImageVector
+) {
+    GOAL(R.string.category_goal, R.string.desc_category_goal, Icons.Default.TrackChanges),
+    BOTTLE(R.string.category_bottle, R.string.desc_category_bottle, Icons.Default.LocalDrink),
+    REMINDERS(R.string.category_reminders, R.string.desc_category_reminders, Icons.Default.Schedule),
+    SOUNDS(R.string.category_sounds, R.string.desc_category_sounds, Icons.Default.Notifications),
+    LANGUAGE(R.string.category_language, R.string.desc_category_language, Icons.Default.Language),
+    ABOUT(R.string.category_about, R.string.desc_category_about, Icons.Default.Info)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -103,6 +124,8 @@ fun SettingsScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
 
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
@@ -139,14 +162,33 @@ fun SettingsScreen(
         }
     }
 
+    // Handle back button when inside a category detail screen
+    BackHandler(enabled = selectedCategory != null) {
+        selectedCategory = null
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        stringResource(R.string.settings),
+                        text = if (selectedCategory != null) {
+                            stringResource(selectedCategory!!.titleResId)
+                        } else {
+                            stringResource(R.string.settings)
+                        },
                         fontWeight = FontWeight.Bold
                     )
+                },
+                navigationIcon = {
+                    if (selectedCategory != null) {
+                        IconButton(onClick = { selectedCategory = null }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -167,240 +209,65 @@ fun SettingsScreen(
                 CircularProgressIndicator()
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
-            ) {
+            if (selectedCategory == null) {
                 // ==========================================
-                // 1. HYDRATION TARGET & QUICK ADD
+                // MAIN SETTINGS: LIST OF MAIN CATEGORIES
                 // ==========================================
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CategoryHeader(
-                        title = stringResource(R.string.category_goal),
-                        icon = Icons.Default.TrackChanges
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            // Daily Target
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        text = stringResource(R.string.daily_target),
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                    )
-                                    val formattedGoal = LocalizationUtils.formatNumber(uiState.dailyGoalMl, isArabic)
-                                    Text(
-                                        text = stringResource(R.string.ml_format, formattedGoal),
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = BluePrimary
-                                        )
-                                    )
-                                }
-                                OutlinedButton(onClick = { showGoalDialog = true }) {
-                                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(stringResource(R.string.dialog_add))
-                                }
-                            }
-
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                            // Frequent Drinking Size
-                            Text(
-                                text = stringResource(R.string.frequent_drink_amount),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                            Text(
-                                text = stringResource(R.string.frequent_drink_desc),
-                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                listOf(150, 250, 330, 500).forEach { amount ->
-                                    val formattedAmount = LocalizationUtils.formatNumber(amount, isArabic)
-                                    FilterChip(
-                                        selected = uiState.frequentIntakeMl == amount,
-                                        onClick = { viewModel.updateFrequentIntakeMl(amount) },
-                                        label = { Text(stringResource(R.string.ml_format, formattedAmount), fontSize = 12.sp) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                            // Notification 1-tap logging
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.one_tap_notification),
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                    )
-                                    val formattedDefaultQuick = LocalizationUtils.formatNumber(uiState.defaultQuickAddMl, isArabic)
-                                    Text(
-                                        text = stringResource(R.string.reminder_tap_text, formattedDefaultQuick),
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-                                }
-                                Switch(
-                                    checked = uiState.quickAddOnNotificationClick,
-                                    onCheckedChange = { viewModel.updateQuickAddOnNotificationClick(it) }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(SettingsCategory.entries.toTypedArray()) { category ->
+                        SettingsCategoryItem(
+                            category = category,
+                            summary = getCategorySummary(category, uiState, isArabic),
+                            onClick = { selectedCategory = category }
+                        )
+                    }
+                }
+            } else {
+                // ==========================================
+                // DETAIL SCREEN FOR SELECTED CATEGORY
+                // ==========================================
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    when (selectedCategory!!) {
+                        SettingsCategory.GOAL -> {
+                            item {
+                                GoalSettingsDetail(
+                                    uiState = uiState,
+                                    isArabic = isArabic,
+                                    onEditGoalClick = { showGoalDialog = true },
+                                    onFrequentAmountSelect = { viewModel.updateFrequentIntakeMl(it) },
+                                    onQuickAddToggle = { viewModel.updateQuickAddOnNotificationClick(it) }
                                 )
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                // ==========================================
-                // 2. BOTTLE TRACKING MODE
-                // ==========================================
-                item {
-                    CategoryHeader(
-                        title = stringResource(R.string.category_bottle),
-                        icon = Icons.Default.LocalDrink
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.enable_bottle_mode),
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.bottle_mode_desc),
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-                                }
-                                Switch(
-                                    checked = uiState.bottleModeEnabled,
-                                    onCheckedChange = { viewModel.updateBottleModeEnabled(it) }
+                        SettingsCategory.BOTTLE -> {
+                            item {
+                                BottleSettingsDetail(
+                                    uiState = uiState,
+                                    isArabic = isArabic,
+                                    onToggleBottleMode = { viewModel.updateBottleModeEnabled(it) },
+                                    onBottleConfigChange = { vol, dur -> viewModel.updateBottleConfig(vol, dur) }
                                 )
-                            }
-
-                            if (uiState.bottleModeEnabled) {
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                                // Bottle Volume Selection
-                                Text(
-                                    text = stringResource(R.string.bottle_capacity),
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    listOf(500, 750, 1000, 1500).forEach { vol ->
-                                        val formattedVol = LocalizationUtils.formatNumber(vol, isArabic)
-                                        FilterChip(
-                                            selected = uiState.bottleVolumeMl == vol,
-                                            onClick = { viewModel.updateBottleConfig(vol, uiState.bottleTargetDurationMinutes) },
-                                            label = { Text(stringResource(R.string.ml_format, formattedVol), fontSize = 11.sp) },
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                // Target Duration Selection
-                                Text(
-                                    text = stringResource(R.string.bottle_target_duration),
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    listOf(60 to 1, 120 to 2, 180 to 3, 240 to 4).forEach { (mins, hours) ->
-                                        val formattedHours = LocalizationUtils.formatNumber(hours, isArabic)
-                                        FilterChip(
-                                            selected = uiState.bottleTargetDurationMinutes == mins,
-                                            onClick = { viewModel.updateBottleConfig(uiState.bottleVolumeMl, mins) },
-                                            label = { Text(stringResource(R.string.hours_format, formattedHours), fontSize = 11.sp) },
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                    }
-                                }
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                // ==========================================
-                // 3. REMINDERS & SCHEDULE
-                // ==========================================
-                item {
-                    CategoryHeader(
-                        title = stringResource(R.string.category_reminders),
-                        icon = Icons.Default.Schedule
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            // Toggle reminders
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.enable_reminders),
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                                    )
-                                }
-                                Switch(
-                                    checked = uiState.remindersEnabled,
-                                    onCheckedChange = { enabled ->
+                        SettingsCategory.REMINDERS -> {
+                            item {
+                                RemindersSettingsDetail(
+                                    uiState = uiState,
+                                    isArabic = isArabic,
+                                    isBatteryOptimized = isBatteryOptimized,
+                                    context = context,
+                                    onToggleReminders = { enabled ->
                                         if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                             val hasPermission = ContextCompat.checkSelfPermission(
                                                 context,
@@ -408,317 +275,44 @@ fun SettingsScreen(
                                             ) == PackageManager.PERMISSION_GRANTED
                                             if (!hasPermission) {
                                                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                                return@Switch
+                                                return@RemindersSettingsDetail
                                             }
                                         }
                                         viewModel.toggleReminders(enabled)
-                                    }
-                                )
-                            }
-
-                            if (uiState.remindersEnabled) {
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                                // Mode selection
-                                Text(
-                                    text = stringResource(R.string.reminder_mode),
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    FilterChip(
-                                        selected = uiState.reminderMode == ReminderMode.INTERVAL,
-                                        onClick = { viewModel.updateReminderMode(ReminderMode.INTERVAL) },
-                                        label = { Text(stringResource(R.string.mode_interval)) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    FilterChip(
-                                        selected = uiState.reminderMode == ReminderMode.CUSTOM_ROUTINE,
-                                        onClick = { viewModel.updateReminderMode(ReminderMode.CUSTOM_ROUTINE) },
-                                        label = { Text(stringResource(R.string.mode_routine)) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(14.dp))
-
-                                if (uiState.reminderMode == ReminderMode.INTERVAL) {
-                                    Text(
-                                        text = stringResource(R.string.remind_every),
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        listOf(
-                                            30 to stringResource(R.string.minutes_format, LocalizationUtils.formatNumber(30, isArabic)),
-                                            45 to stringResource(R.string.minutes_format, LocalizationUtils.formatNumber(45, isArabic)),
-                                            60 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(1, isArabic)),
-                                            90 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(1.5, isArabic)),
-                                            120 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(2, isArabic)),
-                                            180 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(3, isArabic))
-                                        ).forEach { (mins, label) ->
-                                            FilterChip(
-                                                selected = uiState.reminderIntervalMinutes == mins,
-                                                onClick = { viewModel.updateReminderIntervalMinutes(mins) },
-                                                label = { Text(label) }
-                                            )
-                                        }
-                                        FilterChip(
-                                            selected = uiState.reminderIntervalMinutes !in listOf(30, 45, 60, 90, 120, 180),
-                                            onClick = { showCustomIntervalDialog = true },
-                                            label = { Text(stringResource(R.string.custom_chip)) },
-                                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp)) }
-                                        )
-                                    }
-                                } else {
-                                    // Custom Routine
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        val formattedHoursCount = LocalizationUtils.formatNumber(uiState.customReminderHours.size, isArabic)
-                                        Text(
-                                            text = stringResource(R.string.routine_hours, formattedHoursCount),
-                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                        )
-                                        OutlinedButton(
-                                            onClick = { showWakingDayDialog = true },
-                                            modifier = Modifier.height(32.dp),
-                                            contentPadding = PaddingValues(horizontal = 8.dp)
-                                        ) {
-                                            Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(14.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(stringResource(R.string.waking_day_preset), fontSize = 11.sp)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        (6..23).forEach { hour ->
-                                            val isSelected = uiState.customReminderHours.contains(hour)
-                                            FilterChip(
-                                                selected = isSelected,
-                                                onClick = { viewModel.toggleCustomReminderHour(hour) },
-                                                label = { Text(LocalizationUtils.formatHour(hour, isArabic), fontSize = 11.sp) },
-                                                modifier = Modifier.height(30.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    // Battery Optimization Warning Card
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isBatteryOptimized) Color(0xFFFFF3E0) else Color(0xFFE8F5E9)
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = if (isBatteryOptimized) Icons.Default.BatteryAlert else Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = if (isBatteryOptimized) Color(0xFFE65100) else Color(0xFF2E7D32)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (isBatteryOptimized) stringResource(R.string.battery_optimization_title) else stringResource(R.string.battery_unrestricted_title),
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isBatteryOptimized) Color(0xFFE65100) else Color(0xFF2E7D32)
-                                    )
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = if (isBatteryOptimized) stringResource(R.string.battery_optimization_desc) else stringResource(R.string.battery_unrestricted_desc),
-                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            )
-                            if (isBatteryOptimized) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(
-                                    onClick = { BatteryOptimizationHelper.requestIgnoreBatteryOptimization(context) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100))
-                                ) {
-                                    Text(stringResource(R.string.disable_battery_optimization), fontSize = 12.sp)
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                // ==========================================
-                // 4. NOTIFICATION & SOUNDS
-                // ==========================================
-                item {
-                    CategoryHeader(
-                        title = stringResource(R.string.category_sounds),
-                        icon = Icons.Default.Notifications
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = stringResource(R.string.reminder_tone),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            NotificationSound.entries.forEach { sound ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { viewModel.updateNotificationSound(sound.id) }
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = uiState.notificationSound == sound.id,
-                                        onClick = { viewModel.updateNotificationSound(sound.id) }
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(text = sound.displayName, fontWeight = FontWeight.SemiBold)
-                                        Text(
-                                            text = sound.description,
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        )
-                                    }
-                                    IconButton(onClick = { viewModel.previewSound(context, sound) }) {
-                                        Icon(Icons.Default.PlayArrow, contentDescription = "Play sound")
-                                    }
-                                }
-                            }
-
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                            Button(
-                                onClick = { viewModel.sendTestNotification(context) },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
-                            ) {
-                                Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(stringResource(R.string.test_alert))
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                // ==========================================
-                // 5. LANGUAGE / اللغة
-                // ==========================================
-                item {
-                    CategoryHeader(
-                        title = stringResource(R.string.category_language),
-                        icon = Icons.Default.Language
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = stringResource(R.string.app_language),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                FilterChip(
-                                    selected = uiState.language == "en",
-                                    onClick = { viewModel.updateLanguage("en") },
-                                    label = { Text(stringResource(R.string.lang_english)) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                FilterChip(
-                                    selected = uiState.language == "ar",
-                                    onClick = { viewModel.updateLanguage("ar") },
-                                    label = { Text(stringResource(R.string.lang_arabic)) },
-                                    modifier = Modifier.weight(1f)
+                                    },
+                                    onModeChange = { viewModel.updateReminderMode(it) },
+                                    onIntervalChange = { viewModel.updateReminderIntervalMinutes(it) },
+                                    onCustomIntervalClick = { showCustomIntervalDialog = true },
+                                    onToggleHour = { viewModel.toggleCustomReminderHour(it) },
+                                    onWakingDayPresetClick = { showWakingDayDialog = true }
                                 )
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                // ==========================================
-                // 6. ABOUT SECTION (Clean - NO change details)
-                // ==========================================
-                item {
-                    CategoryHeader(
-                        title = stringResource(R.string.category_about),
-                        icon = Icons.Default.Info
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.app_name),
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        SettingsCategory.SOUNDS -> {
+                            item {
+                                SoundsSettingsDetail(
+                                    uiState = uiState,
+                                    context = context,
+                                    onSelectSound = { viewModel.updateNotificationSound(it) },
+                                    onPreviewSound = { viewModel.previewSound(context, it) },
+                                    onSendTestAlert = { viewModel.sendTestNotification(context) }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.app_version),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = BluePrimary
+                        }
+                        SettingsCategory.LANGUAGE -> {
+                            item {
+                                LanguageSettingsDetail(
+                                    uiState = uiState,
+                                    onSelectLanguage = { viewModel.updateLanguage(it) }
                                 )
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.app_motto),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
+                            }
+                        }
+                        SettingsCategory.ABOUT -> {
+                            item {
+                                AboutSettingsDetail()
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(36.dp))
                 }
             }
         }
@@ -760,25 +354,625 @@ fun SettingsScreen(
 }
 
 @Composable
-fun CategoryHeader(
-    title: String,
-    icon: ImageVector
+fun SettingsCategoryItem(
+    category: SettingsCategory,
+    summary: String,
+    onClick: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = BluePrimary,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = BluePrimary
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = BluePrimary.copy(alpha = 0.12f),
+                modifier = Modifier.size(46.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = category.icon,
+                        contentDescription = null,
+                        tint = BluePrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(category.titleResId),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(16.dp)
             )
-        )
+        }
+    }
+}
+
+@Composable
+fun getCategorySummary(
+    category: SettingsCategory,
+    uiState: SettingsUiState,
+    isArabic: Boolean
+): String {
+    return when (category) {
+        SettingsCategory.GOAL -> {
+            val goal = LocalizationUtils.formatNumber(uiState.dailyGoalMl, isArabic)
+            val frequent = LocalizationUtils.formatNumber(uiState.frequentIntakeMl, isArabic)
+            val unit = if (isArabic) "مل" else "ml"
+            "$goal $unit • $frequent $unit"
+        }
+        SettingsCategory.BOTTLE -> {
+            if (uiState.bottleModeEnabled) {
+                val vol = LocalizationUtils.formatNumber(uiState.bottleVolumeMl, isArabic)
+                val hours = LocalizationUtils.formatNumber(uiState.bottleTargetDurationMinutes / 60, isArabic)
+                val unit = if (isArabic) "مل" else "ml"
+                val hUnit = if (isArabic) "ساعات" else "h"
+                "$vol $unit • $hours $hUnit"
+            } else {
+                if (isArabic) "معطل" else "Disabled"
+            }
+        }
+        SettingsCategory.REMINDERS -> {
+            if (uiState.remindersEnabled) {
+                if (uiState.reminderMode == ReminderMode.INTERVAL) {
+                    val hours = uiState.reminderIntervalMinutes / 60
+                    if (hours >= 1) {
+                        val h = LocalizationUtils.formatNumber(hours, isArabic)
+                        if (isArabic) "كل $h ساعات" else "Every $h hrs"
+                    } else {
+                        val m = LocalizationUtils.formatNumber(uiState.reminderIntervalMinutes, isArabic)
+                        if (isArabic) "كل $m دقيقة" else "Every $m mins"
+                    }
+                } else {
+                    val count = LocalizationUtils.formatNumber(uiState.customReminderHours.size, isArabic)
+                    if (isArabic) "جدول روتيني ($count أوقات)" else "Routine ($count set)"
+                }
+            } else {
+                if (isArabic) "معطل" else "Disabled"
+            }
+        }
+        SettingsCategory.SOUNDS -> {
+            val sound = NotificationSound.fromId(uiState.notificationSound)
+            sound.displayName
+        }
+        SettingsCategory.LANGUAGE -> {
+            if (uiState.language == "ar") "العربية (Arabic)" else "English"
+        }
+        SettingsCategory.ABOUT -> {
+            "KeepHydrated v2.0.0"
+        }
+    }
+}
+
+@Composable
+fun GoalSettingsDetail(
+    uiState: SettingsUiState,
+    isArabic: Boolean,
+    onEditGoalClick: () -> Unit,
+    onFrequentAmountSelect: (Int) -> Unit,
+    onQuickAddToggle: (Boolean) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.daily_target),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                    val formattedGoal = LocalizationUtils.formatNumber(uiState.dailyGoalMl, isArabic)
+                    Text(
+                        text = stringResource(R.string.ml_format, formattedGoal),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = BluePrimary
+                        )
+                    )
+                }
+                OutlinedButton(onClick = onEditGoalClick) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.dialog_add))
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+            Text(
+                text = stringResource(R.string.frequent_drink_amount),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+            )
+            Text(
+                text = stringResource(R.string.frequent_drink_desc),
+                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(150, 250, 330, 500).forEach { amount ->
+                    val formattedAmount = LocalizationUtils.formatNumber(amount, isArabic)
+                    FilterChip(
+                        selected = uiState.frequentIntakeMl == amount,
+                        onClick = { onFrequentAmountSelect(amount) },
+                        label = { Text(stringResource(R.string.ml_format, formattedAmount), fontSize = 12.sp) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.one_tap_notification),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                    val formattedDefaultQuick = LocalizationUtils.formatNumber(uiState.defaultQuickAddMl, isArabic)
+                    Text(
+                        text = stringResource(R.string.reminder_tap_text, formattedDefaultQuick),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                }
+                Switch(
+                    checked = uiState.quickAddOnNotificationClick,
+                    onCheckedChange = onQuickAddToggle
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BottleSettingsDetail(
+    uiState: SettingsUiState,
+    isArabic: Boolean,
+    onToggleBottleMode: (Boolean) -> Unit,
+    onBottleConfigChange: (vol: Int, dur: Int) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.enable_bottle_mode),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Text(
+                        text = stringResource(R.string.bottle_mode_desc),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                }
+                Switch(
+                    checked = uiState.bottleModeEnabled,
+                    onCheckedChange = onToggleBottleMode
+                )
+            }
+
+            if (uiState.bottleModeEnabled) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                Text(
+                    text = stringResource(R.string.bottle_capacity),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf(500, 750, 1000, 1500).forEach { vol ->
+                        val formattedVol = LocalizationUtils.formatNumber(vol, isArabic)
+                        FilterChip(
+                            selected = uiState.bottleVolumeMl == vol,
+                            onClick = { onBottleConfigChange(vol, uiState.bottleTargetDurationMinutes) },
+                            label = { Text(stringResource(R.string.ml_format, formattedVol), fontSize = 11.sp) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = stringResource(R.string.bottle_target_duration),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf(60 to 1, 120 to 2, 180 to 3, 240 to 4).forEach { (mins, hours) ->
+                        val formattedHours = LocalizationUtils.formatNumber(hours, isArabic)
+                        FilterChip(
+                            selected = uiState.bottleTargetDurationMinutes == mins,
+                            onClick = { onBottleConfigChange(uiState.bottleVolumeMl, mins) },
+                            label = { Text(stringResource(R.string.hours_format, formattedHours), fontSize = 11.sp) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun RemindersSettingsDetail(
+    uiState: SettingsUiState,
+    isArabic: Boolean,
+    isBatteryOptimized: Boolean,
+    context: android.content.Context,
+    onToggleReminders: (Boolean) -> Unit,
+    onModeChange: (ReminderMode) -> Unit,
+    onIntervalChange: (Int) -> Unit,
+    onCustomIntervalClick: () -> Unit,
+    onToggleHour: (Int) -> Unit,
+    onWakingDayPresetClick: () -> Unit
+) {
+    Column {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(2.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.enable_reminders),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                    }
+                    Switch(
+                        checked = uiState.remindersEnabled,
+                        onCheckedChange = onToggleReminders
+                    )
+                }
+
+                if (uiState.remindersEnabled) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                    Text(
+                        text = stringResource(R.string.reminder_mode),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterChip(
+                            selected = uiState.reminderMode == ReminderMode.INTERVAL,
+                            onClick = { onModeChange(ReminderMode.INTERVAL) },
+                            label = { Text(stringResource(R.string.mode_interval)) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        FilterChip(
+                            selected = uiState.reminderMode == ReminderMode.CUSTOM_ROUTINE,
+                            onClick = { onModeChange(ReminderMode.CUSTOM_ROUTINE) },
+                            label = { Text(stringResource(R.string.mode_routine)) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    if (uiState.reminderMode == ReminderMode.INTERVAL) {
+                        Text(
+                            text = stringResource(R.string.remind_every),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            listOf(
+                                30 to stringResource(R.string.minutes_format, LocalizationUtils.formatNumber(30, isArabic)),
+                                45 to stringResource(R.string.minutes_format, LocalizationUtils.formatNumber(45, isArabic)),
+                                60 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(1, isArabic)),
+                                90 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(1.5, isArabic)),
+                                120 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(2, isArabic)),
+                                180 to stringResource(R.string.hours_format, LocalizationUtils.formatNumber(3, isArabic))
+                            ).forEach { (mins, label) ->
+                                FilterChip(
+                                    selected = uiState.reminderIntervalMinutes == mins,
+                                    onClick = { onIntervalChange(mins) },
+                                    label = { Text(label) }
+                                )
+                            }
+                            FilterChip(
+                                selected = uiState.reminderIntervalMinutes !in listOf(30, 45, 60, 90, 120, 180),
+                                onClick = onCustomIntervalClick,
+                                label = { Text(stringResource(R.string.custom_chip)) },
+                                leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                            )
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val formattedHoursCount = LocalizationUtils.formatNumber(uiState.customReminderHours.size, isArabic)
+                            Text(
+                                text = stringResource(R.string.routine_hours, formattedHoursCount),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                            OutlinedButton(
+                                onClick = onWakingDayPresetClick,
+                                modifier = Modifier.height(32.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp)
+                            ) {
+                                Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(stringResource(R.string.waking_day_preset), fontSize = 11.sp)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            (6..23).forEach { hour ->
+                                val isSelected = uiState.customReminderHours.contains(hour)
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { onToggleHour(hour) },
+                                    label = { Text(LocalizationUtils.formatHour(hour, isArabic), fontSize = 11.sp) },
+                                    modifier = Modifier.height(30.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isBatteryOptimized) Color(0xFFFFF3E0) else Color(0xFFE8F5E9)
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (isBatteryOptimized) Icons.Default.BatteryAlert else Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = if (isBatteryOptimized) Color(0xFFE65100) else Color(0xFF2E7D32)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isBatteryOptimized) stringResource(R.string.battery_optimization_title) else stringResource(R.string.battery_unrestricted_title),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = if (isBatteryOptimized) Color(0xFFE65100) else Color(0xFF2E7D32)
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (isBatteryOptimized) stringResource(R.string.battery_optimization_desc) else stringResource(R.string.battery_unrestricted_desc),
+                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                )
+                if (isBatteryOptimized) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { BatteryOptimizationHelper.requestIgnoreBatteryOptimization(context) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100))
+                    ) {
+                        Text(stringResource(R.string.disable_battery_optimization), fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SoundsSettingsDetail(
+    uiState: SettingsUiState,
+    context: android.content.Context,
+    onSelectSound: (String) -> Unit,
+    onPreviewSound: (NotificationSound) -> Unit,
+    onSendTestAlert: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.reminder_tone),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+
+            NotificationSound.entries.forEach { sound ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelectSound(sound.id) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = uiState.notificationSound == sound.id,
+                        onClick = { onSelectSound(sound.id) }
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = sound.displayName, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = sound.description,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                    IconButton(onClick = { onPreviewSound(sound) }) {
+                        Icon(Icons.Default.PlayArrow, contentDescription = "Play sound")
+                    }
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+            Button(
+                onClick = onSendTestAlert,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+            ) {
+                Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(stringResource(R.string.test_alert))
+            }
+        }
+    }
+}
+
+@Composable
+fun LanguageSettingsDetail(
+    uiState: SettingsUiState,
+    onSelectLanguage: (String) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.app_language),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                FilterChip(
+                    selected = uiState.language == "en",
+                    onClick = { onSelectLanguage("en") },
+                    label = { Text(stringResource(R.string.lang_english)) },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = uiState.language == "ar",
+                    onClick = { onSelectLanguage("ar") },
+                    label = { Text(stringResource(R.string.lang_arabic)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AboutSettingsDetail() {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.app_version),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = BluePrimary
+                )
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.app_motto),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
     }
 }
 

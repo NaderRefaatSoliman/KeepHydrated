@@ -12,10 +12,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
+import com.keephydrated.app.presentation.ui.theme.BluePrimaryContainer
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
 import com.keephydrated.app.util.LocalizationUtils
 import kotlin.math.PI
@@ -55,7 +58,7 @@ fun CircularHydrationProgress(
     frequentIntakeMl: Int = 250,
     onFrequentIntakeClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    size: Dp = 250.dp,
+    size: Dp = 260.dp,
     strokeWidth: Dp = 18.dp
 ) {
     val progress = if (goalMl > 0) (currentMl.toFloat() / goalMl.toFloat()).coerceIn(0f, 1f) else 0f
@@ -72,6 +75,14 @@ fun CircularHydrationProgress(
     val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
     val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
     val formattedFrequent = LocalizationUtils.formatNumber(frequentIntakeMl, isArabic)
+
+    val containerEmoji = when (frequentIntakeMl) {
+        150 -> "☕"
+        250 -> "🥛"
+        330 -> "🥤"
+        500 -> "🍶"
+        else -> "🥛"
+    }
 
     // Animated water wave transition
     val infiniteTransition = rememberInfiniteTransition(label = "waveTransition")
@@ -196,52 +207,74 @@ fun CircularHydrationProgress(
             }
         }
 
-        // Center Content Overlay
+        // Center Content Overlay with Cup Shape Button
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.clickable(enabled = onFrequentIntakeClick != null) {
-                onFrequentIntakeClick?.invoke()
-            }
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             Text(
                 text = stringResource(R.string.progress_percentage, formattedPercent),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = BluePrimary,
-                    fontSize = 38.sp
+                    fontSize = 36.sp
                 )
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = stringResource(R.string.intake_progress_format, formattedCurrent, formattedGoal),
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             )
 
-            // Frequent Drinking selected amount badge on the progress circle
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Interactive Selected Cup / Amount Shape Button in Center
             Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = BluePrimary.copy(alpha = 0.12f),
-                modifier = Modifier.padding(horizontal = 4.dp)
+                shape = RoundedCornerShape(16.dp),
+                color = BluePrimaryContainer.copy(alpha = 0.9f),
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = onFrequentIntakeClick != null) {
+                        onFrequentIntakeClick?.invoke()
+                    }
             ) {
-                Text(
-                    text = "💧 ${stringResource(R.string.frequent_sip_badge, formattedFrequent)}",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = BluePrimary
-                    ),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = containerEmoji,
+                        fontSize = 22.sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = "+$formattedFrequent ml 💧",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = BluePrimary
+                            )
+                        )
+                        Text(
+                            text = stringResource(R.string.tap_to_add_cup, "$formattedFrequent ml"),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                color = BluePrimary.copy(alpha = 0.85f)
+                            )
+                        )
+                    }
+                }
             }
 
             if (currentMl >= goalMl && goalMl > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.goal_achieved_badge),
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    style = MaterialTheme.typography.labelSmall.copy(
                         color = Color(0xFF2E7D32),
                         fontWeight = FontWeight.Bold
                     )
