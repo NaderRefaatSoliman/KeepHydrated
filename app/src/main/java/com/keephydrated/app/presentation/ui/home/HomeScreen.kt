@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -43,9 +40,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.keephydrated.app.R
+import com.keephydrated.app.presentation.ui.components.BottleTrackingCard
 import com.keephydrated.app.presentation.ui.components.CircularHydrationProgress
 import com.keephydrated.app.presentation.ui.components.IntakeHistoryItem
 import com.keephydrated.app.presentation.ui.components.QuickAddSection
@@ -73,7 +73,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "KeepHydrated",
+                        stringResource(R.string.app_name),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -82,7 +82,7 @@ fun HomeScreen(
                         IconButton(onClick = { viewModel.undoLastIntake() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Undo,
-                                contentDescription = "Undo last intake",
+                                contentDescription = stringResource(R.string.undo_intake),
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
@@ -101,7 +101,7 @@ fun HomeScreen(
                 containerColor = BluePrimary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Custom Add")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.custom_add))
             }
         },
         modifier = modifier
@@ -124,14 +124,33 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Water View: Circular progress with wave animation & frequent intake marker
                     CircularHydrationProgress(
                         currentMl = uiState.currentIntakeMl,
-                        goalMl = uiState.dailyGoalMl
+                        goalMl = uiState.dailyGoalMl,
+                        frequentIntakeMl = uiState.frequentIntakeMl,
+                        onFrequentIntakeClick = {
+                            viewModel.addWater(uiState.frequentIntakeMl)
+                        }
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
 
+                // If Bottle Tracking Mode is active, show the interactive Bottle Card
+                if (uiState.isBottleMode) {
+                    item {
+                        BottleTrackingCard(
+                            bottleStatus = uiState.bottleStatus,
+                            frequentAmountMl = uiState.frequentIntakeMl,
+                            onDrinkSip = { viewModel.drinkFromBottle() },
+                            onRefillBottle = { viewModel.refillBottle() }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+
+                // Quick Add Section (150ml, 250ml, 330ml, 500ml)
                 item {
                     QuickAddSection(
                         onAddWater = { amount -> viewModel.addWater(amount) }
@@ -139,6 +158,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 
+                // Today's Logs header
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -146,7 +166,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Today's Logs (${uiState.todayIntakes.size})",
+                            text = stringResource(R.string.todays_logs, uiState.todayIntakes.size),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             )
@@ -158,7 +178,7 @@ fun HomeScreen(
                 if (uiState.todayIntakes.isEmpty()) {
                     item {
                         Text(
-                            text = "No water logged yet today. Take a sip! 💧",
+                            text = stringResource(R.string.no_water_logged),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
@@ -202,7 +222,7 @@ fun CustomAmountDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Log Custom Water Amount") },
+        title = { Text(stringResource(R.string.custom_add)) },
         text = {
             Column {
                 Text("Enter the water amount in milliliters (ml):")
@@ -234,12 +254,12 @@ fun CustomAmountDialog(
                     }
                 }
             ) {
-                Text("Add")
+                Text(stringResource(R.string.dialog_add))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.dialog_cancel))
             }
         }
     )

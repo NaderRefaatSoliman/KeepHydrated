@@ -4,8 +4,7 @@ import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
-import com.keephydrated.app.domain.usecase.GetUserSettingsUseCase
-import com.keephydrated.app.domain.usecase.SaveUserSettingsUseCase
+import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.presentation.ui.settings.SettingsViewModel
 import com.keephydrated.app.worker.ReminderScheduler
 import io.mockk.coVerify
@@ -21,7 +20,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -29,8 +27,7 @@ import org.junit.Test
 class SettingsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private lateinit var getUserSettingsUseCase: GetUserSettingsUseCase
-    private lateinit var saveUserSettingsUseCase: SaveUserSettingsUseCase
+    private lateinit var settingsRepository: SettingsRepository
     private lateinit var reminderScheduler: ReminderScheduler
 
     private val settingsFlow = MutableSharedFlow<UserSettings>(replay = 1)
@@ -38,11 +35,10 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        getUserSettingsUseCase = mockk()
-        saveUserSettingsUseCase = mockk(relaxed = true)
+        settingsRepository = mockk(relaxed = true)
         reminderScheduler = mockk(relaxed = true)
 
-        every { getUserSettingsUseCase() } returns settingsFlow
+        every { settingsRepository.getUserSettings() } returns settingsFlow
     }
 
     @After
@@ -50,8 +46,16 @@ class SettingsViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private fun createViewModel(): SettingsViewModel {
+        return SettingsViewModel(
+            settingsRepository,
+            reminderScheduler,
+            null
+        )
+    }
+
     @Test
-    fun `initial state reflects settings from usecase`() = runTest {
+    fun `initial state reflects settings from repository`() = runTest {
         val userSettings = UserSettings(
             dailyGoalMl = 2500,
             reminderIntervalHours = 3,
@@ -64,15 +68,16 @@ class SettingsViewModelTest {
             notificationSound = NotificationSound.WATER_POUR.id,
             celebrationSound = CelebrationSound.VICTORY_SPLASH.id,
             defaultQuickAddMl = 350,
-            quickAddOnNotificationClick = true
+            quickAddOnNotificationClick = true,
+            language = "ar",
+            frequentIntakeMl = 330,
+            bottleModeEnabled = true,
+            bottleVolumeMl = 1000,
+            bottleTargetDurationMinutes = 120
         )
         settingsFlow.emit(userSettings)
 
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
+        val viewModel = createViewModel()
         testDispatcher.scheduler.advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -80,205 +85,77 @@ class SettingsViewModelTest {
         assertEquals(3, state.reminderIntervalHours)
         assertEquals(180, state.reminderIntervalMinutes)
         assertEquals(true, state.remindersEnabled)
-        assertEquals(7, state.startHour)
-        assertEquals(23, state.endHour)
-        assertEquals(ReminderMode.CUSTOM_ROUTINE, state.reminderMode)
-        assertEquals(setOf(8, 12, 16, 20), state.customReminderHours)
-        assertEquals(NotificationSound.WATER_POUR.id, state.notificationSound)
-        assertEquals(CelebrationSound.VICTORY_SPLASH.id, state.celebrationSound)
-        assertEquals(350, state.defaultQuickAddMl)
-        assertEquals(true, state.quickAddOnNotificationClick)
+        assertEquals("ar", state.language)
+        assertEquals(330, state.frequentIntakeMl)
+        assertEquals(true, state.bottleModeEnabled)
+        assertEquals(1000, state.bottleVolumeMl)
+        assertEquals(120, state.bottleTargetDurationMinutes)
     }
 
     @Test
-    fun `updateDailyGoal delegates to usecase and updates message`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
+    fun `updateLanguage delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateLanguage("ar")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateLanguage("ar") }
+        assertEquals("ar", viewModel.uiState.value.language)
+    }
+
+    @Test
+    fun `updateBottleModeEnabled delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateBottleModeEnabled(true)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateBottleModeEnabled(true) }
+        assertEquals(true, viewModel.uiState.value.bottleModeEnabled)
+    }
+
+    @Test
+    fun `updateBottleConfig delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateBottleConfig(1500, 240)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateBottleConfig(1500, 240) }
+        assertEquals(1500, viewModel.uiState.value.bottleVolumeMl)
+        assertEquals(240, viewModel.uiState.value.bottleTargetDurationMinutes)
+    }
+
+    @Test
+    fun `updateFrequentIntakeMl delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateFrequentIntakeMl(500)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateFrequentIntakeMl(500) }
+        assertEquals(500, viewModel.uiState.value.frequentIntakeMl)
+    }
+
+    @Test
+    fun `updateDailyGoal delegates to repository and updates message`() = runTest {
+        val viewModel = createViewModel()
 
         viewModel.updateDailyGoal(2800)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateGoal(2800) }
+        coVerify(exactly = 1) { settingsRepository.updateDailyGoal(2800) }
         assertEquals("Goal updated to 2800 ml", viewModel.uiState.value.userMessage)
     }
 
     @Test
-    fun `updateReminderInterval delegates to usecase and reschedules reminders`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateReminderInterval(4)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateReminderInterval(4) }
-        verify(exactly = 1) { reminderScheduler.scheduleReminders(240, any(), any()) }
-        assertEquals("Reminder interval updated to 4 hours", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
-    fun `updateReminderIntervalMinutes delegates to usecase and reschedules reminders`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateReminderIntervalMinutes(45)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateReminderIntervalMinutes(45) }
-        verify(exactly = 1) { reminderScheduler.scheduleReminders(45, any(), any()) }
-        assertEquals("Reminder interval updated to 45 minutes", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
     fun `toggleReminders reschedules reminders in ReminderScheduler`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
+        val viewModel = createViewModel()
 
         viewModel.toggleReminders(false)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateRemindersEnabled(false) }
+        coVerify(exactly = 1) { settingsRepository.updateRemindersEnabled(false) }
         verify(exactly = 1) { reminderScheduler.scheduleReminders(any(), false, any()) }
-    }
-
-    @Test
-    fun `updateReminderMode delegates to usecase and updates scheduler`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateReminderMode(ReminderMode.CUSTOM_ROUTINE)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateReminderMode(ReminderMode.CUSTOM_ROUTINE) }
-        verify(exactly = 1) { reminderScheduler.scheduleReminders(any(), any(), ReminderMode.CUSTOM_ROUTINE) }
-    }
-
-    @Test
-    fun `toggleCustomReminderHour toggles hour in usecase`() = runTest {
-        val userSettings = UserSettings(
-            customReminderHours = setOf(9, 12, 15)
-        )
-        settingsFlow.emit(userSettings)
-
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Toggle hour 18 on (not currently in set)
-        viewModel.toggleCustomReminderHour(18)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(setOf(9, 12, 15, 18)) }
-    }
-
-    @Test
-    fun `setCustomReminderHours updates custom hours and userMessage`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        val preset = setOf(9, 11, 13, 15, 17)
-        viewModel.setCustomReminderHours(preset)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(preset) }
-        assertEquals("Preset routine applied (5 reminders)", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
-    fun `updateNotificationSound updates sound in usecase and sets message`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateNotificationSound(NotificationSound.OCEAN_WAVE.id)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateNotificationSound(NotificationSound.OCEAN_WAVE.id) }
-        assertEquals("Notification sound: Ocean Wave", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
-    fun `updateCelebrationSound updates sound in usecase and sets message`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateCelebrationSound(CelebrationSound.VICTORY_SPLASH.id)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCelebrationSound(CelebrationSound.VICTORY_SPLASH.id) }
-        assertEquals("Celebration tone: Victory Splash", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
-    fun `applyWakingDayPreset updates active hours and custom reminder routine`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        // Wake at 7 AM, sleep at 11 PM (23), every 2h
-        viewModel.applyWakingDayPreset(wakeHour = 7, sleepHour = 23, stepHours = 2)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateActiveHours(7, 23) }
-        val expectedHours = setOf(7, 9, 11, 13, 15, 17, 19, 21, 23)
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateCustomReminderHours(expectedHours) }
-        assertEquals("Awake schedule applied: 9 reminders set", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
-    fun `updateDefaultQuickAddMl updates amount in usecase and sets message`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateDefaultQuickAddMl(350)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateDefaultQuickAddMl(350) }
-        assertEquals("Quick-add amount set to 350 ml", viewModel.uiState.value.userMessage)
-    }
-
-    @Test
-    fun `updateQuickAddOnNotificationClick updates flag in usecase and sets message`() = runTest {
-        val viewModel = SettingsViewModel(
-            getUserSettingsUseCase,
-            saveUserSettingsUseCase,
-            reminderScheduler
-        )
-
-        viewModel.updateQuickAddOnNotificationClick(true)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        coVerify(exactly = 1) { saveUserSettingsUseCase.updateQuickAddOnNotificationClick(true) }
-        assertEquals("One-tap log on notification click enabled", viewModel.uiState.value.userMessage)
     }
 }

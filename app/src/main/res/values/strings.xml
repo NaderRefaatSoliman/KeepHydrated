@@ -1,14 +1,122 @@
 <resources>
+    <!-- App & Navigation -->
     <string name="app_name">KeepHydrated</string>
-    <string name="daily_goal">Daily Goal</string>
-    <string name="current_intake">Current Intake</string>
-    <string name="quick_add">Quick Add</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- General Units & Formatting -->
     <string name="ml_format">%1$d ml</string>
     <string name="progress_percentage">%1$d%%</string>
+    <string name="hours_format">%1$d hours</string>
+    <string name="minutes_format">%1$d minutes</string>
+    <string name="days_count">%1$d days</string>
+
+    <!-- Home Screen -->
+    <string name="daily_goal">Daily Goal</string>
+    <string name="current_intake">Current Intake</string>
+    <string name="todays_progress">Today\'s Hydration Progress</string>
+    <string name="quick_add">Quick Add</string>
+    <string name="custom_add">Custom Amount</string>
+    <string name="undo_intake">Undo last intake</string>
+    <string name="todays_logs">Today\'s Logs (%1$d)</string>
+    <string name="no_water_logged">No water logged yet today. Take a refreshing sip! 💧</string>
+    <string name="add_water_success">Added %1$d ml of water!</string>
+    <string name="undo_success">Removed %1$d ml entry.</string>
+    <string name="frequent_sip_badge">Frequent: %1$d ml</string>
+    <string name="tap_to_log_frequent">Tap center to log %1$d ml</string>
+
+    <!-- Bottle Tracking Mode -->
+    <string name="bottle_mode_title">Bottle Tracking Mode</string>
+    <string name="bottle_mode_desc">Track your water bottle intake and get refill reminders.</string>
+    <string name="bottle_status_active">Bottle Session Active</string>
+    <string name="bottle_capacity">Bottle Capacity</string>
+    <string name="bottle_target_duration">Target Drink Duration</string>
+    <string name="bottle_remaining">Remaining in bottle: %1$d / %2$d ml</string>
+    <string name="bottle_time_left">Time left: %1$d mins</string>
+    <string name="bottle_time_up">Time up! Finish bottle and refill 💧</string>
+    <string name="bottle_drink_sip">Drink Sip (%1$d ml)</string>
+    <string name="bottle_refill_action">Refill Bottle 🔄</string>
+    <string name="bottle_refilled_today">Refilled %1$d times today</string>
+    <string name="bottle_empty">Bottle is empty! Great job! Refill it now.</string>
+
+    <!-- History Screen -->
     <string name="hydration_history">Hydration History</string>
+    <string name="period_week">Week</string>
+    <string name="period_month">Month</string>
+    <string name="period_year">Year</string>
+    <string name="daily_average">Daily Average</string>
+    <string name="goals_reached">Goals Reached</string>
+    <string name="intake_records">Daily Target Records</string>
+    <string name="no_history">No history recorded yet.</string>
+    <string name="status_done">Done</string>
+    <string name="status_partial">Partial</string>
+    <string name="status_zero">Zero</string>
+    <string name="legend_done">Target Met (Done)</string>
+    <string name="legend_partial">Partially Met</string>
+    <string name="legend_zero">No Intake (Zero)</string>
+
+    <!-- Settings Categories -->
     <string name="settings">Settings</string>
-    <string name="reminder_title">Time to drink water!</string>
-    <string name="reminder_message">Stay hydrated and healthy! Take a sip of water now.</string>
+    <string name="category_goal">Hydration Target &amp; Quick Add</string>
+    <string name="category_bottle">Bottle Tracking Mode</string>
+    <string name="category_reminders">Reminders &amp; Schedule</string>
+    <string name="category_sounds">Notification &amp; Sounds</string>
+    <string name="category_language">Language / اللغة</string>
+    <string name="category_about">About</string>
+
+    <!-- Settings Options -->
+    <string name="daily_target">Daily Target</string>
+    <string name="frequent_drink_amount">Frequent Drinking Amount</string>
+    <string name="frequent_drink_desc">Highlighted on the daily progress circle for fast 1-tap logging.</string>
+    <string name="enable_bottle_mode">Enable Bottle Mode</string>
+    <string name="enable_reminders">Drink Water Reminders</string>
+    <string name="reminder_mode">Reminder Schedule Mode</string>
+    <string name="mode_interval">Periodic Interval</string>
+    <string name="mode_routine">Daily Routine Hours</string>
+    <string name="remind_every">Remind me every:</string>
+    <string name="routine_hours">Routine Hours (%1$d/24 set):</string>
+    <string name="waking_day_preset">Waking Day Schedule</string>
+    <string name="work_day_preset">Work Day</string>
+    <string name="all_day_preset">All Day</string>
+    <string name="reminder_tone">Reminder Tone</string>
+    <string name="celebration_tone">Goal Celebration Tone</string>
+    <string name="test_alert">Test Alert</string>
+    <string name="smartwatch_quick_add">Smartwatch &amp; Shade Quick-Add</string>
+    <string name="one_tap_notification">One-Tap Add on Notification Click</string>
+    <string name="battery_optimization_title">Battery Optimization Active</string>
+    <string name="battery_optimization_desc">Android may silence background drinking reminders. Disable battery optimization to guarantee real-time alerts.</string>
+    <string name="disable_battery_optimization">Disable Battery Optimization</string>
+    <string name="battery_unrestricted_title">Background Execution: Unrestricted</string>
+    <string name="battery_unrestricted_desc">Battery optimization disabled. Real-time alerts and smartwatch syncing active.</string>
+
+    <!-- Language Selector -->
+    <string name="app_language">App Language</string>
+    <string name="lang_english">English (الإنجليزية)</string>
+    <string name="lang_arabic">العربية (Arabic)</string>
+
+    <!-- About Section (Clean - no change details) -->
+    <string name="app_version">Version 2.0.0</string>
+    <string name="app_motto">Your smart personal companion for daily healthy hydration and wellness.</string>
+
+    <!-- Notifications -->
     <string name="channel_name">Hydration Reminders</string>
     <string name="channel_description">Reminders to drink water throughout the day</string>
+    <string name="reminder_title">Time to drink water! 💧</string>
+    <string name="reminder_message">Stay hydrated and healthy! Take a sip of water now.</string>
+    <string name="reminder_tap_text">Tap to log %1$d ml water intake</string>
+    <string name="bottle_reminder_title">Bottle Sip Reminder 💧</string>
+    <string name="bottle_reminder_msg">Take a sip from your %1$d ml bottle! %2$d ml remaining.</string>
+    <string name="bottle_refill_title">Time to Refill Your Bottle! 🔄</string>
+    <string name="bottle_refill_msg">Target time reached! Drink up the rest and refill your bottle to keep hydrating.</string>
+    <string name="logged_confirmation_title">💧 %1$d ml Logged</string>
+    <string name="logged_confirmation_body">Today: %1$d / %2$d ml (%3$d%%)</string>
+    <string name="celebration_title">🎉 Daily Goal Achieved!</string>
+    <string name="celebration_body">Congratulations! You\'ve reached your daily hydration goal of %1$d ml! 🏆💧</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_save">Save</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_add">Add</string>
+    <string name="dialog_apply">Apply</string>
 </resources>

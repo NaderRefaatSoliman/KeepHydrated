@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -41,6 +42,16 @@ class UserPreferencesDataStore @Inject constructor(
         val CELEBRATION_SOUND = stringPreferencesKey("celebration_sound")
         val DEFAULT_QUICK_ADD_ML = intPreferencesKey("default_quick_add_ml")
         val QUICK_ADD_ON_NOTIFICATION_CLICK = booleanPreferencesKey("quick_add_on_notification_click")
+
+        // Enhancements: Language, Frequent Intake, Bottle Tracking Mode
+        val LANGUAGE = stringPreferencesKey("app_language")
+        val FREQUENT_INTAKE_ML = intPreferencesKey("frequent_intake_ml")
+        val BOTTLE_MODE_ENABLED = booleanPreferencesKey("bottle_mode_enabled")
+        val BOTTLE_VOLUME_ML = intPreferencesKey("bottle_volume_ml")
+        val BOTTLE_TARGET_DURATION_MINUTES = intPreferencesKey("bottle_target_duration_minutes")
+        val BOTTLE_START_TIME_MILLIS = longPreferencesKey("bottle_start_time_millis")
+        val BOTTLE_DRANK_ML = intPreferencesKey("bottle_drank_ml")
+        val BOTTLE_REFILL_COUNT = intPreferencesKey("bottle_refill_count")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -73,6 +84,16 @@ class UserPreferencesDataStore @Inject constructor(
             val defaultQuickAddMl = preferences[PreferencesKeys.DEFAULT_QUICK_ADD_ML] ?: 250
             val quickAddOnClick = preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] ?: true
 
+            // New settings mapping
+            val language = preferences[PreferencesKeys.LANGUAGE] ?: "en"
+            val frequentIntakeMl = preferences[PreferencesKeys.FREQUENT_INTAKE_ML] ?: 250
+            val bottleModeEnabled = preferences[PreferencesKeys.BOTTLE_MODE_ENABLED] ?: false
+            val bottleVolumeMl = preferences[PreferencesKeys.BOTTLE_VOLUME_ML] ?: 750
+            val bottleTargetDurationMinutes = preferences[PreferencesKeys.BOTTLE_TARGET_DURATION_MINUTES] ?: 180
+            val bottleStartTimeMillis = preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] ?: 0L
+            val bottleDrankMl = preferences[PreferencesKeys.BOTTLE_DRANK_ML] ?: 0
+            val bottleRefillCount = preferences[PreferencesKeys.BOTTLE_REFILL_COUNT] ?: 0
+
             UserSettings(
                 dailyGoalMl = dailyGoal,
                 reminderIntervalHours = reminderIntervalHours,
@@ -85,7 +106,15 @@ class UserPreferencesDataStore @Inject constructor(
                 notificationSound = soundId,
                 celebrationSound = celebrationSoundId,
                 defaultQuickAddMl = defaultQuickAddMl,
-                quickAddOnNotificationClick = quickAddOnClick
+                quickAddOnNotificationClick = quickAddOnClick,
+                language = language,
+                frequentIntakeMl = frequentIntakeMl,
+                bottleModeEnabled = bottleModeEnabled,
+                bottleVolumeMl = bottleVolumeMl,
+                bottleTargetDurationMinutes = bottleTargetDurationMinutes,
+                bottleStartTimeMillis = bottleStartTimeMillis,
+                bottleDrankMl = bottleDrankMl,
+                bottleRefillCount = bottleRefillCount
             )
         }
 
@@ -155,6 +184,55 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun updateQuickAddOnNotificationClick(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.QUICK_ADD_ON_NOTIFICATION_CLICK] = enabled
+        }
+    }
+
+    suspend fun updateLanguage(language: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LANGUAGE] = language
+        }
+    }
+
+    suspend fun updateFrequentIntakeMl(amountMl: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.FREQUENT_INTAKE_ML] = amountMl
+        }
+    }
+
+    suspend fun updateBottleModeEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.BOTTLE_MODE_ENABLED] = enabled
+            if (enabled && (preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] ?: 0L) == 0L) {
+                preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] = System.currentTimeMillis()
+                preferences[PreferencesKeys.BOTTLE_DRANK_ML] = 0
+            }
+        }
+    }
+
+    suspend fun updateBottleConfig(volumeMl: Int, durationMinutes: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.BOTTLE_VOLUME_ML] = volumeMl
+            preferences[PreferencesKeys.BOTTLE_TARGET_DURATION_MINUTES] = durationMinutes
+        }
+    }
+
+    suspend fun recordBottleDrink(drankAmountMl: Int) {
+        context.dataStore.edit { preferences ->
+            val currentDrank = preferences[PreferencesKeys.BOTTLE_DRANK_ML] ?: 0
+            val volume = preferences[PreferencesKeys.BOTTLE_VOLUME_ML] ?: 750
+            preferences[PreferencesKeys.BOTTLE_DRANK_ML] = (currentDrank + drankAmountMl).coerceAtMost(volume)
+            if ((preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] ?: 0L) == 0L) {
+                preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] = System.currentTimeMillis()
+            }
+        }
+    }
+
+    suspend fun refillBottle() {
+        context.dataStore.edit { preferences ->
+            val refills = preferences[PreferencesKeys.BOTTLE_REFILL_COUNT] ?: 0
+            preferences[PreferencesKeys.BOTTLE_REFILL_COUNT] = refills + 1
+            preferences[PreferencesKeys.BOTTLE_DRANK_ML] = 0
+            preferences[PreferencesKeys.BOTTLE_START_TIME_MILLIS] = System.currentTimeMillis()
         }
     }
 }

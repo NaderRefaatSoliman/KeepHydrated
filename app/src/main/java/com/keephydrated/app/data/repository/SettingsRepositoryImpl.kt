@@ -60,4 +60,28 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateQuickAddOnNotificationClick(enabled: Boolean) {
         preferencesDataStore.updateQuickAddOnNotificationClick(enabled)
     }
+
+    override suspend fun updateLanguage(language: String) {
+        preferencesDataStore.updateLanguage(language)
+    }
+
+    override suspend fun updateFrequentIntakeMl(amountMl: Int) {
+        preferencesDataStore.updateFrequentIntakeMl(amountMl)
+    }
+
+    override suspend fun updateBottleModeEnabled(enabled: Boolean) {
+        preferencesDataStore.updateBottleModeEnabled(enabled)
+    }
+
+    override suspend fun updateBottleConfig(volumeMl: Int, durationMinutes: Int) {
+        preferencesDataStore.updateBottleConfig(volumeMl, durationMinutes)
+    }
+
+    override suspend fun recordBottleDrink(drankAmountMl: Int) {
+        preferencesDataStore.recordBottleDrink(drankAmountMl)
+    }
+
+    override suspend fun refillBottle() {
+        preferencesDataStore.refillBottle()
+    }
 }

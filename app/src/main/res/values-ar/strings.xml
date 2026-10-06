@@ -1,0 +1,122 @@
+<resources>
+    <!-- App & Navigation -->
+    <string name="app_name">حافظ على ترطيبك</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_history">السجل</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <!-- General Units & Formatting -->
+    <string name="ml_format">%1$d مل</string>
+    <string name="progress_percentage">%1$d%%</string>
+    <string name="hours_format">%1$d ساعات</string>
+    <string name="minutes_format">%1$d دقيقة</string>
+    <string name="days_count">%1$d أيام</string>
+
+    <!-- Home Screen -->
+    <string name="daily_goal">الهدف اليومي</string>
+    <string name="current_intake">الكمية الحالية</string>
+    <string name="todays_progress">معدل شرب الماء اليومي</string>
+    <string name="quick_add">إضافة سريعة</string>
+    <string name="custom_add">كمية مخصصة</string>
+    <string name="undo_intake">تراجع عن آخر كمية</string>
+    <string name="todays_logs">سجلات اليوم (%1$d)</string>
+    <string name="no_water_logged">لم يتم تسجيل شرب ماء اليوم بعد. خذ رشفة منعشة! 💧</string>
+    <string name="add_water_success">تمت إضافة %1$d مل من الماء!</string>
+    <string name="undo_success">تم حذف إدخال %1$d مل.</string>
+    <string name="frequent_sip_badge">الشائع: %1$d مل</string>
+    <string name="tap_to_log_frequent">اضغط على المركز لتسجيل %1$d مل</string>
+
+    <!-- Bottle Tracking Mode -->
+    <string name="bottle_mode_title">وضع تتبع زجاجة الماء</string>
+    <string name="bottle_mode_desc">تتبع زجاجة الماء الخاصة بك وتلقي تذكيرات بشربها وإعادة تعبئتها.</string>
+    <string name="bottle_status_active">جلسة الزجاجة نشطة</string>
+    <string name="bottle_capacity">سعة الزجاجة</string>
+    <string name="bottle_target_duration">المدة المحددة للانتهاء من الزجاجة</string>
+    <string name="bottle_remaining">المتبقي في الزجاجة: %1$d / %2$d مل</string>
+    <string name="bottle_time_left">الوقت المتبقي: %1$d دقيقة</string>
+    <string name="bottle_time_up">انتهى الوقت المحدد! أكمل الزجاجة وأعد تعبئتها 💧</string>
+    <string name="bottle_drink_sip">شرب رشفة (%1$d مل)</string>
+    <string name="bottle_refill_action">إعادة تعبئة الزجاجة 🔄</string>
+    <string name="bottle_refilled_today">تمت إعادة التعبئة %1$d مرات اليوم</string>
+    <string name="bottle_empty">الزجاجة فارغة! أحسنت! قم بإعادة تعبئتها الآن.</string>
+
+    <!-- History Screen -->
+    <string name="hydration_history">سجل الترطيب</string>
+    <string name="period_week">أسبوعي</string>
+    <string name="period_month">شهري</string>
+    <string name="period_year">سنوي</string>
+    <string name="daily_average">المعدل اليومي</string>
+    <string name="goals_reached">الأهداف المحققة</string>
+    <string name="intake_records">سجلات تحقيق الهدف اليومي</string>
+    <string name="no_history">لا توجد بيانات مسجلة بعد.</string>
+    <string name="status_done">مكتمل</string>
+    <string name="status_partial">جزئي</string>
+    <string name="status_zero">لم يشرب</string>
+    <string name="legend_done">تم تحقيق الهدف (مكتمل)</string>
+    <string name="legend_partial">تحقيق جزئي للهدف</string>
+    <string name="legend_zero">لم يتم الشرب (صفر)</string>
+
+    <!-- Settings Categories -->
+    <string name="settings">الإعدادات</string>
+    <string name="category_goal">هدف الترطيب والإضافة السريعة</string>
+    <string name="category_bottle">وضع تتبع زجاجة الماء</string>
+    <string name="category_reminders">التذكيرات والجدول الزمني</string>
+    <string name="category_sounds">الإشعارات والأصوات</string>
+    <string name="category_language">اللغة / Language</string>
+    <string name="category_about">حول التطبيق</string>
+
+    <!-- Settings Options -->
+    <string name="daily_target">الهدف اليومي</string>
+    <string name="frequent_drink_amount">كمية الشرب المتكررة المفضلة</string>
+    <string name="frequent_drink_desc">تظهر مميزة على دائرة التقدم اليومية للتسجيل السريع بلمسة واحدة.</string>
+    <string name="enable_bottle_mode">تفعيل وضع تتبع الزجاجة</string>
+    <string name="enable_reminders">تذكيرات شرب الماء</string>
+    <string name="reminder_mode">نوع جدول التذكير</string>
+    <string name="mode_interval">فترات زمنية دورية</string>
+    <string name="mode_routine">ساعات روتينية يومية</string>
+    <string name="remind_every">تذكيري كل:</string>
+    <string name="routine_hours">ساعات الروتين (%1$d/24 ساعة محددة):</string>
+    <string name="waking_day_preset">جدول ساعات الاستيقاظ</string>
+    <string name="work_day_preset">يوم العمل</string>
+    <string name="all_day_preset">كامل اليوم</string>
+    <string name="reminder_tone">نغمة التذكير</string>
+    <string name="celebration_tone">نغمة الاحتفال بالهدف</string>
+    <string name="test_alert">تجربة التنبيه</string>
+    <string name="smartwatch_quick_add">الإضافة السريعة للإشعار والساعة الذكية</string>
+    <string name="one_tap_notification">تسجيل فوري عند النقر على الإشعار</string>
+    <string name="battery_optimization_title">تحسين استهلاك البطارية مفعل</string>
+    <string name="battery_optimization_desc">قد يوقف نظام أندرويد تنبيهات الشرب في الخلفية عند قفل الشاشة. يرجى استثناء التطبيق لضمان دقة التنبيهات.</string>
+    <string name="disable_battery_optimization">تعطيل تحسين البطارية للتطبيق</string>
+    <string name="battery_unrestricted_title">التشغيل في الخلفية: غير مقيد</string>
+    <string name="battery_unrestricted_desc">تم استثناء البطارية. التنبيهات اللحظية ومزامنة الساعة الذكية نشطة.</string>
+
+    <!-- Language Selector -->
+    <string name="app_language">لغة التطبيق</string>
+    <string name="lang_english">English (الإنجليزية)</string>
+    <string name="lang_arabic">العربية (Arabic)</string>
+
+    <!-- About Section (Clean - no change details) -->
+    <string name="app_version">الإصدار 2.0.0</string>
+    <string name="app_motto">رفيقك الذكي للحفاظ على ترطيب صحي وطاقة متجددة طوال اليوم.</string>
+
+    <!-- Notifications -->
+    <string name="channel_name">تذكيرات الترطيب</string>
+    <string name="channel_description">تذكيرات دورية لشرب الماء على مدار اليوم</string>
+    <string name="reminder_title">حان وقت شرب الماء! 💧</string>
+    <string name="reminder_message">حافظ على صحتك وترطيب جسمك! خذ رشفة ماء الآن.</string>
+    <string name="reminder_tap_text">انقر لتسجيل %1$d مل ماء</string>
+    <string name="bottle_reminder_title">تذكير رشفة من الزجاجة 💧</string>
+    <string name="bottle_reminder_msg">خذ رشفة من زجاجتك سعة %1$d مل! متبقي %2$d مل.</string>
+    <string name="bottle_refill_title">حان وقت إعادة تعبئة زجاجتك! 🔄</string>
+    <string name="bottle_refill_msg">وصلت إلى نهاية وقت الشرب المحدد! اشرب المتبقي وأعد تعبئة الزجاجة للاستمرار في الترطيب.</string>
+    <string name="logged_confirmation_title">💧 تم تسجيل %1$d مل</string>
+    <string name="logged_confirmation_body">اليوم: %1$d / %2$d مل (%3$d%%)</string>
+    <string name="celebration_title">🎉 تم تحقيق هدف اليوم!</string>
+    <string name="celebration_body">تهانينا! لقد حققت هدفك اليومي لشرب الماء البالغ %1$d مل! 🏆💧</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_save">حفظ</string>
+    <string name="dialog_cancel">إلغاء</string>
+    <string name="dialog_add">إضافة</string>
+    <string name="dialog_apply">تطبيق</string>
+</resources>

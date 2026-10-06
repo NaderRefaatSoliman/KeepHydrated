@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
+import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
@@ -34,6 +35,7 @@ class KeepHydratedApp : Application(), Configuration.Provider {
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = "hydration_reminders_channel"
+        const val BOTTLE_CHANNEL_ID = "hydration_bottle_channel"
         const val SILENT_ACK_CHANNEL_ID = "hydration_silent_ack_channel"
         const val CELEBRATION_CHANNEL_ID = "hydration_celebration_channel"
         const val CHANNEL_PREFIX = "hydration_channel_"
@@ -41,6 +43,7 @@ class KeepHydratedApp : Application(), Configuration.Provider {
 
         const val REMINDER_NOTIFICATION_ID = 1001
         const val CELEBRATION_NOTIFICATION_ID = 1002
+        const val BOTTLE_NOTIFICATION_ID = 1003
 
         fun getChannelIdForSound(soundId: String?): String {
             if (soundId.isNullOrBlank() || soundId == NotificationSound.SYSTEM_DEFAULT.id) {
@@ -90,7 +93,7 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .build()
 
-                // Default legacy channel
+                // Default hydration reminders channel
                 val defaultChannel = NotificationChannel(
                     NOTIFICATION_CHANNEL_ID,
                     context.getString(R.string.channel_name),
@@ -98,8 +101,21 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                 ).apply {
                     description = context.getString(R.string.channel_description)
                     enableVibration(true)
+                    lightColor = Color.parseColor("#0288D1")
                 }
                 notificationManager.createNotificationChannel(defaultChannel)
+
+                // Dedicated Bottle Mode & Refill Reminders channel
+                val bottleChannel = NotificationChannel(
+                    BOTTLE_CHANNEL_ID,
+                    context.getString(R.string.bottle_mode_title),
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = context.getString(R.string.bottle_mode_desc)
+                    enableVibration(true)
+                    lightColor = Color.parseColor("#00BCD4")
+                }
+                notificationManager.createNotificationChannel(bottleChannel)
 
                 // Dedicated silent acknowledgment channel (for logged intake confirmations)
                 val silentAckChannel = NotificationChannel(
@@ -125,6 +141,7 @@ class KeepHydratedApp : Application(), Configuration.Provider {
                         ).apply {
                             description = "${context.getString(R.string.channel_description)} (${sound.displayName})"
                             enableVibration(true)
+                            lightColor = Color.parseColor("#0288D1")
                             val soundUri = getSoundUri(context, sound)
                             if (soundUri != null) {
                                 setSound(soundUri, audioAttributes)

@@ -31,12 +31,30 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                val action = intent.action
                 val settings = settingsRepository.getUserSettings().first()
 
-                if (settings.remindersEnabled) {
-                    val currentHour = LocalTime.now().hour
-                    var shouldNotify = true
+                if (!settings.remindersEnabled) {
+                    return@launch
+                }
 
+                if (action == ACTION_BOTTLE_REFILL_ALARM) {
+                    if (settings.bottleModeEnabled) {
+                        NotificationHelper.showBottleRefillReminder(context, settings)
+                    }
+                    return@launch
+                }
+
+                val currentHour = LocalTime.now().hour
+                var shouldNotify = true
+
+                if (settings.bottleModeEnabled) {
+                    val bottleStatus = settings.toBottleStatus()
+                    if (bottleStatus.needsRefill) {
+                        NotificationHelper.showBottleRefillReminder(context, settings)
+                        shouldNotify = false
+                    }
+                } else {
                     when (settings.reminderMode) {
                         ReminderMode.CUSTOM_ROUTINE -> {
                             if (currentHour !in settings.customReminderHours) {
@@ -54,17 +72,17 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                             }
                         }
                     }
-
-                    if (shouldNotify) {
-                        val notification = NotificationHelper.buildReminderNotification(context, settings)
-                        val notificationManager =
-                            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        notificationManager.notify(KeepHydratedApp.REMINDER_NOTIFICATION_ID, notification)
-                    }
-
-                    // Always schedule next exact alarm for continuous real-time reminders
-                    reminderScheduler.scheduleNextAlarm(settings)
                 }
+
+                if (shouldNotify) {
+                    val notification = NotificationHelper.buildReminderNotification(context, settings)
+                    val notificationManager =
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.notify(KeepHydratedApp.REMINDER_NOTIFICATION_ID, notification)
+                }
+
+                // Schedule next alarm
+                reminderScheduler.scheduleNextAlarm(settings)
             } catch (_: Exception) {
                 // Graceful fallback
             } finally {
@@ -75,5 +93,6 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_REMINDER_ALARM = "com.keephydrated.app.action.REMINDER_ALARM"
+        const val ACTION_BOTTLE_REFILL_ALARM = "com.keephydrated.app.action.BOTTLE_REFILL_ALARM"
     }
 }

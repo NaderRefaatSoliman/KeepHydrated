@@ -29,25 +29,31 @@ class WaterReminderWorker @AssistedInject constructor(
             return Result.success()
         }
 
-        val currentHour = LocalTime.now().hour
-
-        when (settings.reminderMode) {
-            ReminderMode.CUSTOM_ROUTINE -> {
-                // If custom routine is active, only notify during user-selected hours
-                if (currentHour !in settings.customReminderHours) {
-                    return Result.success()
-                }
+        if (settings.bottleModeEnabled) {
+            val bottleStatus = settings.toBottleStatus()
+            if (bottleStatus.needsRefill) {
+                NotificationHelper.showBottleRefillReminder(context, settings)
+                return Result.success()
             }
-            ReminderMode.INTERVAL -> {
-                // Check active / quiet hours
-                val isQuietHour = if (settings.startHour <= settings.endHour) {
-                    currentHour < settings.startHour || currentHour >= settings.endHour
-                } else {
-                    currentHour in settings.endHour until settings.startHour
-                }
+        } else {
+            val currentHour = LocalTime.now().hour
 
-                if (isQuietHour) {
-                    return Result.success()
+            when (settings.reminderMode) {
+                ReminderMode.CUSTOM_ROUTINE -> {
+                    if (currentHour !in settings.customReminderHours) {
+                        return Result.success()
+                    }
+                }
+                ReminderMode.INTERVAL -> {
+                    val isQuietHour = if (settings.startHour <= settings.endHour) {
+                        currentHour < settings.startHour || currentHour >= settings.endHour
+                    } else {
+                        currentHour in settings.endHour until settings.startHour
+                    }
+
+                    if (isQuietHour) {
+                        return Result.success()
+                    }
                 }
             }
         }

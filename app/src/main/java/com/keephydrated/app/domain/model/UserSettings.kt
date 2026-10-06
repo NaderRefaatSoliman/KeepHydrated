@@ -58,5 +58,27 @@ data class UserSettings(
     val notificationSound: String = NotificationSound.WATER_DROP.id,
     val celebrationSound: String = CelebrationSound.CHIME_FANFARE.id,
     val defaultQuickAddMl: Int = 250,
-    val quickAddOnNotificationClick: Boolean = true
-)
+    val quickAddOnNotificationClick: Boolean = true,
+    // Language: "en" for English, "ar" for Arabic, or "system"
+    val language: String = "en",
+    // Frequent drinking amount to highlight on circular progress (150, 250, 330, 500)
+    val frequentIntakeMl: Int = 250,
+    // Bottle filling tracking mode
+    val bottleModeEnabled: Boolean = false,
+    val bottleVolumeMl: Int = 750,
+    val bottleTargetDurationMinutes: Int = 180, // e.g. 3 hours to drink the full bottle
+    val bottleStartTimeMillis: Long = 0L,
+    val bottleDrankMl: Int = 0,
+    val bottleRefillCount: Int = 0
+) {
+    fun toBottleStatus(): BottleStatus {
+        return BottleStatus(
+            isEnabled = bottleModeEnabled,
+            volumeMl = bottleVolumeMl,
+            drankMl = bottleDrankMl,
+            targetDurationMinutes = bottleTargetDurationMinutes,
+            startTimeMillis = bottleStartTimeMillis,
+            refillCount = bottleRefillCount
+        )
+    }
+}

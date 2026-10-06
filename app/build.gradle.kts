@@ -13,12 +13,23 @@ android {
         applicationId = "com.keephydrated.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    signingConfigs {
+        if (file("../keystore/debug.keystore").exists()) {
+            getByName("debug") {
+                storeFile = file("../keystore/debug.keystore")
+                storePassword = "androiddebugkey"
+                keyAlias = "androiddebugkey"
+                keyPassword = "androiddebugkey"
+            }
         }
     }
 

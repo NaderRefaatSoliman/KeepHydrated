@@ -33,6 +33,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PlayArrow
@@ -75,8 +77,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -84,6 +88,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
@@ -105,6 +110,7 @@ fun SettingsScreen(
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
     var showWakingDayDialog by remember { mutableStateOf(false) }
     var showQuickAddAmountDialog by remember { mutableStateOf(false) }
+    var showBottleConfigDialog by remember { mutableStateOf(false) }
 
     var isBatteryOptimized by remember {
         mutableStateOf(!BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
@@ -123,18 +129,10 @@ fun SettingsScreen(
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             viewModel.toggleReminders(true)
-        }
-    }
-
-    val testNotificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.sendTestNotification(context)
         }
     }
 
@@ -148,7 +146,12 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.settings),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -174,15 +177,14 @@ fun SettingsScreen(
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp)
             ) {
-                // Section 1: Hydration Goal
+                // ==========================================
+                // 1. HYDRATION TARGET & QUICK ADD
+                // ==========================================
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Hydration Goal",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = BluePrimary
-                        )
+                    CategoryHeader(
+                        title = stringResource(R.string.category_goal),
+                        icon = Icons.Default.TrackChanges
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -193,148 +195,98 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
+                            // Daily Target
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.TrackChanges, contentDescription = null, tint = BluePrimary)
-                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                Column {
                                     Text(
-                                        text = "Daily Target",
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                                        text = stringResource(R.string.daily_target),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text = "${uiState.dailyGoalMl} ml",
-                                        style = MaterialTheme.typography.titleMedium.copy(
+                                        style = MaterialTheme.typography.titleLarge.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = BluePrimary
                                         )
                                     )
-                                    IconButton(onClick = { showGoalDialog = true }) {
-                                        Icon(Icons.Default.Edit, contentDescription = "Edit Goal")
-                                    }
+                                }
+                                OutlinedButton(onClick = { showGoalDialog = true }) {
+                                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(R.string.dialog_add))
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                            // Frequent Drinking Size
                             Text(
-                                text = "Quick Select:",
+                                text = stringResource(R.string.frequent_drink_amount),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                            Text(
+                                text = stringResource(R.string.frequent_drink_desc),
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                listOf(1500, 2000, 2500, 3000).forEach { goal ->
-                                    FilterChip(
-                                        selected = uiState.dailyGoalMl == goal,
-                                        onClick = { viewModel.updateDailyGoal(goal) },
-                                        label = { Text("${goal}ml") }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Reminders & Alerts",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = BluePrimary
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Battery Optimization Check & Prompt
-                    if (isBatteryOptimized) {
-                        Card(
-                            shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(14.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        Icons.Default.BatteryAlert,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Battery Optimization Active",
-                                        style = MaterialTheme.typography.titleSmall.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onErrorContainer
-                                        )
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Android may delay or silence drinking reminders and smartwatch alerts when the screen is off. Disable battery optimization to guarantee real-time reminders.",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Button(
-                                    onClick = {
-                                        BatteryOptimizationHelper.requestIgnoreBatteryOptimization(context)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.error,
-                                        contentColor = MaterialTheme.colorScheme.onError
-                                    ),
-                                    modifier = Modifier.height(34.dp),
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-                                ) {
-                                    Text("Disable Battery Optimization", fontSize = 12.sp)
-                                }
-                            }
-                        }
-                    } else {
-                        Card(
-                            shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        ) {
                             Row(
-                                modifier = Modifier.padding(12.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf(150, 250, 330, 500).forEach { amount ->
+                                    FilterChip(
+                                        selected = uiState.frequentIntakeMl == amount,
+                                        onClick = { viewModel.updateFrequentIntakeMl(amount) },
+                                        label = { Text("${amount}ml", fontSize = 12.sp) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                            // Notification 1-tap logging
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = Color(0xFF2E7D32),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Background Execution: Unrestricted",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                        text = stringResource(R.string.one_tap_notification),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                     Text(
-                                        text = "Battery optimization disabled. Real-time alerts and smartwatch syncing active.",
+                                        text = "Tapping notification body directly logs ${uiState.defaultQuickAddMl} ml",
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     )
                                 }
+                                Switch(
+                                    checked = uiState.quickAddOnNotificationClick,
+                                    onCheckedChange = { viewModel.updateQuickAddOnNotificationClick(it) }
+                                )
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                // ==========================================
+                // 2. BOTTLE TRACKING MODE
+                // ==========================================
+                item {
+                    CategoryHeader(
+                        title = stringResource(R.string.category_bottle),
+                        icon = Icons.Default.LocalDrink
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Card(
                         shape = RoundedCornerShape(16.dp),
@@ -343,18 +295,110 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            // Master reminder switch
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Notifications, contentDescription = null, tint = BluePrimary)
-                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Drink Water Reminders",
+                                        text = stringResource(R.string.enable_bottle_mode),
                                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.bottle_mode_desc),
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    )
+                                }
+                                Switch(
+                                    checked = uiState.bottleModeEnabled,
+                                    onCheckedChange = { viewModel.updateBottleModeEnabled(it) }
+                                )
+                            }
+
+                            if (uiState.bottleModeEnabled) {
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                                // Bottle Volume Selection
+                                Text(
+                                    text = stringResource(R.string.bottle_capacity),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    listOf(500, 750, 1000, 1500).forEach { vol ->
+                                        FilterChip(
+                                            selected = uiState.bottleVolumeMl == vol,
+                                            onClick = { viewModel.updateBottleConfig(vol, uiState.bottleTargetDurationMinutes) },
+                                            label = { Text("${vol}ml", fontSize = 11.sp) },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Target Duration Selection
+                                Text(
+                                    text = stringResource(R.string.bottle_target_duration),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    listOf(60 to "1h", 120 to "2h", 180 to "3h", 240 to "4h").forEach { (mins, label) ->
+                                        FilterChip(
+                                            selected = uiState.bottleTargetDurationMinutes == mins,
+                                            onClick = { viewModel.updateBottleConfig(uiState.bottleVolumeMl, mins) },
+                                            label = { Text(label, fontSize = 11.sp) },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                // ==========================================
+                // 3. REMINDERS & SCHEDULE
+                // ==========================================
+                item {
+                    CategoryHeader(
+                        title = stringResource(R.string.category_reminders),
+                        icon = Icons.Default.Schedule
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(2.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Toggle reminders
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.enable_reminders),
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                    Text(
+                                        text = "Exact real-time alarms waking through Doze mode",
+                                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     )
                                 }
                                 Switch(
@@ -365,7 +409,6 @@ fun SettingsScreen(
                                                 context,
                                                 Manifest.permission.POST_NOTIFICATIONS
                                             ) == PackageManager.PERMISSION_GRANTED
-
                                             if (!hasPermission) {
                                                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                                 return@Switch
@@ -379,215 +422,91 @@ fun SettingsScreen(
                             if (uiState.remindersEnabled) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
-                                // Reminder Mode: Regular Interval vs Custom Routine
+                                // Mode selection
                                 Text(
-                                    text = "Reminder Schedule Mode:",
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                                    text = stringResource(R.string.reminder_mode),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-
-                                FlowRow(
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     FilterChip(
                                         selected = uiState.reminderMode == ReminderMode.INTERVAL,
                                         onClick = { viewModel.updateReminderMode(ReminderMode.INTERVAL) },
-                                        label = { Text("Periodic Interval") }
+                                        label = { Text(stringResource(R.string.mode_interval)) },
+                                        modifier = Modifier.weight(1f)
                                     )
                                     FilterChip(
                                         selected = uiState.reminderMode == ReminderMode.CUSTOM_ROUTINE,
                                         onClick = { viewModel.updateReminderMode(ReminderMode.CUSTOM_ROUTINE) },
-                                        label = { Text("Daily Routine Hours") }
+                                        label = { Text(stringResource(R.string.mode_routine)) },
+                                        modifier = Modifier.weight(1f)
                                     )
                                 }
 
                                 Spacer(modifier = Modifier.height(14.dp))
 
                                 if (uiState.reminderMode == ReminderMode.INTERVAL) {
-                                    // Mode 1: Regular Interval with Predefined + Manual User Input
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(Icons.Default.Alarm, contentDescription = null, tint = BluePrimary)
-                                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                            Text(
-                                                text = "Remind me every:",
-                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
-                                            )
-                                        }
-                                        OutlinedButton(
-                                            onClick = { showCustomIntervalDialog = true },
-                                            modifier = Modifier.height(32.dp),
-                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                                        ) {
-                                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Custom", fontSize = 12.sp)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    val currentMinutes = uiState.reminderIntervalMinutes
-                                    val isPredefined = currentMinutes in listOf(60, 120, 240)
-
-                                    FlowRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        // Predefined options 1h, 2h, 4h
-                                        listOf(
-                                            1 to "1 Hour",
-                                            2 to "2 Hours",
-                                            4 to "4 Hours"
-                                        ).forEach { (hours, label) ->
-                                            val minutes = hours * 60
-                                            FilterChip(
-                                                selected = currentMinutes == minutes,
-                                                onClick = { viewModel.updateReminderIntervalMinutes(minutes) },
-                                                label = { Text(label) }
-                                            )
-                                        }
-
-                                        // Manual custom input chip
-                                        FilterChip(
-                                            selected = !isPredefined,
-                                            onClick = { showCustomIntervalDialog = true },
-                                            label = {
-                                                Text(
-                                                    if (!isPredefined) {
-                                                        "Custom (${formatInterval(currentMinutes)})"
-                                                    } else {
-                                                        "Custom (X min / X hr)"
-                                                    }
-                                                )
-                                            },
-                                            leadingIcon = {
-                                                Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(16.dp))
-                                            }
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "Active interval: Every ${formatInterval(currentMinutes)}",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    )
-                                } else {
-                                    // Mode 2: Custom Reminder Routine (24-hour selection + Waking Day Preset)
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(Icons.Default.Schedule, contentDescription = null, tint = BluePrimary)
-                                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                            Text(
-                                                text = "Routine Hours (${uiState.customReminderHours.size}/24 set):",
-                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "Select any of the 24 hours or apply schedule presets:",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-                                    Spacer(modifier = Modifier.height(10.dp))
-
-                                    Text(
-                                        text = "Quick Presets:",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                        text = stringResource(R.string.remind_every),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
 
                                     FlowRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        // Waking Day Schedule Preset Button
-                                        Button(
-                                            onClick = { showWakingDayDialog = true },
-                                            modifier = Modifier.height(34.dp),
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-                                        ) {
-                                            Icon(Icons.Default.WbSunny, contentDescription = null, modifier = Modifier.size(14.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("🌅 Waking Day Schedule...", fontSize = 12.sp)
-                                        }
-
-                                        OutlinedButton(
-                                            onClick = { viewModel.setCustomReminderHours(setOf(9, 11, 13, 15, 17)) },
-                                            modifier = Modifier.height(34.dp),
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-                                        ) {
-                                            Text("💼 Work Day", fontSize = 12.sp)
-                                        }
-
-                                        OutlinedButton(
-                                            onClick = { viewModel.setCustomReminderHours(setOf(8, 10, 12, 14, 16, 18, 20, 22)) },
-                                            modifier = Modifier.height(34.dp),
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-                                        ) {
-                                            Text("☀️ All Day", fontSize = 12.sp)
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Text(
-                                        text = "24-Hour Day Schedule:",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    // Full 24 Hours (0 to 23) available for selection
-                                    val all24Hours = (0..23).toList()
-
-                                    FlowRow(
-                                        modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                                         verticalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
-                                        all24Hours.forEach { hour ->
-                                            val isSelected = uiState.customReminderHours.contains(hour)
-                                            val timeLabel = formatHourToAmPm(hour)
+                                        listOf(30 to "30m", 45 to "45m", 60 to "1h", 90 to "1.5h", 120 to "2h", 180 to "3h").forEach { (mins, label) ->
+                                            FilterChip(
+                                                selected = uiState.reminderIntervalMinutes == mins,
+                                                onClick = { viewModel.updateReminderIntervalMinutes(mins) },
+                                                label = { Text(label) }
+                                            )
+                                        }
+                                        FilterChip(
+                                            selected = uiState.reminderIntervalMinutes !in listOf(30, 45, 60, 90, 120, 180),
+                                            onClick = { showCustomIntervalDialog = true },
+                                            label = { Text("Custom...") },
+                                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                                        )
+                                    }
+                                } else {
+                                    // Custom Routine
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.routine_hours, uiState.customReminderHours.size),
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                        )
+                                        OutlinedButton(
+                                            onClick = { showWakingDayDialog = true },
+                                            modifier = Modifier.height(32.dp),
+                                            contentPadding = PaddingValues(horizontal = 8.dp)
+                                        ) {
+                                            Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(stringResource(R.string.waking_day_preset), fontSize = 11.sp)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
 
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        (6..23).forEach { hour ->
+                                            val isSelected = uiState.customReminderHours.contains(hour)
                                             FilterChip(
                                                 selected = isSelected,
                                                 onClick = { viewModel.toggleCustomReminderHour(hour) },
-                                                label = {
-                                                    Text(
-                                                        text = timeLabel,
-                                                        fontSize = 12.sp
-                                                    )
-                                                },
-                                                leadingIcon = if (isSelected) {
-                                                    {
-                                                        Icon(
-                                                            Icons.Default.Check,
-                                                            contentDescription = null,
-                                                            modifier = Modifier.size(14.dp)
-                                                        )
-                                                    }
-                                                } else null
+                                                label = { Text(formatHourToAmPm(hour), fontSize = 11.sp) },
+                                                modifier = Modifier.height(30.dp)
                                             )
                                         }
                                     }
@@ -596,14 +515,58 @@ fun SettingsScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    // Section 3: Notification, Sounds & Smartwatch Actions
-                    Text(
-                        text = "Notification & Sounds",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = BluePrimary
-                        )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Battery Optimization Warning Card
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isBatteryOptimized) Color(0xFFFFF3E0) else Color(0xFFE8F5E9)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = if (isBatteryOptimized) Icons.Default.BatteryAlert else Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = if (isBatteryOptimized) Color(0xFFE65100) else Color(0xFF2E7D32)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (isBatteryOptimized) stringResource(R.string.battery_optimization_title) else stringResource(R.string.battery_unrestricted_title),
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isBatteryOptimized) Color(0xFFE65100) else Color(0xFF2E7D32)
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = if (isBatteryOptimized) stringResource(R.string.battery_optimization_desc) else stringResource(R.string.battery_unrestricted_desc),
+                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            )
+                            if (isBatteryOptimized) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = { BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(context) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100))
+                                ) {
+                                    Text(stringResource(R.string.disable_battery_optimization), fontSize = 12.sp)
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                // ==========================================
+                // 4. NOTIFICATION & SOUNDS
+                // ==========================================
+                item {
+                    CategoryHeader(
+                        title = stringResource(R.string.category_sounds),
+                        icon = Icons.Default.Notifications
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -614,274 +577,109 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null, tint = BluePrimary)
-                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                    Text(
-                                        text = "Reminder Tone",
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                                    )
-                                }
-
-                                // Notification Test Option
-                                OutlinedButton(
-                                    onClick = {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            val hasPermission = ContextCompat.checkSelfPermission(
-                                                context,
-                                                Manifest.permission.POST_NOTIFICATIONS
-                                            ) == PackageManager.PERMISSION_GRANTED
-
-                                            if (!hasPermission) {
-                                                testNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                                return@OutlinedButton
-                                            }
-                                        }
-                                        viewModel.sendTestNotification(context)
-                                    },
-                                    modifier = Modifier.height(34.dp),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.NotificationsActive,
-                                        contentDescription = "Test Notification",
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Test Alert", fontSize = 12.sp)
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(6.dp))
+                            // Reminder Tone
                             Text(
-                                text = "Choose a refreshing water-inspired sound or test it now:",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                text = stringResource(R.string.reminder_tone),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                            // List of notification sounds suitable for water and drinking
                             NotificationSound.entries.forEach { sound ->
-                                val isSelected = uiState.notificationSound == sound.id
-
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable { viewModel.updateNotificationSound(sound.id) }
-                                        .padding(vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        RadioButton(
-                                            selected = isSelected,
-                                            onClick = { viewModel.updateNotificationSound(sound.id) }
+                                    RadioButton(
+                                        selected = uiState.notificationSound == sound.id,
+                                        onClick = { viewModel.updateNotificationSound(sound.id) }
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(text = sound.displayName, fontWeight = FontWeight.SemiBold)
+                                        Text(
+                                            text = sound.description,
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Column {
-                                            Text(
-                                                text = sound.displayName,
-                                                style = MaterialTheme.typography.bodyMedium.copy(
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                                )
-                                            )
-                                            Text(
-                                                text = sound.description,
-                                                style = MaterialTheme.typography.bodySmall.copy(
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            )
-                                        }
                                     }
-
-                                    // Preview sound button
-                                    IconButton(
-                                        onClick = { viewModel.previewSound(context, sound) },
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.PlayArrow,
-                                            contentDescription = "Preview ${sound.displayName}",
-                                            tint = BluePrimary
-                                        )
+                                    IconButton(onClick = { viewModel.previewSound(context, sound) }) {
+                                        Icon(Icons.Default.PlayArrow, contentDescription = "Play sound")
                                     }
                                 }
                             }
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
-                            // Goal Celebration Sound Selector
+                            // Test Notification Button
+                            Button(
+                                onClick = { viewModel.sendTestNotification(context) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+                            ) {
+                                Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(stringResource(R.string.test_alert))
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                // ==========================================
+                // 5. LANGUAGE / اللغة
+                // ==========================================
+                item {
+                    CategoryHeader(
+                        title = stringResource(R.string.category_language),
+                        icon = Icons.Default.Language
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(2.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = stringResource(R.string.app_language),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Celebration, contentDescription = null, tint = BluePrimary)
-                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                    Text(
-                                        text = "Goal Celebration Tone",
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Triumphant sound played when you reach your daily hydration target:",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            // List of celebration sounds
-                            CelebrationSound.entries.forEach { sound ->
-                                val isSelected = uiState.celebrationSound == sound.id
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { viewModel.updateCelebrationSound(sound.id) }
-                                        .padding(vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        RadioButton(
-                                            selected = isSelected,
-                                            onClick = { viewModel.updateCelebrationSound(sound.id) }
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Column {
-                                            Text(
-                                                text = sound.displayName,
-                                                style = MaterialTheme.typography.bodyMedium.copy(
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                                )
-                                            )
-                                            Text(
-                                                text = sound.description,
-                                                style = MaterialTheme.typography.bodySmall.copy(
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            )
-                                        }
-                                    }
-
-                                    IconButton(
-                                        onClick = { viewModel.previewCelebrationSound(context, sound) },
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.PlayArrow,
-                                            contentDescription = "Preview ${sound.displayName}",
-                                            tint = BluePrimary
-                                        )
-                                    }
-                                }
-                            }
-
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                            // Smartwatch & Notification Quick Log Settings
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Watch, contentDescription = null, tint = BluePrimary)
-                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                    Text(
-                                        text = "Smartwatch & Shade Quick-Add",
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Predefined amount logged when clicking the notification or quick action on your phone or smartwatch:",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            val predefinedAmounts = listOf(150, 200, 250, 300, 350, 500)
-                            val isCustomAmount = uiState.defaultQuickAddMl !in predefinedAmounts
-
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                predefinedAmounts.forEach { amount ->
-                                    FilterChip(
-                                        selected = uiState.defaultQuickAddMl == amount,
-                                        onClick = { viewModel.updateDefaultQuickAddMl(amount) },
-                                        label = { Text("${amount} ml") }
-                                    )
-                                }
-
                                 FilterChip(
-                                    selected = isCustomAmount,
-                                    onClick = { showQuickAddAmountDialog = true },
-                                    label = {
-                                        Text(if (isCustomAmount) "${uiState.defaultQuickAddMl} ml" else "Custom...")
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    }
+                                    selected = uiState.language == "en",
+                                    onClick = { viewModel.updateLanguage("en") },
+                                    label = { Text(stringResource(R.string.lang_english)) },
+                                    modifier = Modifier.weight(1f)
                                 )
-                            }
-
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "One-Tap Add on Notification Click",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                                    )
-                                    Text(
-                                        text = "Tapping notification body immediately logs ${uiState.defaultQuickAddMl} ml in the background silently",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Switch(
-                                    checked = uiState.quickAddOnNotificationClick,
-                                    onCheckedChange = { viewModel.updateQuickAddOnNotificationClick(it) }
+                                FilterChip(
+                                    selected = uiState.language == "ar",
+                                    onClick = { viewModel.updateLanguage("ar") },
+                                    label = { Text(stringResource(R.string.lang_arabic)) },
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "About",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = BluePrimary
-                        )
+                // ==========================================
+                // 6. ABOUT SECTION (Clean - NO change details)
+                // ==========================================
+                item {
+                    CategoryHeader(
+                        title = stringResource(R.string.category_about),
+                        icon = Icons.Default.Info
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -894,22 +692,30 @@ fun SettingsScreen(
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
-                                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "KeepHydrated App",
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                                    text = stringResource(R.string.app_name),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Version 1.5.0 (Exact Real-Time Alarms, Smartwatch Bridging & Battery Optimization)",
+                                text = stringResource(R.string.app_version),
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = BluePrimary
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.app_motto),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(36.dp))
                 }
             }
         }
@@ -948,15 +754,27 @@ fun SettingsScreen(
             }
         )
     }
+}
 
-    if (showQuickAddAmountDialog) {
-        QuickAddAmountDialog(
-            currentAmount = uiState.defaultQuickAddMl,
-            onDismiss = { showQuickAddAmountDialog = false },
-            onConfirm = { amount ->
-                viewModel.updateDefaultQuickAddMl(amount)
-                showQuickAddAmountDialog = false
-            }
+@Composable
+fun CategoryHeader(
+    title: String,
+    icon: ImageVector
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = BluePrimary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = BluePrimary
+            )
         )
     }
 }
@@ -967,15 +785,6 @@ private fun formatHourToAmPm(hour: Int): String {
         hour == 12 -> "12 PM"
         hour < 12 -> "$hour AM"
         else -> "${hour - 12} PM"
-    }
-}
-
-private fun formatInterval(minutes: Int): String {
-    return if (minutes % 60 == 0) {
-        val hours = minutes / 60
-        if (hours == 1) "1 hour" else "$hours hours"
-    } else {
-        "$minutes minutes"
     }
 }
 
@@ -990,7 +799,7 @@ fun DailyGoalDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Update Daily Goal") },
+        title = { Text(stringResource(R.string.daily_target)) },
         text = {
             Column {
                 Text("Enter target daily intake in ml (500 - 10000):")
@@ -1022,66 +831,12 @@ fun DailyGoalDialog(
                     }
                 }
             ) {
-                Text("Save")
+                Text(stringResource(R.string.dialog_save))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-fun QuickAddAmountDialog(
-    currentAmount: Int,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    var textValue by remember { mutableStateOf(currentAmount.toString()) }
-    var isError by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Predefined Quick-Add Amount") },
-        text = {
-            Column {
-                Text("Enter amount in ml (50 - 2000 ml) for one-tap notification & smartwatch logging:")
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = textValue,
-                    onValueChange = {
-                        textValue = it
-                        isError = false
-                    },
-                    isError = isError,
-                    label = { Text("Amount (ml)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    supportingText = {
-                        if (isError) Text("Must be between 50 and 2000 ml")
-                    }
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val amount = textValue.toIntOrNull()
-                    if (amount != null && amount in 50..2000) {
-                        onConfirm(amount)
-                    } else {
-                        isError = true
-                    }
-                }
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.dialog_cancel))
             }
         }
     )
@@ -1113,7 +868,6 @@ fun CustomIntervalDialog(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Unit selection: Minutes vs Hours
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1164,37 +918,6 @@ fun CustomIntervalDialog(
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Quick Presets:",
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    listOf(15 to "15m", 30 to "30m", 45 to "45m", 90 to "90m", 180 to "3h", 300 to "5h").forEach { (mins, label) ->
-                        OutlinedButton(
-                            onClick = {
-                                if (mins % 60 == 0 && mins >= 60) {
-                                    isHoursUnit = true
-                                    inputValue = (mins / 60).toString()
-                                } else {
-                                    isHoursUnit = false
-                                    inputValue = mins.toString()
-                                }
-                                errorMessage = null
-                            },
-                            modifier = Modifier.height(30.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                        ) {
-                            Text(label, fontSize = 11.sp)
-                        }
-                    }
-                }
             }
         },
         confirmButton = {
@@ -1219,12 +942,12 @@ fun CustomIntervalDialog(
                     onConfirm(totalMinutes)
                 }
             ) {
-                Text("Set Interval")
+                Text(stringResource(R.string.dialog_apply))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.dialog_cancel))
             }
         }
     )
@@ -1248,7 +971,7 @@ fun WakingDayScheduleDialog(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.WbSunny, contentDescription = null, tint = BluePrimary)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Waking Day Schedule")
+                Text(stringResource(R.string.waking_day_preset))
             }
         },
         text = {
@@ -1259,22 +982,13 @@ fun WakingDayScheduleDialog(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Wake-up Time Selection
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.WbSunny, contentDescription = null, tint = BluePrimary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Wake-up Time:", fontWeight = FontWeight.SemiBold)
-                    }
-                    Text(
-                        formatHourToAmPm(wakeHour),
-                        fontWeight = FontWeight.Bold,
-                        color = BluePrimary
-                    )
+                    Text("Wake-up Time:", fontWeight = FontWeight.SemiBold)
+                    Text(formatHourToAmPm(wakeHour), fontWeight = FontWeight.Bold, color = BluePrimary)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
@@ -1293,22 +1007,13 @@ fun WakingDayScheduleDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Sleeping / Bedtime Selection
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Bedtime, contentDescription = null, tint = BluePrimary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Bedtime / Sleep:", fontWeight = FontWeight.SemiBold)
-                    }
-                    Text(
-                        formatHourToAmPm(sleepHour),
-                        fontWeight = FontWeight.Bold,
-                        color = BluePrimary
-                    )
+                    Text("Bedtime / Sleep:", fontWeight = FontWeight.SemiBold)
+                    Text(formatHourToAmPm(sleepHour), fontWeight = FontWeight.Bold, color = BluePrimary)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
@@ -1327,7 +1032,6 @@ fun WakingDayScheduleDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Reminder Frequency during day
                 Text(
                     text = "Reminder Frequency:",
                     fontWeight = FontWeight.SemiBold,
@@ -1347,60 +1051,18 @@ fun WakingDayScheduleDialog(
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Live calculation preview
-                val previewHours = mutableListOf<Int>()
-                if (wakeHour <= sleepHour) {
-                    var h = wakeHour
-                    while (h <= sleepHour) {
-                        previewHours.add(h)
-                        h += stepHours
-                    }
-                } else {
-                    var h = wakeHour
-                    while (h < 24) {
-                        previewHours.add(h)
-                        h += stepHours
-                    }
-                    var m = h % 24
-                    while (m <= sleepHour) {
-                        previewHours.add(m)
-                        m += stepHours
-                    }
-                }
-
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(
-                            text = "Schedule Preview (${previewHours.size} reminders):",
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = previewHours.joinToString(", ") { formatHourToAmPm(it) },
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                    }
-                }
             }
         },
         confirmButton = {
             Button(
                 onClick = { onConfirm(wakeHour, sleepHour, stepHours) }
             ) {
-                Text("Apply to Routine")
+                Text(stringResource(R.string.dialog_apply))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.dialog_cancel))
             }
         }
     )

@@ -6,16 +6,16 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.keephydrated.app.KeepHydratedApp
 import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
-import com.keephydrated.app.domain.usecase.GetUserSettingsUseCase
-import com.keephydrated.app.domain.usecase.SaveUserSettingsUseCase
+import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.notification.NotificationHelper
+import com.keephydrated.app.util.LocaleHelper
 import com.keephydrated.app.worker.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,9 +26,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val getUserSettingsUseCase: GetUserSettingsUseCase,
-    private val saveUserSettingsUseCase: SaveUserSettingsUseCase,
-    private val reminderScheduler: ReminderScheduler
+    private val settingsRepository: SettingsRepository,
+    private val reminderScheduler: ReminderScheduler,
+    @ApplicationContext private val context: Context? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -42,7 +42,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun observeSettings() {
         viewModelScope.launch {
-            getUserSettingsUseCase().collectLatest { settings ->
+            settingsRepository.getUserSettings().collectLatest { settings ->
                 _uiState.update {
                     it.copy(
                         dailyGoalMl = settings.dailyGoalMl,
@@ -57,6 +57,11 @@ class SettingsViewModel @Inject constructor(
                         celebrationSound = settings.celebrationSound,
                         defaultQuickAddMl = settings.defaultQuickAddMl,
                         quickAddOnNotificationClick = settings.quickAddOnNotificationClick,
+                        language = settings.language,
+                        frequentIntakeMl = settings.frequentIntakeMl,
+                        bottleModeEnabled = settings.bottleModeEnabled,
+                        bottleVolumeMl = settings.bottleVolumeMl,
+                        bottleTargetDurationMinutes = settings.bottleTargetDurationMinutes,
                         isLoading = false
                     )
                 }
@@ -64,10 +69,24 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateLanguage(languageCode: String) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateLanguage(languageCode)
+                context?.let { ctx ->
+                    LocaleHelper.setLocale(ctx, languageCode)
+                }
+                _uiState.update { it.copy(language = languageCode) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update language") }
+            }
+        }
+    }
+
     fun updateDailyGoal(goalMl: Int) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateGoal(goalMl)
+                settingsRepository.updateDailyGoal(goalMl)
                 _uiState.update { it.copy(userMessage = "Goal updated to $goalMl ml") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update goal") }
@@ -75,10 +94,50 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateFrequentIntakeMl(amountMl: Int) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateFrequentIntakeMl(amountMl)
+                _uiState.update { it.copy(frequentIntakeMl = amountMl) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update frequent amount") }
+            }
+        }
+    }
+
+    fun updateBottleModeEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateBottleModeEnabled(enabled)
+                val msg = if (enabled) "Bottle Tracking Mode enabled" else "Bottle Tracking Mode disabled"
+                _uiState.update { it.copy(bottleModeEnabled = enabled, userMessage = msg) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to toggle bottle mode") }
+            }
+        }
+    }
+
+    fun updateBottleConfig(volumeMl: Int, durationMinutes: Int) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateBottleConfig(volumeMl, durationMinutes)
+                _uiState.update {
+                    it.copy(
+                        bottleVolumeMl = volumeMl,
+                        bottleTargetDurationMinutes = durationMinutes,
+                        userMessage = "Bottle configured: $volumeMl ml ($durationMinutes mins)"
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update bottle settings") }
+            }
+        }
+    }
+
     fun updateReminderInterval(hours: Int) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateReminderInterval(hours)
+                settingsRepository.updateReminderInterval(hours)
                 reminderScheduler.scheduleReminders(
                     intervalMinutes = hours * 60,
                     enabled = _uiState.value.remindersEnabled,
@@ -95,7 +154,7 @@ class SettingsViewModel @Inject constructor(
     fun updateReminderIntervalMinutes(minutes: Int) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateReminderIntervalMinutes(minutes)
+                settingsRepository.updateReminderIntervalMinutes(minutes)
                 reminderScheduler.scheduleReminders(
                     intervalMinutes = minutes,
                     enabled = _uiState.value.remindersEnabled,
@@ -117,7 +176,7 @@ class SettingsViewModel @Inject constructor(
     fun toggleReminders(enabled: Boolean) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateRemindersEnabled(enabled)
+                settingsRepository.updateRemindersEnabled(enabled)
                 reminderScheduler.scheduleReminders(
                     intervalMinutes = _uiState.value.reminderIntervalMinutes,
                     enabled = enabled,
@@ -134,7 +193,7 @@ class SettingsViewModel @Inject constructor(
     fun updateReminderMode(mode: ReminderMode) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateReminderMode(mode)
+                settingsRepository.updateReminderMode(mode)
                 reminderScheduler.scheduleReminders(
                     intervalMinutes = _uiState.value.reminderIntervalMinutes,
                     enabled = _uiState.value.remindersEnabled,
@@ -152,7 +211,7 @@ class SettingsViewModel @Inject constructor(
         if (hours.isEmpty()) return
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateCustomReminderHours(hours)
+                settingsRepository.updateCustomReminderHours(hours)
                 _uiState.update { it.copy(userMessage = "Preset routine applied (${hours.size} reminders)") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to set routine") }
@@ -174,7 +233,7 @@ class SettingsViewModel @Inject constructor(
                 } else {
                     current.add(hour)
                 }
-                saveUserSettingsUseCase.updateCustomReminderHours(current)
+                settingsRepository.updateCustomReminderHours(current)
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update reminder hours") }
             }
@@ -184,7 +243,7 @@ class SettingsViewModel @Inject constructor(
     fun updateActiveHours(startHour: Int, endHour: Int) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateActiveHours(startHour, endHour)
+                settingsRepository.updateActiveHours(startHour, endHour)
                 _uiState.update { it.copy(userMessage = "Active hours updated") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update active hours") }
@@ -195,7 +254,7 @@ class SettingsViewModel @Inject constructor(
     fun applyWakingDayPreset(wakeHour: Int, sleepHour: Int, stepHours: Int = 2) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateActiveHours(wakeHour, sleepHour)
+                settingsRepository.updateActiveHours(wakeHour, sleepHour)
                 val step = stepHours.coerceIn(1, 4)
                 val generatedHours = mutableSetOf<Int>()
 
@@ -206,7 +265,6 @@ class SettingsViewModel @Inject constructor(
                         h += step
                     }
                 } else {
-                    // Overnight awake schedule (e.g., night shift: 20:00 to 06:00)
                     var h = wakeHour
                     while (h < 24) {
                         generatedHours.add(h)
@@ -223,7 +281,7 @@ class SettingsViewModel @Inject constructor(
                     generatedHours.add(wakeHour)
                 }
 
-                saveUserSettingsUseCase.updateCustomReminderHours(generatedHours)
+                settingsRepository.updateCustomReminderHours(generatedHours)
                 _uiState.update {
                     it.copy(userMessage = "Awake schedule applied: ${generatedHours.size} reminders set")
                 }
@@ -237,7 +295,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val sound = NotificationSound.fromId(soundId)
-                saveUserSettingsUseCase.updateNotificationSound(sound.id)
+                settingsRepository.updateNotificationSound(sound.id)
                 _uiState.update { it.copy(userMessage = "Notification sound: ${sound.displayName}") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update notification sound") }
@@ -249,7 +307,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val sound = CelebrationSound.fromId(soundId)
-                saveUserSettingsUseCase.updateCelebrationSound(sound.id)
+                settingsRepository.updateCelebrationSound(sound.id)
                 _uiState.update { it.copy(userMessage = "Celebration tone: ${sound.displayName}") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update celebration tone") }
@@ -260,7 +318,7 @@ class SettingsViewModel @Inject constructor(
     fun updateDefaultQuickAddMl(amountMl: Int) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateDefaultQuickAddMl(amountMl)
+                settingsRepository.updateDefaultQuickAddMl(amountMl)
                 _uiState.update { it.copy(userMessage = "Quick-add amount set to $amountMl ml") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update quick-add amount") }
@@ -271,7 +329,7 @@ class SettingsViewModel @Inject constructor(
     fun updateQuickAddOnNotificationClick(enabled: Boolean) {
         viewModelScope.launch {
             try {
-                saveUserSettingsUseCase.updateQuickAddOnNotificationClick(enabled)
+                settingsRepository.updateQuickAddOnNotificationClick(enabled)
                 val msg = if (enabled) "One-tap log on notification click enabled" else "One-tap log on notification click disabled"
                 _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
@@ -347,7 +405,12 @@ class SettingsViewModel @Inject constructor(
                 notificationSound = sound.id,
                 celebrationSound = _uiState.value.celebrationSound,
                 defaultQuickAddMl = _uiState.value.defaultQuickAddMl,
-                quickAddOnNotificationClick = _uiState.value.quickAddOnNotificationClick
+                quickAddOnNotificationClick = _uiState.value.quickAddOnNotificationClick,
+                language = _uiState.value.language,
+                frequentIntakeMl = _uiState.value.frequentIntakeMl,
+                bottleModeEnabled = _uiState.value.bottleModeEnabled,
+                bottleVolumeMl = _uiState.value.bottleVolumeMl,
+                bottleTargetDurationMinutes = _uiState.value.bottleTargetDurationMinutes
             )
 
             val notification = NotificationHelper.buildReminderNotification(context, testSettings)

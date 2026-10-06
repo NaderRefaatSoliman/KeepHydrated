@@ -1,0 +1,54 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- Cup Outline / Glass Body -->
+    <path
+        android:fillColor="#E1F5FE"
+        android:strokeColor="#0288D1"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M24,18 L32,82 C32.5,86 36,88 40,88 L56,88 C60,88 63.5,86 64,82 L72,18 Z" />
+
+    <!-- Water Liquid inside Cup -->
+    <path
+        android:fillColor="#03A9F4"
+        android:pathData="M27.5,38 C34,42 42,34 48,38 C54,42 62,34 68.5,38 L62.5,80 C62,83 59,85 56,85 L40,85 C37,85 34,83 33.5,80 Z" />
+
+    <!-- Liquid Top Wave / Surface -->
+    <path
+        android:fillColor="#4FC3F7"
+        android:pathData="M27.5,38 C34,42 42,34 48,38 C54,42 62,34 68.5,38 C65,40 57,36 48,36 C39,36 31,40 27.5,38 Z" />
+
+    <!-- Glass Rim Highlight -->
+    <path
+        android:strokeColor="#81D4FA"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M22,18 L74,18" />
+
+    <!-- Glass Reflection / Shimmer Line -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.75"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M32,26 L38,76" />
+
+    <!-- Small Rising Water Bubbles -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M48,68 A3,3 0 1,1 48,62 A3,3 0 1,1 48,68 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M54,54 A2,2 0 1,1 54,50 A2,2 0 1,1 54,54 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M42,48 A2.5,2.5 0 1,1 42,43 A2.5,2.5 0 1,1 42,48 Z" />
+</vector>

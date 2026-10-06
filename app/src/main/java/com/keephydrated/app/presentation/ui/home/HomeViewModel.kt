@@ -3,9 +3,12 @@ package com.keephydrated.app.presentation.ui.home
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.domain.usecase.AddWaterIntakeUseCase
 import com.keephydrated.app.domain.usecase.DeleteWaterIntakeUseCase
 import com.keephydrated.app.domain.usecase.GetTodayHydrationUseCase
+import com.keephydrated.app.domain.usecase.LogBottleDrinkUseCase
+import com.keephydrated.app.domain.usecase.RefillBottleUseCase
 import com.keephydrated.app.domain.usecase.UndoLastIntakeUseCase
 import com.keephydrated.app.notification.NotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,6 +28,9 @@ class HomeViewModel @Inject constructor(
     private val addWaterIntakeUseCase: AddWaterIntakeUseCase,
     private val deleteWaterIntakeUseCase: DeleteWaterIntakeUseCase,
     private val undoLastIntakeUseCase: UndoLastIntakeUseCase,
+    private val settingsRepository: SettingsRepository,
+    private val logBottleDrinkUseCase: LogBottleDrinkUseCase,
+    private val refillBottleUseCase: RefillBottleUseCase,
     @ApplicationContext private val context: Context? = null
 ) : ViewModel() {
 
@@ -31,22 +38,30 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        observeTodayHydration()
+        observeHydrationAndSettings()
     }
 
-    private fun observeTodayHydration() {
+    private fun observeHydrationAndSettings() {
         viewModelScope.launch {
-            getTodayHydrationUseCase().collectLatest { summary ->
-                _uiState.update { current ->
-                    current.copy(
-                        currentIntakeMl = summary.totalIntakeMl,
-                        dailyGoalMl = summary.goalMl,
-                        progressPercentage = summary.progressPercentage,
-                        isGoalAchieved = summary.isGoalAchieved,
-                        todayIntakes = summary.intakes,
-                        isLoading = false
-                    )
-                }
+            combine(
+                getTodayHydrationUseCase(),
+                settingsRepository.getUserSettings()
+            ) { summary, settings ->
+                val bottleStatus = settings.toBottleStatus()
+                HomeUiState(
+                    currentIntakeMl = summary.totalIntakeMl,
+                    dailyGoalMl = summary.goalMl,
+                    progressPercentage = summary.progressPercentage,
+                    isGoalAchieved = summary.isGoalAchieved,
+                    todayIntakes = summary.intakes,
+                    isLoading = false,
+                    userMessage = _uiState.value.userMessage,
+                    frequentIntakeMl = settings.frequentIntakeMl,
+                    bottleStatus = bottleStatus,
+                    isBottleMode = settings.bottleModeEnabled
+                )
+            }.collectLatest { state ->
+                _uiState.value = state
             }
         }
     }
@@ -59,6 +74,11 @@ class HomeViewModel @Inject constructor(
                 addWaterIntakeUseCase(amountMl)
                 val newTotal = previousTotal + amountMl
 
+                // If in bottle mode, also deduct from bottle
+                if (_uiState.value.isBottleMode) {
+                    settingsRepository.recordBottleDrink(amountMl)
+                }
+
                 if (previousTotal < goal && newTotal >= goal && goal > 0) {
                     context?.let { ctx ->
                         NotificationHelper.showCelebrationNotification(ctx, goal)
@@ -68,6 +88,29 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { it.copy(userMessage = "Added $amountMl ml") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to log water") }
+            }
+        }
+    }
+
+    fun drinkFromBottle(amountMl: Int? = null) {
+        val amount = amountMl ?: _uiState.value.frequentIntakeMl
+        viewModelScope.launch {
+            try {
+                logBottleDrinkUseCase(amount)
+                _uiState.update { it.copy(userMessage = "Logged $amount ml from bottle! 💧") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to record sip") }
+            }
+        }
+    }
+
+    fun refillBottle() {
+        viewModelScope.launch {
+            try {
+                refillBottleUseCase()
+                _uiState.update { it.copy(userMessage = "Bottle refilled! Fresh start 🔄") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to refill bottle") }
             }
         }
     }

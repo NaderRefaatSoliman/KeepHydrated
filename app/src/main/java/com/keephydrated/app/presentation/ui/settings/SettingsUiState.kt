@@ -17,6 +17,11 @@ data class SettingsUiState(
     val celebrationSound: String = CelebrationSound.CHIME_FANFARE.id,
     val defaultQuickAddMl: Int = 250,
     val quickAddOnNotificationClick: Boolean = true,
+    val language: String = "en",
+    val frequentIntakeMl: Int = 250,
+    val bottleModeEnabled: Boolean = false,
+    val bottleVolumeMl: Int = 750,
+    val bottleTargetDurationMinutes: Int = 180,
     val isLoading: Boolean = true,
     val userMessage: String? = null
 )

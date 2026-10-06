@@ -1,5 +1,9 @@
 package com.keephydrated.app.presentation.ui.history
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,21 +13,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.HourglassBottom
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,15 +41,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.keephydrated.app.R
+import com.keephydrated.app.domain.model.AchievementStatus
 import com.keephydrated.app.domain.model.DailyHydrationSummary
+import com.keephydrated.app.domain.model.HistoryPeriod
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +71,7 @@ fun HistoryScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Hydration History", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.hydration_history), fontWeight = FontWeight.Bold)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -80,34 +97,139 @@ fun HistoryScreen(
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp)
             ) {
+                // Period Selector (Week / Month / Year)
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(
+                            HistoryPeriod.WEEK to stringResource(R.string.period_week),
+                            HistoryPeriod.MONTH to stringResource(R.string.period_month),
+                            HistoryPeriod.YEAR to stringResource(R.string.period_year)
+                        ).forEach { (period, label) ->
+                            FilterChip(
+                                selected = uiState.selectedPeriod == period,
+                                onClick = { viewModel.selectPeriod(period) },
+                                label = { Text(label, fontWeight = FontWeight.SemiBold) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+
+                // Overview Stat Cards
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         StatCard(
-                            title = "Daily Average",
+                            title = stringResource(R.string.daily_average),
                             value = "${uiState.averageIntakeMl} ml",
                             modifier = Modifier.weight(1f)
                         )
                         StatCard(
-                            title = "Goals Reached",
+                            title = stringResource(R.string.goals_reached),
                             value = "${uiState.daysGoalMetCount} days",
                             modifier = Modifier.weight(1f)
                         )
                     }
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+
+                // Achievement Status Summary Chips (Done / Partial / Zero)
+                item {
+                    Card(
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(2.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatusCountChip(
+                                label = stringResource(R.string.status_done),
+                                count = uiState.doneCount,
+                                color = Color(0xFF2E7D32)
+                            )
+                            StatusCountChip(
+                                label = stringResource(R.string.status_partial),
+                                count = uiState.partialCount,
+                                color = Color(0xFFF57C00)
+                            )
+                            StatusCountChip(
+                                label = stringResource(R.string.status_zero),
+                                count = uiState.zeroCount,
+                                color = Color(0xFF757575)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Intake Progress Bar Chart
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(2.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Intake Tracking Chart (${when (uiState.selectedPeriod) {
+                                    HistoryPeriod.WEEK -> stringResource(R.string.period_week)
+                                    HistoryPeriod.MONTH -> stringResource(R.string.period_month)
+                                    HistoryPeriod.YEAR -> stringResource(R.string.period_year)
+                                }})",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = BluePrimary
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            HydrationBarChart(
+                                chartData = uiState.chartData,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                // Daily Records List Header
+                item {
                     Text(
-                        text = "Past Days",
+                        text = stringResource(R.string.intake_records),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         )
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                if (uiState.dailySummaries.isEmpty()) {
+                val records = if (uiState.selectedPeriod == HistoryPeriod.WEEK) {
+                    uiState.periodSummaries
+                } else {
+                    uiState.periodSummaries.ifEmpty { uiState.dailySummaries }
+                }
+
+                if (records.isEmpty()) {
                     item {
                         Box(
                             modifier = Modifier
@@ -116,7 +238,7 @@ fun HistoryScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No history recorded yet.",
+                                text = stringResource(R.string.no_history),
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -124,12 +246,117 @@ fun HistoryScreen(
                         }
                     }
                 } else {
-                    items(uiState.dailySummaries, key = { it.date.toString() }) { summary ->
+                    items(records, key = { "${it.date}_${it.totalIntakeMl}" }) { summary ->
                         DailySummaryCard(summary = summary)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
+
+                item {
+                    Spacer(modifier = Modifier.height(30.dp))
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun StatusCountChip(
+    label: String,
+    count: Int,
+    color: Color
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .background(color, CircleShape)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = "$label: ",
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
+        )
+        Text(
+            text = "$count",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+        )
+    }
+}
+
+@Composable
+fun HydrationBarChart(
+    chartData: List<ChartBarData>,
+    modifier: Modifier = Modifier
+) {
+    if (chartData.isEmpty()) return
+
+    val maxAmount = chartData.maxOfOrNull { it.amountMl }?.coerceAtLeast(1) ?: 1
+    val maxGoal = chartData.maxOfOrNull { it.goalMl }?.coerceAtLeast(1) ?: 1
+    val chartCeiling = maxOf(maxAmount, maxGoal).toFloat()
+
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val bottomPadding = 30f
+        val topPadding = 20f
+        val usableHeight = h - bottomPadding - topPadding
+
+        val barCount = chartData.size
+        val barSpacing = w / (barCount * 4f)
+        val barWidth = (w - (barSpacing * (barCount + 1))) / barCount
+
+        // Draw Goal Baseline line
+        val goalFraction = (maxGoal / chartCeiling).coerceIn(0f, 1f)
+        val goalY = h - bottomPadding - (usableHeight * goalFraction)
+        drawLine(
+            color = Color(0xFFB0BEC5),
+            start = Offset(0f, goalY),
+            end = Offset(w, goalY),
+            strokeWidth = 2f,
+            cap = StrokeCap.Round
+        )
+
+        chartData.forEachIndexed { index, data ->
+            val fraction = (data.amountMl / chartCeiling).coerceIn(0f, 1f)
+            val barHeight = usableHeight * fraction
+            val left = barSpacing + index * (barWidth + barSpacing)
+            val top = h - bottomPadding - barHeight
+
+            val barColor = when (data.status) {
+                AchievementStatus.DONE -> Color(0xFF2E7D32)
+                AchievementStatus.PARTIAL -> Color(0xFF0288D1)
+                AchievementStatus.ZERO -> Color(0xFFE0E0E0)
+            }
+
+            // Draw Bar
+            drawRoundRect(
+                color = barColor,
+                topLeft = Offset(left, top),
+                size = Size(barWidth, barHeight.coerceAtLeast(4f)),
+                cornerRadius = CornerRadius(6f, 6f)
+            )
+        }
+    }
+
+    // Bar Labels below chart
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        chartData.forEach { data ->
+            Text(
+                text = data.label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
         }
     }
 }
@@ -143,12 +370,13 @@ fun StatCard(
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
+        elevation = CardDefaults.cardElevation(2.dp),
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(14.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
@@ -174,7 +402,25 @@ fun DailySummaryCard(
     summary: DailyHydrationSummary,
     modifier: Modifier = Modifier
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy")
+    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy", Locale.getDefault())
+
+    val (statusLabel, statusColor, statusIcon) = when (summary.status) {
+        AchievementStatus.DONE -> Triple(
+            stringResource(R.string.status_done),
+            Color(0xFF2E7D32),
+            Icons.Default.CheckCircle
+        )
+        AchievementStatus.PARTIAL -> Triple(
+            stringResource(R.string.status_partial),
+            Color(0xFFF57C00),
+            Icons.Default.HourglassBottom
+        )
+        AchievementStatus.ZERO -> Triple(
+            stringResource(R.string.status_zero),
+            Color(0xFF757575),
+            Icons.Default.RemoveCircleOutline
+        )
+    }
 
     Card(
         shape = RoundedCornerShape(14.dp),
@@ -201,17 +447,25 @@ fun DailySummaryCard(
                     )
                 )
 
-                if (summary.isGoalAchieved) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                // Achievement Status Sign (Done / Partial / Zero)
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = statusColor.copy(alpha = 0.12f)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Achieved",
-                            tint = Color(0xFF2E7D32),
-                            modifier = Modifier.padding(end = 4.dp)
+                            imageVector = statusIcon,
+                            contentDescription = statusLabel,
+                            tint = statusColor,
+                            modifier = Modifier.size(15.dp)
                         )
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Achieved",
-                            color = Color(0xFF2E7D32),
+                            text = statusLabel,
+                            color = statusColor,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold
                             )
@@ -248,10 +502,14 @@ fun DailySummaryCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
-                color = if (summary.isGoalAchieved) Color(0xFF2E7D32) else CyanSecondary,
+                color = statusColor,
                 trackColor = Color(0xFFE0F2FE),
                 strokeCap = StrokeCap.Round
             )
         }
     }
 }
+
+// Background extension import helper
+private fun Modifier.background(color: Color, shape: androidx.compose.ui.graphics.Shape): Modifier =
+    this.then(androidx.compose.foundation.background(color, shape))

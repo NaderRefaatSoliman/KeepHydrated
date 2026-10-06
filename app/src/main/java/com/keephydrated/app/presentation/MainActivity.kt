@@ -12,8 +12,13 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -31,6 +36,7 @@ import com.keephydrated.app.presentation.ui.settings.SettingsScreen
 import com.keephydrated.app.presentation.ui.settings.SettingsViewModel
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.KeepHydratedTheme
+import com.keephydrated.app.util.LocaleHelper
 import com.keephydrated.app.worker.ReminderScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
@@ -52,6 +58,9 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 val settings = settingsRepository.getUserSettings().first()
+                // Set initial locale
+                LocaleHelper.setLocale(this@MainActivity, settings.language)
+
                 if (settings.remindersEnabled) {
                     reminderScheduler.scheduleReminders(
                         intervalMinutes = settings.reminderIntervalMinutes,
@@ -65,8 +74,14 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            KeepHydratedTheme {
-                KeepHydratedMain()
+            val userSettings by settingsRepository.getUserSettings().collectAsState(initial = null)
+            val isArabic = userSettings?.language == "ar"
+            val layoutDirection = if (isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr
+
+            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                KeepHydratedTheme {
+                    KeepHydratedMain()
+                }
             }
         }
     }
@@ -84,6 +99,7 @@ fun KeepHydratedMain() {
             NavigationBar {
                 Screen.items.forEach { screen ->
                     val selected = currentRoute == screen.route
+                    val title = stringResource(screen.titleResId)
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -95,8 +111,8 @@ fun KeepHydratedMain() {
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(screen.icon, contentDescription = screen.title) },
-                        label = { Text(screen.title) },
+                        icon = { Icon(screen.icon, contentDescription = title) },
+                        label = { Text(title) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = BluePrimary,
                             selectedTextColor = BluePrimary

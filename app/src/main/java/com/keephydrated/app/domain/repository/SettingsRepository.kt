@@ -17,4 +17,14 @@ interface SettingsRepository {
     suspend fun updateCelebrationSound(soundId: String)
     suspend fun updateDefaultQuickAddMl(amountMl: Int)
     suspend fun updateQuickAddOnNotificationClick(enabled: Boolean)
+
+    // Language & UI Preferences
+    suspend fun updateLanguage(language: String)
+    suspend fun updateFrequentIntakeMl(amountMl: Int)
+
+    // Bottle Filling Tracking Mode
+    suspend fun updateBottleModeEnabled(enabled: Boolean)
+    suspend fun updateBottleConfig(volumeMl: Int, durationMinutes: Int)
+    suspend fun recordBottleDrink(drankAmountMl: Int)
+    suspend fun refillBottle()
 }
