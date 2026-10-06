@@ -99,7 +99,6 @@ object NotificationHelper {
         val wearableExtender = NotificationCompat.WearableExtender()
             .addAction(quickAddAction)
             .setContentAction(0)
-            .setHintShowBackgroundOnly(false)
             .setBridgeTag("keephydrated_water_reminder")
 
         val builder = NotificationCompat.Builder(context, channelId)
@@ -252,7 +251,6 @@ object NotificationHelper {
         val cupBitmap = getWaterCupBitmap(context)
 
         val wearableExtender = NotificationCompat.WearableExtender()
-            .setHintShowBackgroundOnly(false)
             .setBridgeTag("keephydrated_goal_celebration")
 
         val builder = NotificationCompat.Builder(context, channelId)

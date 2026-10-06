@@ -54,7 +54,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun selectPeriod(period: HistoryPeriod) {
-        _uiState.update { current ->
+        _uiState.update {
             computeStateForPeriod(period)
         }
     }
@@ -164,7 +164,6 @@ class HistoryViewModel @Inject constructor(
                     val month = Month.of(monthNum)
                     val monthSummaries = allSummariesCache.filter { it.date.year == currentYear && it.date.month == month }
                     val total = monthSummaries.sumOf { it.totalIntakeMl }
-                    val daysInMonth = month.length(today.isLeapYear)
                     val avg = if (monthSummaries.isNotEmpty()) total / monthSummaries.size else 0
                     val pct = if (defaultGoalCache > 0) avg.toFloat() / defaultGoalCache.toFloat() else 0f
                     val status = when {

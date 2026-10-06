@@ -109,8 +109,6 @@ fun SettingsScreen(
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
     var showWakingDayDialog by remember { mutableStateOf(false) }
-    var showQuickAddAmountDialog by remember { mutableStateOf(false) }
-    var showBottleConfigDialog by remember { mutableStateOf(false) }
 
     var isBatteryOptimized by remember {
         mutableStateOf(!BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
