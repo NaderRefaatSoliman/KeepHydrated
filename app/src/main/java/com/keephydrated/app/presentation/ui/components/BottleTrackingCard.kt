@@ -187,11 +187,11 @@ fun BottleTrackingCard(
                             cubicTo(leftX, bottleBodyTop + bodyHeight * 0.45f, leftX + 4f, bottleBodyTop + bodyHeight * 0.52f, leftX + 4f, bottleBodyTop + bodyHeight * 0.60f)
                             cubicTo(leftX + 4f, bottleBodyTop + bodyHeight * 0.68f, leftX, bottleBodyTop + bodyHeight * 0.75f, leftX, bottleBodyTop + bodyHeight * 0.88f)
                             // Rounded bottom-left corner
-                            quadraticTo(leftX, bottleBodyBottom, leftX + 12f, bottleBodyBottom)
+                            quadraticBezierTo(leftX, bottleBodyBottom, leftX + 12f, bottleBodyBottom)
                             // Base bottom line
                             lineTo(rightX - 12f, bottleBodyBottom)
                             // Rounded bottom-right corner
-                            quadraticTo(rightX, bottleBodyBottom, rightX, bottleBodyBottom - 12f)
+                            quadraticBezierTo(rightX, bottleBodyBottom, rightX, bottleBodyBottom - 12f)
                             // Right side ergonomic grip
                             cubicTo(rightX, bottleBodyTop + bodyHeight * 0.75f, rightX - 4f, bottleBodyTop + bodyHeight * 0.68f, rightX - 4f, bottleBodyTop + bodyHeight * 0.60f)
                             cubicTo(rightX - 4f, bottleBodyTop + bodyHeight * 0.52f, rightX, bottleBodyTop + bodyHeight * 0.45f, rightX, bottleBodyTop + bodyHeight * 0.25f)
@@ -216,11 +216,11 @@ fun BottleTrackingCard(
                                 moveTo(leftX + 2f, bottleBodyBottom - 4f)
                                 lineTo(leftX + 2f, liquidLevelY)
                                 // Wave Meniscus
-                                quadraticTo(w * 0.5f, liquidLevelY - 2.5f, rightX - 2f, liquidLevelY)
+                                quadraticBezierTo(w * 0.5f, liquidLevelY - 2.5f, rightX - 2f, liquidLevelY)
                                 lineTo(rightX - 2f, bottleBodyBottom - 4f)
-                                quadraticTo(rightX - 2f, bottleBodyBottom, rightX - 10f, bottleBodyBottom)
+                                quadraticBezierTo(rightX - 2f, bottleBodyBottom, rightX - 10f, bottleBodyBottom)
                                 lineTo(leftX + 10f, bottleBodyBottom)
-                                quadraticTo(leftX + 2f, bottleBodyBottom, leftX + 2f, bottleBodyBottom - 4f)
+                                quadraticBezierTo(leftX + 2f, bottleBodyBottom, leftX + 2f, bottleBodyBottom - 4f)
                                 close()
                             }
 
