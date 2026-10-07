@@ -40,6 +40,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -57,6 +60,8 @@ import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.AchievementStatus
 import com.keephydrated.app.domain.model.DailyHydrationSummary
 import com.keephydrated.app.domain.model.HistoryPeriod
+import com.keephydrated.app.presentation.ui.components.DrDroppyMascotButton
+import com.keephydrated.app.presentation.ui.guide.HealthGuideScreen
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.util.LocalizationUtils
 import java.time.format.DateTimeFormatter
@@ -71,33 +76,50 @@ fun HistoryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+    var showHealthGuide by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
-        onNavigateToHome()
+        if (showHealthGuide) {
+            showHealthGuide = false
+        } else {
+            onNavigateToHome()
+        }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(R.string.hydration_history), fontWeight = FontWeight.Bold)
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateToHome) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.nav_home)
+    if (showHealthGuide) {
+        HealthGuideScreen(
+            userSettings = uiState.userSettings,
+            onBackClick = { showHealthGuide = false }
+        )
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(stringResource(R.string.hydration_history), fontWeight = FontWeight.Bold)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateToHome) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.nav_home)
+                            )
+                        }
+                    },
+                    actions = {
+                        DrDroppyMascotButton(
+                            onClick = { showHealthGuide = true },
+                            modifier = Modifier.padding(end = 4.dp)
                         )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
-            )
-        },
-        modifier = modifier
-    ) { innerPadding ->
+            },
+            modifier = modifier
+        ) { innerPadding ->
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier

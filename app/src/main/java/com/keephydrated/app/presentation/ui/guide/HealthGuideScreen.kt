@@ -140,16 +140,19 @@ fun HealthGuideContent(
                 Column(modifier = Modifier.weight(1f)) {
                     val name = if (userSettings.userName.isNotBlank()) userSettings.userName else if (isArabic) "صديقي" else "Friend"
                     Text(
-                        text = "Droppy",
+                        text = "Dr. Droppy",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = BluePrimary
+                            color = Color(0xFF01579B)
                         )
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.droppy_recommendation_msg, name),
-                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface)
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF0D47A1)
+                        )
                     )
                 }
             }
@@ -170,14 +173,27 @@ fun HealthGuideContent(
                         text = stringResource(R.string.recalculated_goal_label, formattedGoal),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = BluePrimary
+                            color = Color(0xFF01579B)
                         )
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
+                val sexLabel = if (userSettings.userSex == "male") {
+                    if (isArabic) "ذكر" else "Male"
+                } else {
+                    if (isArabic) "أنثى" else "Female"
+                }
+                val weightLabel = LocalizationUtils.formatNumber(userSettings.userWeightKg.toInt(), isArabic)
+                val ageLabel = LocalizationUtils.formatNumber(userSettings.userAge, isArabic)
+                val wUnit = if (isArabic) "كجم" else "kg"
+                val aUnit = if (isArabic) "سنة" else "yrs"
                 Text(
-                    text = "Based on: ${userSettings.userWeightKg.toInt()} kg, ${userSettings.userAge} yrs, ${userSettings.userSex.replaceFirstChar { it.uppercase() }}, ${userSettings.userActivityLevel} sports",
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    text = if (isArabic) "حسب المعايير: $weightLabel $wUnit، $ageLabel $aUnit، $sexLabel، النشاط: ${userSettings.userActivityLevel}"
+                           else "Based on: $weightLabel $wUnit, $ageLabel $aUnit, $sexLabel, Activity: ${userSettings.userActivityLevel}",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF37474F)
+                    )
                 )
             }
         }
@@ -185,59 +201,65 @@ fun HealthGuideContent(
         // Section 1: Dangers & Effects of Dehydration
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA)),
             elevation = CardDefaults.cardElevation(2.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocalHospital, contentDescription = null, tint = Color(0xFFC62828))
+                    Icon(Icons.Default.LocalHospital, contentDescription = null, tint = Color(0xFFB71C1C))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.guide_dehydration_title),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFC62828)
+                            color = Color(0xFFB71C1C)
                         )
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(R.string.dehydration_intro),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color(0xFF263238),
+                        fontWeight = FontWeight.Normal
+                    )
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = stringResource(R.string.dehydration_point1_title),
                     fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB71C1C),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = stringResource(R.string.dehydration_point1_desc),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF212121))
                 )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFCFD8DC))
 
                 Text(
                     text = stringResource(R.string.dehydration_point2_title),
                     fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB71C1C),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = stringResource(R.string.dehydration_point2_desc),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF212121))
                 )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFCFD8DC))
 
                 Text(
                     text = stringResource(R.string.dehydration_point3_title),
                     fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB71C1C),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = stringResource(R.string.dehydration_point3_desc),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF212121))
                 )
             }
         }
@@ -245,7 +267,7 @@ fun HealthGuideContent(
         // Section 2: ⚠️ Water Toxicity & Hyponatremia Warning
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
             elevation = CardDefaults.cardElevation(2.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -257,55 +279,63 @@ fun HealthGuideContent(
                         text = stringResource(R.string.guide_toxicity_title),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFE65100)
+                            color = Color(0xFFBF360C)
                         )
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = stringResource(R.string.toxicity_subtitle),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFBF360C)
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFD84315)
                     )
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Row(verticalAlignment = Alignment.Top) {
-                    Icon(Icons.Default.Speed, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(Icons.Default.Speed, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
                             text = stringResource(R.string.toxicity_kidney_limit_title),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFBF360C))
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = stringResource(R.string.toxicity_kidney_limit_desc),
-                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface)
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF212121),
+                                fontWeight = FontWeight.Normal
+                            )
                         )
                     }
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFFFCC80))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFFFE082))
 
                 Row(verticalAlignment = Alignment.Top) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
                             text = stringResource(R.string.toxicity_safe_ceiling_title),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFBF360C))
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = stringResource(R.string.toxicity_safe_ceiling_desc, formattedMax),
-                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface)
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF212121),
+                                fontWeight = FontWeight.Normal
+                            )
                         )
                     }
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFFFCC80))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFFFE082))
 
                 Text(
                     text = stringResource(R.string.toxicity_symptoms_title),
@@ -315,7 +345,10 @@ fun HealthGuideContent(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.toxicity_symptoms_desc),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface)
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = Color(0xFF212121),
+                        fontWeight = FontWeight.Normal
+                    )
                 )
             }
         }

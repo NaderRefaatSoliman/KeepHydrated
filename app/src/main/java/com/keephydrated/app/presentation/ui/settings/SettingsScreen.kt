@@ -96,6 +96,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
+import com.keephydrated.app.presentation.ui.components.DrDroppyMascotButton
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
 import com.keephydrated.app.util.BatteryOptimizationHelper
@@ -204,6 +205,12 @@ fun SettingsScreen(
                             contentDescription = if (selectedCategory != null) stringResource(R.string.back) else stringResource(R.string.nav_home)
                         )
                     }
+                },
+                actions = {
+                    DrDroppyMascotButton(
+                        onClick = { selectedCategory = SettingsCategory.GUIDE },
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,

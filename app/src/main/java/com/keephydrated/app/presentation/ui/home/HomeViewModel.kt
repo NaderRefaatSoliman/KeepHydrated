@@ -10,6 +10,7 @@ import com.keephydrated.app.domain.usecase.GetTodayHydrationUseCase
 import com.keephydrated.app.domain.usecase.LogBottleDrinkUseCase
 import com.keephydrated.app.domain.usecase.RefillBottleUseCase
 import com.keephydrated.app.domain.usecase.UndoLastIntakeUseCase
+import com.keephydrated.app.domain.util.HydrationCalculator
 import com.keephydrated.app.notification.NotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -49,6 +50,16 @@ class HomeViewModel @Inject constructor(
                 settingsRepository.getUserSettings()
             ) { summary, settings ->
                 val bottleStatus = settings.toBottleStatus()
+                val rec = HydrationCalculator.calculate(
+                    age = settings.userAge,
+                    sex = settings.userSex,
+                    weightKg = settings.userWeightKg,
+                    heightCm = settings.userHeightCm,
+                    activityLevel = settings.userActivityLevel
+                )
+                val safeMaxDailyMl = rec.safeMaxDailyMl
+                val isLimitExceeded = summary.totalIntakeMl >= safeMaxDailyMl
+
                 HomeUiState(
                     currentIntakeMl = summary.totalIntakeMl,
                     dailyGoalMl = summary.goalMl,
@@ -60,7 +71,9 @@ class HomeViewModel @Inject constructor(
                     frequentIntakeMl = settings.frequentIntakeMl,
                     bottleStatus = bottleStatus,
                     isBottleMode = settings.bottleModeEnabled,
-                    userSettings = settings
+                    userSettings = settings,
+                    safeMaxDailyMl = safeMaxDailyMl,
+                    isLimitExceeded = isLimitExceeded
                 )
             }.collectLatest { state ->
                 _uiState.value = state
@@ -93,7 +106,18 @@ class HomeViewModel @Inject constructor(
                     }
                 }
 
-                _uiState.update { it.copy(userMessage = "Added $amountMl ml") }
+                val safeLimit = _uiState.value.safeMaxDailyMl
+                if (newTotal >= safeLimit) {
+                    val isArabic = _uiState.value.userSettings.language == "ar"
+                    val warningMsg = if (isArabic) {
+                        "⚠️ تحذير: شرب الماء فوق الحد الأقصى الآمن ($safeLimit مل)! الإجمالي: $newTotal مل."
+                    } else {
+                        "⚠️ Warning: Safe limit ($safeLimit ml) exceeded! Total: $newTotal ml."
+                    }
+                    _uiState.update { it.copy(userMessage = warningMsg) }
+                } else {
+                    _uiState.update { it.copy(userMessage = "Added $amountMl ml") }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to log water") }
             }
@@ -105,7 +129,19 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 logBottleDrinkUseCase(amount)
-                _uiState.update { it.copy(userMessage = "Logged $amount ml from bottle! 💧") }
+                val newTotal = _uiState.value.currentIntakeMl + amount
+                val safeLimit = _uiState.value.safeMaxDailyMl
+                if (newTotal >= safeLimit) {
+                    val isArabic = _uiState.value.userSettings.language == "ar"
+                    val warningMsg = if (isArabic) {
+                        "⚠️ تحذير: شرب الماء فوق الحد الأقصى الآمن ($safeLimit مل)! الإجمالي: $newTotal مل."
+                    } else {
+                        "⚠️ Warning: Safe limit ($safeLimit ml) exceeded! Total: $newTotal ml."
+                    }
+                    _uiState.update { it.copy(userMessage = warningMsg) }
+                } else {
+                    _uiState.update { it.copy(userMessage = "Logged $amount ml from bottle! 💧") }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to record sip") }
             }

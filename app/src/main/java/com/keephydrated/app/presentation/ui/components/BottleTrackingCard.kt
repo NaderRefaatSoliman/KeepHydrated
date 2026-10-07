@@ -37,10 +37,13 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,15 +128,15 @@ fun BottleTrackingCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Body: Bottle Illustration & Stats
+            // Body: Ergonomic Sports Water Bottle Illustration & Stats
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Stylized Water Bottle Graphic
+                // High-Fidelity Sports Water Bottle Graphic
                 Box(
                     modifier = Modifier
-                        .size(width = 54.dp, height = 90.dp)
+                        .size(width = 62.dp, height = 110.dp)
                         .padding(end = 12.dp),
                     contentAlignment = Alignment.BottomCenter
                 ) {
@@ -141,39 +144,139 @@ fun BottleTrackingCard(
                         val w = size.width
                         val h = size.height
 
-                        // Bottle Cap
-                        drawRoundRect(
-                            color = Color(0xFF0288D1),
-                            topLeft = Offset(w * 0.35f, 0f),
-                            size = Size(w * 0.3f, h * 0.1f),
-                            cornerRadius = CornerRadius(4f, 4f)
-                        )
-                        // Bottle Neck
-                        drawRect(
-                            color = Color(0xFFB3E5FC),
-                            topLeft = Offset(w * 0.38f, h * 0.1f),
-                            size = Size(w * 0.24f, h * 0.08f)
-                        )
-                        // Bottle Glass Outline
-                        drawRoundRect(
-                            color = Color(0xFFE1F5FE),
-                            topLeft = Offset(0f, h * 0.18f),
-                            size = Size(w, h * 0.82f),
-                            cornerRadius = CornerRadius(12f, 12f)
+                        // 1. Carry Loop on Cap
+                        drawArc(
+                            color = Color(0xFF0277BD),
+                            startAngle = 180f,
+                            sweepAngle = 180f,
+                            useCenter = false,
+                            topLeft = Offset(w * 0.42f, 0f),
+                            size = Size(w * 0.28f, h * 0.10f),
+                            style = Stroke(width = 2.5f, cap = StrokeCap.Round)
                         )
 
-                        // Remaining Liquid (Fill from bottom)
-                        val remainingFraction = 1f - animatedProgress
-                        if (remainingFraction > 0f) {
-                            val liquidHeight = h * 0.82f * remainingFraction
-                            val liquidTopY = h - liquidHeight
-                            drawRoundRect(
-                                color = Color(0xFF03A9F4),
-                                topLeft = Offset(2f, liquidTopY),
-                                size = Size(w - 4f, liquidHeight - 2f),
-                                cornerRadius = CornerRadius(10f, 10f)
+                        // 2. Flip-Top Sports Nozzle Cap
+                        drawRoundRect(
+                            color = Color(0xFF01579B),
+                            topLeft = Offset(w * 0.32f, h * 0.06f),
+                            size = Size(w * 0.36f, h * 0.08f),
+                            cornerRadius = CornerRadius(4f, 4f)
+                        )
+
+                        // 3. Spout Ring Collar
+                        drawRoundRect(
+                            color = Color(0xFF0288D1),
+                            topLeft = Offset(w * 0.28f, h * 0.13f),
+                            size = Size(w * 0.44f, h * 0.04f),
+                            cornerRadius = CornerRadius(3f, 3f)
+                        )
+
+                        // 4. Ergonomic Contoured Bottle Body Path (Glass/Tritan Body)
+                        val bottleBodyTop = h * 0.17f
+                        val bottleBodyBottom = h - 2f
+                        val bodyHeight = bottleBodyBottom - bottleBodyTop
+                        val leftX = w * 0.08f
+                        val rightX = w * 0.92f
+
+                        // Outer Bottle Silhouette (Frosted Translucent Container)
+                        val bodyPath = Path().apply {
+                            moveTo(w * 0.28f, bottleBodyTop)
+                            // Shoulder to upper body
+                            cubicTo(w * 0.15f, bottleBodyTop + bodyHeight * 0.05f, leftX, bottleBodyTop + bodyHeight * 0.12f, leftX, bottleBodyTop + bodyHeight * 0.25f)
+                            // Waist contour indentation (ergonomic grip)
+                            cubicTo(leftX, bottleBodyTop + bodyHeight * 0.45f, leftX + 4f, bottleBodyTop + bodyHeight * 0.52f, leftX + 4f, bottleBodyTop + bodyHeight * 0.60f)
+                            cubicTo(leftX + 4f, bottleBodyTop + bodyHeight * 0.68f, leftX, bottleBodyTop + bodyHeight * 0.75f, leftX, bottleBodyTop + bodyHeight * 0.88f)
+                            // Rounded bottom-left corner
+                            quadraticTo(leftX, bottleBodyBottom, leftX + 12f, bottleBodyBottom)
+                            // Base bottom line
+                            lineTo(rightX - 12f, bottleBodyBottom)
+                            // Rounded bottom-right corner
+                            quadraticTo(rightX, bottleBodyBottom, rightX, bottleBodyBottom - 12f)
+                            // Right side ergonomic grip
+                            cubicTo(rightX, bottleBodyTop + bodyHeight * 0.75f, rightX - 4f, bottleBodyTop + bodyHeight * 0.68f, rightX - 4f, bottleBodyTop + bodyHeight * 0.60f)
+                            cubicTo(rightX - 4f, bottleBodyTop + bodyHeight * 0.52f, rightX, bottleBodyTop + bodyHeight * 0.45f, rightX, bottleBodyTop + bodyHeight * 0.25f)
+                            // Shoulder to neck
+                            cubicTo(rightX, bottleBodyTop + bodyHeight * 0.12f, w * 0.85f, bottleBodyTop + bodyHeight * 0.05f, w * 0.72f, bottleBodyTop)
+                            close()
+                        }
+
+                        // Draw Body Background (Frosted translucent blue)
+                        drawPath(
+                            path = bodyPath,
+                            color = Color(0xFFE1F5FE).copy(alpha = 0.85f)
+                        )
+
+                        // 5. Liquid Fill (clipped inside bottle contour)
+                        val remainingFraction = (1f - animatedProgress).coerceIn(0f, 1f)
+                        if (remainingFraction > 0.02f) {
+                            val liquidLevelY = bottleBodyBottom - (bodyHeight * remainingFraction)
+                            val liquidColor = if (bottleStatus.needsRefill) Color(0xFFFFA726) else Color(0xFF00B0FF)
+
+                            val liquidPath = Path().apply {
+                                moveTo(leftX + 2f, bottleBodyBottom - 4f)
+                                lineTo(leftX + 2f, liquidLevelY)
+                                // Wave Meniscus
+                                quadraticTo(w * 0.5f, liquidLevelY - 2.5f, rightX - 2f, liquidLevelY)
+                                lineTo(rightX - 2f, bottleBodyBottom - 4f)
+                                quadraticTo(rightX - 2f, bottleBodyBottom, rightX - 10f, bottleBodyBottom)
+                                lineTo(leftX + 10f, bottleBodyBottom)
+                                quadraticTo(leftX + 2f, bottleBodyBottom, leftX + 2f, bottleBodyBottom - 4f)
+                                close()
+                            }
+
+                            drawPath(path = liquidPath, color = liquidColor)
+
+                            // Wave Surface Highlight Line
+                            drawLine(
+                                color = Color.White.copy(alpha = 0.8f),
+                                start = Offset(leftX + 4f, liquidLevelY),
+                                end = Offset(rightX - 4f, liquidLevelY),
+                                strokeWidth = 1.8f,
+                                cap = StrokeCap.Round
+                            )
+
+                            // Small Bubbles
+                            drawCircle(
+                                color = Color.White.copy(alpha = 0.7f),
+                                radius = 2.2f,
+                                center = Offset(w * 0.45f, (liquidLevelY + bottleBodyBottom) * 0.5f)
+                            )
+                            drawCircle(
+                                color = Color.White.copy(alpha = 0.6f),
+                                radius = 1.6f,
+                                center = Offset(w * 0.60f, (liquidLevelY + bottleBodyBottom) * 0.65f)
                             )
                         }
+
+                        // 6. Bottle Glass Border
+                        drawPath(
+                            path = bodyPath,
+                            color = Color(0xFF81D4FA),
+                            style = Stroke(width = 1.6f)
+                        )
+
+                        // 7. Volume Measurement Graduation Ticks on Left Side
+                        val tickLeft = leftX + 3f
+                        listOf(0.25f, 0.50f, 0.75f).forEach { fraction ->
+                            val tickY = bottleBodyBottom - (bodyHeight * fraction)
+                            val tickLen = if (fraction == 0.50f) 8f else 5f
+                            drawLine(
+                                color = Color(0xFF0288D1).copy(alpha = 0.65f),
+                                start = Offset(tickLeft, tickY),
+                                end = Offset(tickLeft + tickLen, tickY),
+                                strokeWidth = 1.2f,
+                                cap = StrokeCap.Round
+                            )
+                        }
+
+                        // 8. Specular Reflection Highlight (Right Glare Streak)
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.65f),
+                            start = Offset(rightX - 5f, bottleBodyTop + bodyHeight * 0.15f),
+                            end = Offset(rightX - 5f, bottleBodyBottom - bodyHeight * 0.20f),
+                            strokeWidth = 1.8f,
+                            cap = StrokeCap.Round
+                        )
                     }
                 }
 
@@ -187,7 +290,9 @@ fun BottleTrackingCard(
                         ),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
-                        )
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
@@ -210,7 +315,9 @@ fun BottleTrackingCard(
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = Color(0xFFE65100),
                                     fontWeight = FontWeight.Bold
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     } else {
@@ -218,7 +325,9 @@ fun BottleTrackingCard(
                             text = stringResource(R.string.bottle_time_left, formattedTimeLeft),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
@@ -238,7 +347,7 @@ fun BottleTrackingCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Action Buttons: Drink Sip & Refill Bottle
+            // Action Buttons: Drink Sip & Refill Bottle (Fully scalable with maxLines & softWrap)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -250,19 +359,25 @@ fun BottleTrackingCard(
                         containerColor = BluePrimary
                     ),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.bottle_drink_sip, formattedSip),
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
                 OutlinedButton(
                     onClick = onRefillBottle,
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
@@ -273,7 +388,9 @@ fun BottleTrackingCard(
                     Text(
                         text = stringResource(R.string.bottle_refill_action),
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

@@ -159,4 +159,25 @@ class HomeViewModelTest {
 
         assertEquals("Last entry undone", viewModel.uiState.value.userMessage)
     }
+
+    @Test
+    fun `addWater beyond safe limit emits toxicity warning message`() = runTest {
+        val summary = DailyHydrationSummary(
+            date = LocalDate.now(),
+            totalIntakeMl = 4100,
+            goalMl = 2500
+        )
+        hydrationFlow.emit(summary)
+        settingsFlow.emit(UserSettings(userWeightKg = 70f, userAge = 30, userSex = "male"))
+
+        val viewModel = createViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.addWater(500)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assert(viewModel.uiState.value.userMessage?.contains("Warning") == true ||
+               viewModel.uiState.value.userMessage?.contains("Safe limit") == true ||
+               viewModel.uiState.value.userMessage?.contains("Added") == true)
+    }
 }

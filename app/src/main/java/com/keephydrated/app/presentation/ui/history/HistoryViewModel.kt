@@ -35,6 +35,7 @@ class HistoryViewModel @Inject constructor(
     private var allSummariesCache: List<DailyHydrationSummary> = emptyList()
     private var defaultGoalCache: Int = 2000
     private var languageCache: String = "en"
+    private var userSettingsCache: com.keephydrated.app.domain.model.UserSettings = com.keephydrated.app.domain.model.UserSettings()
 
     init {
         loadHistory()
@@ -49,6 +50,7 @@ class HistoryViewModel @Inject constructor(
                 allSummariesCache = summaries
                 defaultGoalCache = settings.dailyGoalMl
                 languageCache = settings.language
+                userSettingsCache = settings
                 computeStateForPeriod(_uiState.value.selectedPeriod)
             }.collectLatest { newState ->
                 _uiState.value = newState
@@ -106,7 +108,8 @@ class HistoryViewModel @Inject constructor(
                     doneCount = done,
                     partialCount = partial,
                     zeroCount = zero,
-                    isLoading = false
+                    isLoading = false,
+                    userSettings = userSettingsCache
                 )
             }
 
@@ -161,7 +164,8 @@ class HistoryViewModel @Inject constructor(
                     doneCount = done,
                     partialCount = partial,
                     zeroCount = zero,
-                    isLoading = false
+                    isLoading = false,
+                    userSettings = userSettingsCache
                 )
             }
 
@@ -206,7 +210,8 @@ class HistoryViewModel @Inject constructor(
                     doneCount = done,
                     partialCount = partial,
                     zeroCount = zero,
-                    isLoading = false
+                    isLoading = false,
+                    userSettings = userSettingsCache
                 )
             }
         }

@@ -15,5 +15,7 @@ data class HomeUiState(
     val frequentIntakeMl: Int = 250,
     val bottleStatus: BottleStatus = BottleStatus(),
     val isBottleMode: Boolean = false,
-    val userSettings: UserSettings = UserSettings()
+    val userSettings: UserSettings = UserSettings(),
+    val safeMaxDailyMl: Int = 4200,
+    val isLimitExceeded: Boolean = false
 )

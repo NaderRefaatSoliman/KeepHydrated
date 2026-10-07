@@ -3,6 +3,7 @@ package com.keephydrated.app.presentation.ui.history
 import com.keephydrated.app.domain.model.AchievementStatus
 import com.keephydrated.app.domain.model.DailyHydrationSummary
 import com.keephydrated.app.domain.model.HistoryPeriod
+import com.keephydrated.app.domain.model.UserSettings
 
 data class ChartBarData(
     val label: String,
@@ -22,5 +23,6 @@ data class HistoryUiState(
     val doneCount: Int = 0,
     val partialCount: Int = 0,
     val zeroCount: Int = 0,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val userSettings: UserSettings = UserSettings()
 )

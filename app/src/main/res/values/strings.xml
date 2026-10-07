@@ -206,6 +206,13 @@
     <string name="celebration_title">🎉 Daily Goal Achieved!</string>
     <string name="celebration_body">Congratulations! You\'ve reached your daily hydration goal of %1$s ml! 🏆💧</string>
 
+    <!-- Safe Daily Limit & Toxicity Warnings -->
+    <string name="safe_daily_limit_badge">Safe Upper Limit: %1$s</string>
+    <string name="safe_daily_limit_reached_title">⚠️ Safe Water Limit Exceeded!</string>
+    <string name="safe_daily_limit_reached_desc">You have consumed %1$s, exceeding your safe daily limit of %2$s. Excessive water intake can cause hyponatremia (water toxicity). Pace your intake and do not exceed 800–1,000 ml per hour.</string>
+    <string name="warning_limit_exceeded_snackbar">⚠️ Warning: Safe limit (%1$s) exceeded! Total intake: %2$s</string>
+    <string name="dr_droppy_name">Dr. Droppy</string>
+
     <!-- Dialogs -->
     <string name="dialog_save">Save</string>
     <string name="dialog_cancel">Cancel</string>
