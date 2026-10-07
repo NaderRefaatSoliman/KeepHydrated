@@ -10,7 +10,7 @@
         android:pathData="M38,62 C30,58 20,54 18,48 C16.8,44 20,42 22,45 C25,49 32,56 38,58 Z" />
     <path
         android:fillColor="#4FC3F7"
-        android:pathData="M18,48 A3.5,3.5 0 1,1 18,41 A3.5,3.5 0 1,1 18,48 Z" />
+        android:pathData="M18,45m-3.5,0a3.5,3.5 0 1,0 7,0a3.5,3.5 0 1,0 -7,0" />
 
     <!-- Right Arm (Resting happily on hip/side) -->
     <path
@@ -18,7 +18,7 @@
         android:pathData="M82,62 C90,64 100,68 102,74 C103,77 100,79 98,77 C95,73 88,67 82,65 Z" />
     <path
         android:fillColor="#4FC3F7"
-        android:pathData="M102,74 A3.5,3.5 0 1,1 102,67 A3.5,3.5 0 1,1 102,74 Z" />
+        android:pathData="M102,71m-3.5,0a3.5,3.5 0 1,0 7,0a3.5,3.5 0 1,0 -7,0" />
 
     <!-- Left Leg and Cute Shoe -->
     <path
@@ -56,36 +56,36 @@
     <path
         android:fillColor="#FF8A80"
         android:fillAlpha="0.65"
-        android:pathData="M43,68 A4,3 0 1,1 43,62 A4,3 0 1,1 43,68 Z" />
+        android:pathData="M43,65m-4,0a4,3 0 1,0 8,0a4,3 0 1,0 -8,0" />
     <path
         android:fillColor="#FF8A80"
         android:fillAlpha="0.65"
-        android:pathData="M77,68 A4,3 0 1,1 77,62 A4,3 0 1,1 77,68 Z" />
+        android:pathData="M77,65m-4,0a4,3 0 1,0 8,0a4,3 0 1,0 -8,0" />
 
     <!-- Eyes (Big Expressive Cartoon Eyes) -->
     <!-- Left Eye -->
     <path
         android:fillColor="#0D1B2A"
-        android:pathData="M51,56 A5,6.5 0 1,1 51,43 A5,6.5 0 1,1 51,56 Z" />
+        android:pathData="M51,50m-5,0a5,6.5 0 1,0 10,0a5,6.5 0 1,0 -10,0" />
     <!-- Left Eye Pupil Sparkles -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M52,48 A2,2.5 0 1,1 52,43 A2,2.5 0 1,1 52,48 Z" />
+        android:pathData="M52,46m-2,0a2,2.5 0 1,0 4,0a2,2.5 0 1,0 -4,0" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M49,52 A1,1.2 0 1,1 49,49.6 A1,1.2 0 1,1 49,52 Z" />
+        android:pathData="M49,51m-1,0a1,1.2 0 1,0 2,0a1,1.2 0 1,0 -2,0" />
 
     <!-- Right Eye -->
     <path
         android:fillColor="#0D1B2A"
-        android:pathData="M69,56 A5,6.5 0 1,1 69,43 A5,6.5 0 1,1 69,56 Z" />
+        android:pathData="M69,50m-5,0a5,6.5 0 1,0 10,0a5,6.5 0 1,0 -10,0" />
     <!-- Right Eye Pupil Sparkles -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M70,48 A2,2.5 0 1,1 70,43 A2,2.5 0 1,1 70,48 Z" />
+        android:pathData="M70,46m-2,0a2,2.5 0 1,0 4,0a2,2.5 0 1,0 -4,0" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M67,52 A1,1.2 0 1,1 67,49.6 A1,1.2 0 1,1 67,52 Z" />
+        android:pathData="M67,51m-1,0a1,1.2 0 1,0 2,0a1,1.2 0 1,0 -2,0" />
 
     <!-- Happy Smiling Mouth -->
     <path

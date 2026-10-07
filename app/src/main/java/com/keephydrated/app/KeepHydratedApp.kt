@@ -30,7 +30,11 @@ class KeepHydratedApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannels(this)
+        try {
+            createNotificationChannels(this)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     companion object {

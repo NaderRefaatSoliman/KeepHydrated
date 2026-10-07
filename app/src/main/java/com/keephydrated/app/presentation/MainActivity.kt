@@ -92,23 +92,28 @@ class MainActivity : ComponentActivity() {
                     setLayoutDirection(targetLocale)
                 }
             }
-            val baseContext = LocalContext.current
-            val localizedContext = remember(language, baseContext) {
-                baseContext.createConfigurationContext(localizedConfig)
-            }
 
             LaunchedEffect(language) {
                 LocaleHelper.setLocale(this@MainActivity, language)
+                @Suppress("DEPRECATION")
+                resources.updateConfiguration(localizedConfig, resources.displayMetrics)
             }
 
             CompositionLocalProvider(
                 LocalConfiguration provides localizedConfig,
-                LocalLayoutDirection provides layoutDirection,
-                LocalContext provides localizedContext
+                LocalLayoutDirection provides layoutDirection
             ) {
                 KeepHydratedTheme {
-                    if (userSettings != null && !userSettings!!.isOnboardingCompleted) {
-                        val onboardingViewModel: com.keephydrated.app.presentation.ui.onboarding.OnboardingViewModel = hiltViewModel()
+                    val settings = userSettings
+                    if (settings == null) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (!settings.isOnboardingCompleted) {
+                        val onboardingViewModel: com.keephydrated.app.presentation.ui.onboarding.OnboardingViewModel = hiltViewModel(this@MainActivity)
                         com.keephydrated.app.presentation.ui.onboarding.OnboardingScreen(
                             viewModel = onboardingViewModel,
                             onFinished = {}
