@@ -48,14 +48,18 @@ jobs:
       - name: Report Build Result to Branch
         if: always()
         run: |
+          mkdir -p /tmp/artifacts
+          [ -f build.log ] && cp build.log /tmp/artifacts/
+          [ -f test.log ] && cp test.log /tmp/artifacts/
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B build-logs
+          git checkout --orphan build-logs-clean
+          git rm -rf . >/dev/null 2>&1 || true
           echo "Status: ${{ job.status }}" > build-status.txt
           echo "Commit: ${{ github.sha }}" >> build-status.txt
           echo "Date: $(date -u)" >> build-status.txt
-          if [ -f build.log ]; then git add -f build.log; fi
-          if [ -f test.log ]; then git add -f test.log; fi
-          git add -f build-status.txt
+          [ -f /tmp/artifacts/build.log ] && cp /tmp/artifacts/build.log build.log && git add build.log
+          [ -f /tmp/artifacts/test.log ] && cp /tmp/artifacts/test.log test.log && git add test.log
+          git add build-status.txt
           git commit -m "Build result for ${{ github.sha }}: ${{ job.status }}"
-          git push -f origin build-logs
+          git push -f origin build-logs-clean:build-logs
