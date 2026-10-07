@@ -12,6 +12,7 @@ import com.keephydrated.app.domain.usecase.RefillBottleUseCase
 import com.keephydrated.app.domain.usecase.UndoLastIntakeUseCase
 import com.keephydrated.app.domain.util.HydrationCalculator
 import com.keephydrated.app.notification.NotificationHelper
+import com.keephydrated.app.util.LocalizationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay

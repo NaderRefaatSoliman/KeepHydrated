@@ -13,6 +13,7 @@ import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.notification.NotificationHelper
 import com.keephydrated.app.util.LocaleHelper
+import com.keephydrated.app.util.LocalizationUtils
 import com.keephydrated.app.worker.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
