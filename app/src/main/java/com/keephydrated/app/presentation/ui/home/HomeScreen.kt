@@ -308,7 +308,7 @@ fun HomeScreen(
 
                         item {
                             QuickAddSection(
-                                onAdd = { amount -> viewModel.addWater(amount) }
+                                onAddWater = { amount -> viewModel.addWater(amount) }
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                         }

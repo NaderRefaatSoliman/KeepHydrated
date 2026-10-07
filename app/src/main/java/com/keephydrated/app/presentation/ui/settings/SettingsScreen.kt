@@ -847,7 +847,8 @@ fun RemindersSettingsDetail(
     onIntervalChange: (Int) -> Unit,
     onCustomIntervalClick: () -> Unit,
     onToggleHour: (Int) -> Unit,
-    onWakingDayPresetClick: () -> Unit
+    onWakingDayPresetClick: () -> Unit,
+    onToggleRemindAfterGoal: (Boolean) -> Unit = {}
 ) {
     Column {
         Card(
@@ -875,6 +876,25 @@ fun RemindersSettingsDetail(
                 }
 
                 if (uiState.remindersEnabled) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.setting_remind_after_goal),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                        }
+                        Switch(
+                            checked = uiState.remindAfterGoalReached,
+                            onCheckedChange = onToggleRemindAfterGoal
+                        )
+                    }
+
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
                     Text(
@@ -1027,7 +1047,8 @@ fun SoundsSettingsDetail(
     context: android.content.Context,
     onSelectSound: (String) -> Unit,
     onPreviewSound: (NotificationSound) -> Unit,
-    onSendTestAlert: () -> Unit
+    onSendTestAlert: () -> Unit,
+    onToggleDroppyTips: (Boolean) -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -1067,6 +1088,25 @@ fun SoundsSettingsDetail(
                         Icon(Icons.Default.PlayArrow, contentDescription = "Play sound")
                     }
                 }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.setting_droppy_tips),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
+                Switch(
+                    checked = uiState.droppyTipsEnabled,
+                    onCheckedChange = onToggleDroppyTips
+                )
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
