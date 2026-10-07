@@ -149,6 +149,18 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `updateUserProfile delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateUserProfile("Nader", 30, "male", 75f, 180f, "intense", 3200)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) {
+            settingsRepository.updateUserProfile("Nader", 30, "male", 75f, 180f, "intense", 3200)
+        }
+    }
+
+    @Test
     fun `toggleReminders reschedules reminders in ReminderScheduler`() = runTest {
         val viewModel = createViewModel()
 

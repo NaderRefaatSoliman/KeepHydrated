@@ -176,11 +176,33 @@ fun KeepHydratedMain() {
             }
             composable(Screen.History.route) {
                 val viewModel: HistoryViewModel = hiltViewModel()
-                HistoryScreen(viewModel = viewModel)
+                HistoryScreen(
+                    viewModel = viewModel,
+                    onNavigateToHome = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Screen.Settings.route) {
                 val viewModel: SettingsViewModel = hiltViewModel()
-                SettingsScreen(viewModel = viewModel)
+                SettingsScreen(
+                    viewModel = viewModel,
+                    onNavigateToHome = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     }

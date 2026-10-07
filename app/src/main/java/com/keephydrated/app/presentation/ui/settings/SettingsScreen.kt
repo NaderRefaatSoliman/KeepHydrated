@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -118,6 +120,7 @@ enum class SettingsCategory(
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    onNavigateToHome: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -164,9 +167,13 @@ fun SettingsScreen(
         }
     }
 
-    // Handle back button when inside a category detail screen
-    BackHandler(enabled = selectedCategory != null) {
-        selectedCategory = null
+    // Handle back button: returns to category list or goes to Home tab
+    BackHandler(enabled = true) {
+        if (selectedCategory != null) {
+            selectedCategory = null
+        } else {
+            onNavigateToHome()
+        }
     }
 
     Scaffold(
@@ -183,13 +190,19 @@ fun SettingsScreen(
                     )
                 },
                 navigationIcon = {
-                    if (selectedCategory != null) {
-                        IconButton(onClick = { selectedCategory = null }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back)
-                            )
+                    IconButton(
+                        onClick = {
+                            if (selectedCategory != null) {
+                                selectedCategory = null
+                            } else {
+                                onNavigateToHome()
+                            }
                         }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = if (selectedCategory != null) stringResource(R.string.back) else stringResource(R.string.nav_home)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -232,110 +245,97 @@ fun SettingsScreen(
                 }
             } else {
                 // ==========================================
-                // DETAIL SCREEN FOR SELECTED CATEGORY
+                // DETAIL SCREEN FOR SELECTED CATEGORY (Single Un-nested Scrollable Column)
                 // ==========================================
-                LazyColumn(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
                         .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     when (selectedCategory!!) {
                         SettingsCategory.PROFILE -> {
-                            item {
-                                ProfileSettingsDetail(
-                                    uiState = uiState,
-                                    isArabic = isArabic,
-                                    onSaveProfile = { name, age, sex, weight, height, activity, goal ->
-                                        viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
-                                        selectedCategory = null
-                                    }
-                                )
-                            }
+                            ProfileSettingsDetail(
+                                uiState = uiState,
+                                isArabic = isArabic,
+                                onSaveProfile = { name, age, sex, weight, height, activity, goal ->
+                                    viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
+                                    selectedCategory = null
+                                }
+                            )
                         }
                         SettingsCategory.GUIDE -> {
-                            item {
-                                com.keephydrated.app.presentation.ui.guide.HealthGuideScreen(
-                                    userSettings = uiState.toUserSettings(),
-                                    onBackClick = { selectedCategory = null }
-                                )
-                            }
+                            com.keephydrated.app.presentation.ui.guide.HealthGuideContent(
+                                userSettings = uiState.toUserSettings(),
+                                isArabic = isArabic
+                            )
                         }
                         SettingsCategory.GOAL -> {
-                            item {
-                                GoalSettingsDetail(
-                                    uiState = uiState,
-                                    isArabic = isArabic,
-                                    onEditGoalClick = { showGoalDialog = true },
-                                    onFrequentAmountSelect = { viewModel.updateFrequentIntakeMl(it) },
-                                    onQuickAddToggle = { viewModel.updateQuickAddOnNotificationClick(it) }
-                                )
-                            }
+                            GoalSettingsDetail(
+                                uiState = uiState,
+                                isArabic = isArabic,
+                                onEditGoalClick = { showGoalDialog = true },
+                                onFrequentAmountSelect = { viewModel.updateFrequentIntakeMl(it) },
+                                onQuickAddToggle = { viewModel.updateQuickAddOnNotificationClick(it) }
+                            )
                         }
                         SettingsCategory.BOTTLE -> {
-                            item {
-                                BottleSettingsDetail(
-                                    uiState = uiState,
-                                    isArabic = isArabic,
-                                    onToggleBottleMode = { viewModel.updateBottleModeEnabled(it) },
-                                    onBottleConfigChange = { vol, dur -> viewModel.updateBottleConfig(vol, dur) }
-                                )
-                            }
+                            BottleSettingsDetail(
+                                uiState = uiState,
+                                isArabic = isArabic,
+                                onToggleBottleMode = { viewModel.updateBottleModeEnabled(it) },
+                                onBottleConfigChange = { vol, dur -> viewModel.updateBottleConfig(vol, dur) }
+                            )
                         }
                         SettingsCategory.REMINDERS -> {
-                            item {
-                                RemindersSettingsDetail(
-                                    uiState = uiState,
-                                    isArabic = isArabic,
-                                    isBatteryOptimized = isBatteryOptimized,
-                                    context = context,
-                                    onToggleReminders = { enabled ->
-                                        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            val hasPermission = ContextCompat.checkSelfPermission(
-                                                context,
-                                                Manifest.permission.POST_NOTIFICATIONS
-                                            ) == PackageManager.PERMISSION_GRANTED
-                                            if (!hasPermission) {
-                                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                                return@RemindersSettingsDetail
-                                            }
+                            RemindersSettingsDetail(
+                                uiState = uiState,
+                                isArabic = isArabic,
+                                isBatteryOptimized = isBatteryOptimized,
+                                context = context,
+                                onToggleReminders = { enabled ->
+                                    if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        val hasPermission = ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                        if (!hasPermission) {
+                                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                            return@RemindersSettingsDetail
                                         }
-                                        viewModel.toggleReminders(enabled)
-                                    },
-                                    onModeChange = { viewModel.updateReminderMode(it) },
-                                    onIntervalChange = { viewModel.updateReminderIntervalMinutes(it) },
-                                    onCustomIntervalClick = { showCustomIntervalDialog = true },
-                                    onToggleHour = { viewModel.toggleCustomReminderHour(it) },
-                                    onWakingDayPresetClick = { showWakingDayDialog = true }
-                                )
-                            }
+                                    }
+                                    viewModel.toggleReminders(enabled)
+                                },
+                                onModeChange = { viewModel.updateReminderMode(it) },
+                                onIntervalChange = { viewModel.updateReminderIntervalMinutes(it) },
+                                onCustomIntervalClick = { showCustomIntervalDialog = true },
+                                onToggleHour = { viewModel.toggleCustomReminderHour(it) },
+                                onWakingDayPresetClick = { showWakingDayDialog = true }
+                            )
                         }
                         SettingsCategory.SOUNDS -> {
-                            item {
-                                SoundsSettingsDetail(
-                                    uiState = uiState,
-                                    isArabic = isArabic,
-                                    context = context,
-                                    onSelectSound = { viewModel.updateNotificationSound(it) },
-                                    onPreviewSound = { viewModel.previewSound(context, it) },
-                                    onSendTestAlert = { viewModel.sendTestNotification(context) }
-                                )
-                            }
+                            SoundsSettingsDetail(
+                                uiState = uiState,
+                                isArabic = isArabic,
+                                context = context,
+                                onSelectSound = { viewModel.updateNotificationSound(it) },
+                                onPreviewSound = { viewModel.previewSound(context, it) },
+                                onSendTestAlert = { viewModel.sendTestNotification(context) }
+                            )
                         }
                         SettingsCategory.LANGUAGE -> {
-                            item {
-                                LanguageSettingsDetail(
-                                    uiState = uiState,
-                                    onSelectLanguage = { viewModel.updateLanguage(it) }
-                                )
-                            }
+                            LanguageSettingsDetail(
+                                uiState = uiState,
+                                onSelectLanguage = { viewModel.updateLanguage(it) }
+                            )
                         }
                         SettingsCategory.ABOUT -> {
-                            item {
-                                AboutSettingsDetail()
-                            }
+                            AboutSettingsDetail()
                         }
                     }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
