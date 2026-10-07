@@ -149,6 +149,18 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `updateDailyGoal in Arabic updates Arabic userMessage`() = runTest {
+        settingsFlow.emit(UserSettings(language = "ar"))
+        val viewModel = createViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.updateDailyGoal(2800)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("تم تحديث الهدف اليومي إلى ٢٨٠٠ مل", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
     fun `updateUserProfile delegates to repository`() = runTest {
         val viewModel = createViewModel()
 

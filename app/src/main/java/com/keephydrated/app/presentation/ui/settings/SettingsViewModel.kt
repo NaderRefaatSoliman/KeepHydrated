@@ -82,9 +82,17 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateDroppyTipsEnabled(enabled)
-                _uiState.update { it.copy(droppyTipsEnabled = enabled) }
+                val isArabic = _uiState.value.language == "ar"
+                val msg = if (isArabic) {
+                    if (enabled) "تم تفعيل نصائح د.قطرة التفاعلية" else "تم تعطيل نصائح د.قطرة التفاعلية"
+                } else {
+                    if (enabled) "Dr. Droppy tips enabled" else "Dr. Droppy tips disabled"
+                }
+                _uiState.update { it.copy(droppyTipsEnabled = enabled, userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to update tips setting") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث إعداد النصائح" else "Failed to update tips setting"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -93,9 +101,17 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateRemindAfterGoalReached(enabled)
-                _uiState.update { it.copy(remindAfterGoalReached = enabled) }
+                val isArabic = _uiState.value.language == "ar"
+                val msg = if (isArabic) {
+                    if (enabled) "سيستمر التذكير بعد تحقيق الهدف اليومي" else "سيتوقف التذكير عند تحقيق الهدف اليومي"
+                } else {
+                    if (enabled) "Reminders will continue after goal" else "Reminders pause after goal is met"
+                }
+                _uiState.update { it.copy(remindAfterGoalReached = enabled, userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to update reminder rule") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث إعداد التذكير" else "Failed to update reminder rule"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -112,9 +128,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateUserProfile(name, age, sex, weightKg, heightCm, activityLevel, recommendedGoalMl)
-                _uiState.update { it.copy(userMessage = "Health Profile updated") }
+                val isArabic = _uiState.value.language == "ar"
+                val msg = if (isArabic) "تم تحديث الملف الصحي بنجاح" else "Health Profile updated"
+                _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to update profile") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث الملف الصحي" else "Failed to update profile"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -126,9 +146,13 @@ class SettingsViewModel @Inject constructor(
                 context?.let { ctx ->
                     LocaleHelper.setLocale(ctx, languageCode)
                 }
-                _uiState.update { it.copy(language = languageCode) }
+                val isArabic = languageCode == "ar"
+                val msg = if (isArabic) "تم تغيير لغة التطبيق إلى العربية" else "Language changed to English"
+                _uiState.update { it.copy(language = languageCode, userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to update language") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث لغة التطبيق" else "Failed to update language"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -137,9 +161,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateDailyGoal(goalMl)
-                _uiState.update { it.copy(userMessage = "Goal updated to $goalMl ml") }
+                val isArabic = _uiState.value.language == "ar"
+                val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
+                val msg = if (isArabic) "تم تحديث الهدف اليومي إلى $formattedGoal مل" else "Goal updated to $goalMl ml"
+                _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = e.message ?: "Failed to update goal") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث الهدف اليومي" else (e.message ?: "Failed to update goal")
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -148,9 +177,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateFrequentIntakeMl(amountMl)
-                _uiState.update { it.copy(frequentIntakeMl = amountMl) }
+                val isArabic = _uiState.value.language == "ar"
+                val formattedAmount = LocalizationUtils.formatNumber(amountMl, isArabic)
+                val msg = if (isArabic) "تم ضبط الكمية المفضلة إلى $formattedAmount مل" else "Frequent amount set to $amountMl ml"
+                _uiState.update { it.copy(frequentIntakeMl = amountMl, userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to update frequent amount") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث الكمية المفضلة" else "Failed to update frequent amount"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -159,10 +193,17 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateBottleModeEnabled(enabled)
-                val msg = if (enabled) "Bottle Tracking Mode enabled" else "Bottle Tracking Mode disabled"
+                val isArabic = _uiState.value.language == "ar"
+                val msg = if (isArabic) {
+                    if (enabled) "تم تفعيل وضع متابعة الزجاجة 🍼" else "تم تعطيل وضع متابعة الزجاجة"
+                } else {
+                    if (enabled) "Bottle Tracking Mode enabled 🍼" else "Bottle Tracking Mode disabled"
+                }
                 _uiState.update { it.copy(bottleModeEnabled = enabled, userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to toggle bottle mode") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تغيير وضع الزجاجة" else "Failed to toggle bottle mode"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -171,15 +212,21 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 settingsRepository.updateBottleConfig(volumeMl, durationMinutes)
+                val isArabic = _uiState.value.language == "ar"
+                val formattedVol = LocalizationUtils.formatNumber(volumeMl, isArabic)
+                val formattedDur = LocalizationUtils.formatNumber(durationMinutes, isArabic)
+                val msg = if (isArabic) "تم ضبط الزجاجة: $formattedVol مل ($formattedDur دقيقة)" else "Bottle configured: $volumeMl ml ($durationMinutes mins)"
                 _uiState.update {
                     it.copy(
                         bottleVolumeMl = volumeMl,
                         bottleTargetDurationMinutes = durationMinutes,
-                        userMessage = "Bottle configured: $volumeMl ml ($durationMinutes mins)"
+                        userMessage = msg
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to update bottle settings") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث إعدادات الزجاجة" else "Failed to update bottle settings"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -193,10 +240,15 @@ class SettingsViewModel @Inject constructor(
                     enabled = _uiState.value.remindersEnabled,
                     mode = _uiState.value.reminderMode
                 )
-                val label = if (hours == 1) "1 hour" else "$hours hours"
-                _uiState.update { it.copy(userMessage = "Reminder interval updated to $label") }
+                val isArabic = _uiState.value.language == "ar"
+                val formattedHours = LocalizationUtils.formatNumber(hours, isArabic)
+                val label = if (isArabic) "$formattedHours ساعات" else (if (hours == 1) "1 hour" else "$hours hours")
+                val msg = if (isArabic) "تم تحديث فترة التذكير إلى $label" else "Reminder interval updated to $label"
+                _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = e.message ?: "Failed to update interval") }
+                val isArabic = _uiState.value.language == "ar"
+                val errMsg = if (isArabic) "فشل تحديث فترة التذكير" else (e.message ?: "Failed to update interval")
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -210,13 +262,17 @@ class SettingsViewModel @Inject constructor(
                     enabled = _uiState.value.remindersEnabled,
                     mode = _uiState.value.reminderMode
                 )
+                val isArabic = _uiState.value.language == "ar"
                 val label = if (minutes % 60 == 0) {
                     val h = minutes / 60
-                    if (h == 1) "1 hour" else "$h hours"
+                    val formattedH = LocalizationUtils.formatNumber(h, isArabic)
+                    if (isArabic) "$formattedH ساعات" else (if (h == 1) "1 hour" else "$h hours")
                 } else {
-                    "$minutes minutes"
+                    val formattedM = LocalizationUtils.formatNumber(minutes, isArabic)
+                    if (isArabic) "$formattedM دقيقة" else "$minutes minutes"
                 }
-                _uiState.update { it.copy(userMessage = "Reminder interval updated to $label") }
+                val msg = if (isArabic) "تم تحديث فترة التذكير إلى $label" else "Reminder interval updated to $label"
+                _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(userMessage = e.message ?: "Failed to update interval") }
             }
@@ -469,9 +525,13 @@ class SettingsViewModel @Inject constructor(
             notificationManager.notify(TEST_NOTIFICATION_ID, notification)
 
             previewSound(context, sound)
-            _uiState.update { it.copy(userMessage = "Test notification sent (${sound.displayName})") }
+            val isArabic = _uiState.value.language == "ar"
+            val msg = if (isArabic) "تم إرسال إشعار تجريبي (${sound.getLocalizedDisplayName(true)})" else "Test notification sent (${sound.displayName})"
+            _uiState.update { it.copy(userMessage = msg) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(userMessage = e.message ?: "Failed to send test notification") }
+            val isArabic = _uiState.value.language == "ar"
+            val errMsg = if (isArabic) "فشل إرسال الإشعار التجريبي" else (e.message ?: "Failed to send test notification")
+            _uiState.update { it.copy(userMessage = errMsg) }
         }
     }
 

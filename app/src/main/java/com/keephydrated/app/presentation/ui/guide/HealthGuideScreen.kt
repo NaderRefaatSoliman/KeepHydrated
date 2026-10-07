@@ -140,7 +140,7 @@ fun HealthGuideContent(
                 Column(modifier = Modifier.weight(1f)) {
                     val name = if (userSettings.userName.isNotBlank()) userSettings.userName else if (isArabic) "صديقي" else "Friend"
                     Text(
-                        text = "Dr. Droppy",
+                        text = stringResource(R.string.dr_droppy_name),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF01579B)
@@ -183,13 +183,20 @@ fun HealthGuideContent(
                 } else {
                     if (isArabic) "أنثى" else "Female"
                 }
+                val activityLabel = when (userSettings.userActivityLevel) {
+                    "sedentary" -> if (isArabic) "خامل" else "Sedentary"
+                    "light" -> if (isArabic) "خفيف" else "Light"
+                    "moderate" -> if (isArabic) "متوسط" else "Moderate"
+                    "intense" -> if (isArabic) "مكثف" else "Intense"
+                    else -> userSettings.userActivityLevel
+                }
                 val weightLabel = LocalizationUtils.formatNumber(userSettings.userWeightKg.toInt(), isArabic)
                 val ageLabel = LocalizationUtils.formatNumber(userSettings.userAge, isArabic)
                 val wUnit = if (isArabic) "كجم" else "kg"
                 val aUnit = if (isArabic) "سنة" else "yrs"
                 Text(
-                    text = if (isArabic) "حسب المعايير: $weightLabel $wUnit، $ageLabel $aUnit، $sexLabel، النشاط: ${userSettings.userActivityLevel}"
-                           else "Based on: $weightLabel $wUnit, $ageLabel $aUnit, $sexLabel, Activity: ${userSettings.userActivityLevel}",
+                    text = if (isArabic) "حسب المعايير: $weightLabel $wUnit، $ageLabel $aUnit، $sexLabel، النشاط: $activityLabel"
+                           else "Based on: $weightLabel $wUnit, $ageLabel $aUnit, $sexLabel, Activity: $activityLabel",
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF37474F)

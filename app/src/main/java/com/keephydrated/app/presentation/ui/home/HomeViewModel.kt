@@ -147,10 +147,15 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    _uiState.update { it.copy(userMessage = "Added $amountMl ml") }
+                    val isArabic = _uiState.value.userSettings.language == "ar"
+                    val formattedAmount = LocalizationUtils.formatNumber(amountMl, isArabic)
+                    val msg = if (isArabic) "تمت إضافة $formattedAmount مل 💧" else "Added $amountMl ml"
+                    _uiState.update { it.copy(userMessage = msg) }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = e.message ?: "Failed to log water") }
+                val isArabic = _uiState.value.userSettings.language == "ar"
+                val errMsg = if (isArabic) "فشل تسجيل الماء" else (e.message ?: "Failed to log water")
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -181,10 +186,15 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    _uiState.update { it.copy(userMessage = "Logged $amount ml from bottle! 💧") }
+                    val isArabic = _uiState.value.userSettings.language == "ar"
+                    val formattedAmount = LocalizationUtils.formatNumber(amount, isArabic)
+                    val msg = if (isArabic) "تم شرب $formattedAmount مل من الزجاجة! 💧" else "Logged $amount ml from bottle! 💧"
+                    _uiState.update { it.copy(userMessage = msg) }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = e.message ?: "Failed to record sip") }
+                val isArabic = _uiState.value.userSettings.language == "ar"
+                val errMsg = if (isArabic) "فشل تسجيل الشرب من الزجاجة" else (e.message ?: "Failed to record sip")
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -193,9 +203,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 refillBottleUseCase()
-                _uiState.update { it.copy(userMessage = "Bottle refilled! Fresh start 🔄") }
+                val isArabic = _uiState.value.userSettings.language == "ar"
+                val msg = if (isArabic) "تمت إعادة تعبئة الزجاجة! بداية جديدة 🔄" else "Bottle refilled! Fresh start 🔄"
+                _uiState.update { it.copy(userMessage = msg) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = e.message ?: "Failed to refill bottle") }
+                val isArabic = _uiState.value.userSettings.language == "ar"
+                val errMsg = if (isArabic) "فشل إعادة تعبئة الزجاجة" else (e.message ?: "Failed to refill bottle")
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -205,7 +219,9 @@ class HomeViewModel @Inject constructor(
             try {
                 deleteWaterIntakeUseCase(id)
             } catch (e: Exception) {
-                _uiState.update { it.copy(userMessage = "Failed to delete entry") }
+                val isArabic = _uiState.value.userSettings.language == "ar"
+                val errMsg = if (isArabic) "فشل حذف التسجيل" else "Failed to delete entry"
+                _uiState.update { it.copy(userMessage = errMsg) }
             }
         }
     }
@@ -213,10 +229,13 @@ class HomeViewModel @Inject constructor(
     fun undoLastIntake() {
         viewModelScope.launch {
             val undone = undoLastIntakeUseCase()
+            val isArabic = _uiState.value.userSettings.language == "ar"
             if (undone) {
-                _uiState.update { it.copy(userMessage = "Last entry undone") }
+                val msg = if (isArabic) "تم التراجع عن آخر تسجيل" else "Last entry undone"
+                _uiState.update { it.copy(userMessage = msg) }
             } else {
-                _uiState.update { it.copy(userMessage = "No entry to undo") }
+                val msg = if (isArabic) "لا يوجد تسجيل للتراجع عنه" else "No entry to undo"
+                _uiState.update { it.copy(userMessage = msg) }
             }
         }
     }

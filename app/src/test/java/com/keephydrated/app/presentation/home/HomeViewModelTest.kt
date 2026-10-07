@@ -161,6 +161,21 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `undoLastIntake in Arabic emits Arabic message`() = runTest {
+        coEvery { undoLastIntakeUseCase() } returns true
+        hydrationFlow.emit(DailyHydrationSummary(date = LocalDate.now(), totalIntakeMl = 500, goalMl = 2000))
+        settingsFlow.emit(UserSettings(dailyGoalMl = 2000, language = "ar"))
+
+        val viewModel = createViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.undoLastIntake()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("تم التراجع عن آخر تسجيل", viewModel.uiState.value.userMessage)
+    }
+
+    @Test
     fun `addWater beyond safe limit emits toxicity warning message`() = runTest {
         val summary = DailyHydrationSummary(
             date = LocalDate.now(),
