@@ -60,6 +60,7 @@ import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.AchievementStatus
 import com.keephydrated.app.domain.model.DailyHydrationSummary
 import com.keephydrated.app.domain.model.HistoryPeriod
+import com.keephydrated.app.presentation.ui.components.DrDroppyFloatingMascot
 import com.keephydrated.app.presentation.ui.components.DrDroppyMascotButton
 import com.keephydrated.app.presentation.ui.guide.HealthGuideScreen
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
@@ -130,13 +131,17 @@ fun HistoryScreen(
                 CircularProgressIndicator()
             }
         } else {
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
             ) {
-                // Period Selector (Week / Month / Year)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    // Period Selector (Week / Month / Year)
                 item {
                     Spacer(modifier = Modifier.height(14.dp))
                     Row(
@@ -296,8 +301,20 @@ fun HistoryScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 8.dp),
+                contentAlignment = if (isArabic) Alignment.BottomEnd else Alignment.BottomStart
+            ) {
+                DrDroppyFloatingMascot(
+                    onClick = { showHealthGuide = true },
+                    showTips = false
+                )
             }
         }
     }

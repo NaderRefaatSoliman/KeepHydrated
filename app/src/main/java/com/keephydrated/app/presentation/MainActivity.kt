@@ -7,12 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -115,7 +116,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             CircularProgressIndicator()
                         }
-                    } else if (!settings.isOnboardingCompleted) {
+                    } else if (!settings.isOnboardingCompleted && !settings.isOnboardingSkipped) {
                         val onboardingViewModel: com.keephydrated.app.presentation.ui.onboarding.OnboardingViewModel = hiltViewModel(this@MainActivity)
                         com.keephydrated.app.presentation.ui.onboarding.OnboardingScreen(
                             viewModel = onboardingViewModel,
@@ -138,12 +139,17 @@ fun KeepHydratedMain() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            NavigationBar {
-                Screen.items.forEach { screen ->
-                    val selected = currentRoute == screen.route
+        topBar = {
+            val selectedTabIndex = Screen.items.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = BluePrimary
+            ) {
+                Screen.items.forEachIndexed { index, screen ->
+                    val selected = selectedTabIndex == index
                     val title = stringResource(screen.titleResId)
-                    NavigationBarItem(
+                    Tab(
                         selected = selected,
                         onClick = {
                             navController.navigate(screen.route) {
@@ -154,12 +160,16 @@ fun KeepHydratedMain() {
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(screen.icon, contentDescription = title) },
-                        label = { Text(title) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BluePrimary,
-                            selectedTextColor = BluePrimary
-                        )
+                        text = {
+                            Text(
+                                text = title,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1
+                            )
+                        },
+                        icon = {
+                            Icon(screen.icon, contentDescription = title, modifier = Modifier.size(20.dp))
+                        }
                     )
                 }
             }

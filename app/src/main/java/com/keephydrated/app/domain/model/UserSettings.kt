@@ -120,7 +120,10 @@ data class UserSettings(
     val userWeightKg: Float = 70f,
     val userHeightCm: Float = 175f,
     val userActivityLevel: String = "moderate", // "sedentary", "light", "moderate", "intense"
-    val isOnboardingCompleted: Boolean = false
+    val isOnboardingCompleted: Boolean = false,
+    val isOnboardingSkipped: Boolean = false,
+    val droppyTipsEnabled: Boolean = true,
+    val remindAfterGoalReached: Boolean = false
 ) {
     fun toBottleStatus(): BottleStatus {
         return BottleStatus(

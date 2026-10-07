@@ -30,6 +30,8 @@ data class SettingsUiState(
     val userHeightCm: Float = 175f,
     val userActivityLevel: String = "moderate",
     val isOnboardingCompleted: Boolean = true,
+    val droppyTipsEnabled: Boolean = true,
+    val remindAfterGoalReached: Boolean = false,
     val isLoading: Boolean = true,
     val userMessage: String? = null
 ) {
@@ -58,7 +60,9 @@ data class SettingsUiState(
             userWeightKg = userWeightKg,
             userHeightCm = userHeightCm,
             userActivityLevel = userActivityLevel,
-            isOnboardingCompleted = isOnboardingCompleted
+            isOnboardingCompleted = isOnboardingCompleted,
+            droppyTipsEnabled = droppyTipsEnabled,
+            remindAfterGoalReached = remindAfterGoalReached
         )
     }
 }

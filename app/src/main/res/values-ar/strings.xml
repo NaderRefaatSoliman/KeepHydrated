@@ -211,7 +211,13 @@
     <string name="safe_daily_limit_reached_title">⚠️ تنبيه: تجاوزت الحد الأقصى الآمن!</string>
     <string name="safe_daily_limit_reached_desc">لقد شربت %1$s، وهو ما يتجاوز الحد الأقصى الآمن لجسمك (%2$s). الإفراط في شرب الماء قد يسبب التسمم المائي (نقص الصوديوم في الدم). يرجى التمهل وتجنب شرب أكثر من ٨٠٠ إلى ١٠٠٠ مل في الساعة الواحدة.</string>
     <string name="warning_limit_exceeded_snackbar">⚠️ تحذير: شرب الماء فوق الحد الأقصى الآمن (%1$s)! الإجمالي: %2$s</string>
-    <string name="dr_droppy_name">د. قطورة</string>
+    <string name="dr_droppy_name">د.قطرة</string>
+    <string name="skip_for_now">تخطي الآن</string>
+    <string name="complete_profile_reminder_title">أكمل ملفك الصحي الشخصي</string>
+    <string name="complete_profile_reminder_desc">احصل على هدف ترطيب يومي دقيق وحد أقصى آمن مخصص لجسمك.</string>
+    <string name="complete_profile_action">إكمال الملف الشخصي</string>
+    <string name="setting_droppy_tips">إظهار نصائح د.قطرة التفاعلية</string>
+    <string name="setting_remind_after_goal">مواصلة التذكير بعد تحقيق الهدف اليومي</string>
 
     <!-- Dialogs -->
     <string name="dialog_save">حفظ</string>

@@ -74,6 +74,22 @@ fun OnboardingScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = { viewModel.skipOnboarding(onFinished) }) {
+                    Text(
+                        text = stringResource(R.string.skip_for_now),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        },
         bottomBar = {
             Row(
                 modifier = Modifier

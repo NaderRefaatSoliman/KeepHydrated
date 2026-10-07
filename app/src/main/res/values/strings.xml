@@ -212,6 +212,12 @@
     <string name="safe_daily_limit_reached_desc">You have consumed %1$s, exceeding your safe daily limit of %2$s. Excessive water intake can cause hyponatremia (water toxicity). Pace your intake and do not exceed 800–1,000 ml per hour.</string>
     <string name="warning_limit_exceeded_snackbar">⚠️ Warning: Safe limit (%1$s) exceeded! Total intake: %2$s</string>
     <string name="dr_droppy_name">Dr. Droppy</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="complete_profile_reminder_title">Complete your health profile</string>
+    <string name="complete_profile_reminder_desc">Get clinical hydration targets and safe daily limits customized for you.</string>
+    <string name="complete_profile_action">Complete Profile</string>
+    <string name="setting_droppy_tips">Show Dr. Droppy tips bubble</string>
+    <string name="setting_remind_after_goal">Keep reminding after reaching daily goal</string>
 
     <!-- Dialogs -->
     <string name="dialog_save">Save</string>

@@ -102,4 +102,16 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun completeOnboarding(completed: Boolean) {
         preferencesDataStore.completeOnboarding(completed)
     }
+
+    override suspend fun skipOnboarding() {
+        preferencesDataStore.skipOnboarding()
+    }
+
+    override suspend fun updateDroppyTipsEnabled(enabled: Boolean) {
+        preferencesDataStore.updateDroppyTipsEnabled(enabled)
+    }
+
+    override suspend fun updateRemindAfterGoalReached(enabled: Boolean) {
+        preferencesDataStore.updateRemindAfterGoalReached(enabled)
+    }
 }

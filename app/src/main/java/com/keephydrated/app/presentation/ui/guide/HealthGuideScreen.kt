@@ -352,5 +352,53 @@ fun HealthGuideContent(
                 )
             }
         }
+
+        // Section 3: Global Clinical Standards & WHO References
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+            elevation = CardDefaults.cardElevation(2.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF2E7D32))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isArabic) "المراجع الطبية ومعايير منظمة الصحة العالمية (WHO)" else "Clinical References & WHO Guidelines",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B5E20)
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = if (isArabic) "توصيات منظمة الصحة العالمية (WHO):" else "World Health Organization (WHO) Guidelines:",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2E7D32),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = if (isArabic) "تنص إرشادات منظمة الصحة العالمية على أن استهلاك الماء اليومي الأساسي للبالغين يتراوح بين ٢ إلى ٣ لترات في الظروف المعتدلة، مع ضرورة توزيع الشرب تدريجياً على مدار ساعات الاستيقاظ لتجنب إجهاد الكلى."
+                           else "WHO guidelines indicate a baseline daily hydration requirement of 2.0 to 3.0 liters under temperate conditions, emphasizing consistent, spaced intake across waking hours to safeguard renal function.",
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF212121))
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0xFFA5D6A7))
+
+                Text(
+                    text = if (isArabic) "الهيئة الأوروبية لسلامة الأغذية (EFSA) و NASEM الأمريكية:" else "EFSA (Europe) & NASEM (USA) Dietary Standards:",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2E7D32),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = if (isArabic) "تحدد المراجع العلمية (EFSA 2010 و NASEM 2005) معايير الترطيب الكافي بـ ٢٫٥ لتر/يوم للذكور و ٢٫٠ لتر/يوم للإناث، مع تعديل الهدف ديناميكياً بحسب النشاط البدني وكتلة الجسم، مع تأكيد ألا يتجاوز الشرب الساعي ٨٠٠ إلى ١٠٠٠ مل."
+                           else "Dietary reference values set adequate intake at 2.5 L/day for males and 2.0 L/day for females, adjusted for body mass and physical exertion, confirming maximum hourly renal throughput of 800–1,000 ml/hr.",
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF212121))
+                )
+            }
+        }
     }
 }

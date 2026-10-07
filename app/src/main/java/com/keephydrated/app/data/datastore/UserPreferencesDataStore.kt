@@ -62,6 +62,9 @@ class UserPreferencesDataStore @Inject constructor(
         val USER_HEIGHT_CM = floatPreferencesKey("user_height_cm")
         val USER_ACTIVITY_LEVEL = stringPreferencesKey("user_activity_level")
         val IS_ONBOARDING_COMPLETED = booleanPreferencesKey("is_onboarding_completed")
+        val IS_ONBOARDING_SKIPPED = booleanPreferencesKey("is_onboarding_skipped")
+        val DROPPY_TIPS_ENABLED = booleanPreferencesKey("droppy_tips_enabled")
+        val REMIND_AFTER_GOAL_REACHED = booleanPreferencesKey("remind_after_goal_reached")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -110,6 +113,9 @@ class UserPreferencesDataStore @Inject constructor(
             val userHeightCm = preferences[PreferencesKeys.USER_HEIGHT_CM] ?: 175f
             val userActivityLevel = preferences[PreferencesKeys.USER_ACTIVITY_LEVEL] ?: "moderate"
             val isOnboardingCompleted = preferences[PreferencesKeys.IS_ONBOARDING_COMPLETED] ?: false
+            val isOnboardingSkipped = preferences[PreferencesKeys.IS_ONBOARDING_SKIPPED] ?: false
+            val droppyTipsEnabled = preferences[PreferencesKeys.DROPPY_TIPS_ENABLED] ?: true
+            val remindAfterGoalReached = preferences[PreferencesKeys.REMIND_AFTER_GOAL_REACHED] ?: false
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
@@ -138,7 +144,10 @@ class UserPreferencesDataStore @Inject constructor(
                 userWeightKg = userWeightKg,
                 userHeightCm = userHeightCm,
                 userActivityLevel = userActivityLevel,
-                isOnboardingCompleted = isOnboardingCompleted
+                isOnboardingCompleted = isOnboardingCompleted,
+                isOnboardingSkipped = isOnboardingSkipped,
+                droppyTipsEnabled = droppyTipsEnabled,
+                remindAfterGoalReached = remindAfterGoalReached
             )
         }
 
@@ -285,6 +294,24 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun completeOnboarding(completed: Boolean = true) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.IS_ONBOARDING_COMPLETED] = completed
+        }
+    }
+
+    suspend fun skipOnboarding() {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_ONBOARDING_SKIPPED] = true
+        }
+    }
+
+    suspend fun updateDroppyTipsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DROPPY_TIPS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun updateRemindAfterGoalReached(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REMIND_AFTER_GOAL_REACHED] = enabled
         }
     }
 }

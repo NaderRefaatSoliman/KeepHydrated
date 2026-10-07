@@ -69,9 +69,33 @@ class SettingsViewModel @Inject constructor(
                         userHeightCm = settings.userHeightCm,
                         userActivityLevel = settings.userActivityLevel,
                         isOnboardingCompleted = settings.isOnboardingCompleted,
+                        droppyTipsEnabled = settings.droppyTipsEnabled,
+                        remindAfterGoalReached = settings.remindAfterGoalReached,
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    fun updateDroppyTipsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateDroppyTipsEnabled(enabled)
+                _uiState.update { it.copy(droppyTipsEnabled = enabled) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update tips setting") }
+            }
+        }
+    }
+
+    fun updateRemindAfterGoalReached(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateRemindAfterGoalReached(enabled)
+                _uiState.update { it.copy(remindAfterGoalReached = enabled) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Failed to update reminder rule") }
             }
         }
     }

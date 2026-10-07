@@ -39,4 +39,7 @@ interface SettingsRepository {
         recommendedGoalMl: Int? = null
     )
     suspend fun completeOnboarding(completed: Boolean = true)
+    suspend fun skipOnboarding()
+    suspend fun updateDroppyTipsEnabled(enabled: Boolean)
+    suspend fun updateRemindAfterGoalReached(enabled: Boolean)
 }

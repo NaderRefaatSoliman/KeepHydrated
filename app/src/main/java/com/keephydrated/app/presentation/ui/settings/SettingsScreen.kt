@@ -319,7 +319,8 @@ fun SettingsScreen(
                                 onIntervalChange = { viewModel.updateReminderIntervalMinutes(it) },
                                 onCustomIntervalClick = { showCustomIntervalDialog = true },
                                 onToggleHour = { viewModel.toggleCustomReminderHour(it) },
-                                onWakingDayPresetClick = { showWakingDayDialog = true }
+                                onWakingDayPresetClick = { showWakingDayDialog = true },
+                                onToggleRemindAfterGoal = { viewModel.updateRemindAfterGoalReached(it) }
                             )
                         }
                         SettingsCategory.SOUNDS -> {
@@ -329,7 +330,8 @@ fun SettingsScreen(
                                 context = context,
                                 onSelectSound = { viewModel.updateNotificationSound(it) },
                                 onPreviewSound = { viewModel.previewSound(context, it) },
-                                onSendTestAlert = { viewModel.sendTestNotification(context) }
+                                onSendTestAlert = { viewModel.sendTestNotification(context) },
+                                onToggleDroppyTips = { viewModel.updateDroppyTipsEnabled(it) }
                             )
                         }
                         SettingsCategory.LANGUAGE -> {

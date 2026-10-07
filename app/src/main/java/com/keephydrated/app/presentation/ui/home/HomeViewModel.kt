@@ -14,14 +14,19 @@ import com.keephydrated.app.domain.util.HydrationCalculator
 import com.keephydrated.app.notification.NotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,42 +44,58 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    // Real-time observer monitoring local phone date to guarantee midnight reset
+    private val dateTickerFlow: Flow<LocalDate> = flow {
+        var lastDate = LocalDate.now()
+        emit(lastDate)
+        while (true) {
+            delay(5_000)
+            val currentDate = LocalDate.now()
+            if (currentDate != lastDate) {
+                lastDate = currentDate
+                emit(currentDate)
+            }
+        }
+    }
+
     init {
         observeHydrationAndSettings()
     }
 
     private fun observeHydrationAndSettings() {
         viewModelScope.launch {
-            combine(
-                getTodayHydrationUseCase(),
-                settingsRepository.getUserSettings()
-            ) { summary, settings ->
-                val bottleStatus = settings.toBottleStatus()
-                val rec = HydrationCalculator.calculate(
-                    age = settings.userAge,
-                    sex = settings.userSex,
-                    weightKg = settings.userWeightKg,
-                    heightCm = settings.userHeightCm,
-                    activityLevel = settings.userActivityLevel
-                )
-                val safeMaxDailyMl = rec.safeMaxDailyMl
-                val isLimitExceeded = summary.totalIntakeMl >= safeMaxDailyMl
+            dateTickerFlow.flatMapLatest { today ->
+                combine(
+                    getTodayHydrationUseCase(today),
+                    settingsRepository.getUserSettings()
+                ) { summary, settings ->
+                    val bottleStatus = settings.toBottleStatus()
+                    val rec = HydrationCalculator.calculate(
+                        age = settings.userAge,
+                        sex = settings.userSex,
+                        weightKg = settings.userWeightKg,
+                        heightCm = settings.userHeightCm,
+                        activityLevel = settings.userActivityLevel
+                    )
+                    val safeMaxDailyMl = rec.safeMaxDailyMl
+                    val isLimitExceeded = summary.totalIntakeMl >= safeMaxDailyMl
 
-                HomeUiState(
-                    currentIntakeMl = summary.totalIntakeMl,
-                    dailyGoalMl = summary.goalMl,
-                    progressPercentage = summary.progressPercentage,
-                    isGoalAchieved = summary.isGoalAchieved,
-                    todayIntakes = summary.intakes,
-                    isLoading = false,
-                    userMessage = _uiState.value.userMessage,
-                    frequentIntakeMl = settings.frequentIntakeMl,
-                    bottleStatus = bottleStatus,
-                    isBottleMode = settings.bottleModeEnabled,
-                    userSettings = settings,
-                    safeMaxDailyMl = safeMaxDailyMl,
-                    isLimitExceeded = isLimitExceeded
-                )
+                    HomeUiState(
+                        currentIntakeMl = summary.totalIntakeMl,
+                        dailyGoalMl = summary.goalMl,
+                        progressPercentage = summary.progressPercentage,
+                        isGoalAchieved = summary.isGoalAchieved,
+                        todayIntakes = summary.intakes,
+                        isLoading = false,
+                        userMessage = _uiState.value.userMessage,
+                        frequentIntakeMl = settings.frequentIntakeMl,
+                        bottleStatus = bottleStatus,
+                        isBottleMode = settings.bottleModeEnabled,
+                        userSettings = settings,
+                        safeMaxDailyMl = safeMaxDailyMl,
+                        isLimitExceeded = isLimitExceeded
+                    )
+                }
             }.collectLatest { state ->
                 _uiState.value = state
             }
@@ -115,6 +136,16 @@ class HomeViewModel @Inject constructor(
                         "⚠️ Warning: Safe limit ($safeLimit ml) exceeded! Total: $newTotal ml."
                     }
                     _uiState.update { it.copy(userMessage = warningMsg) }
+
+                    // Push high-priority red alert notification outside the app
+                    context?.let { ctx ->
+                        NotificationHelper.showToxicityAlertNotification(
+                            ctx,
+                            newTotal,
+                            safeLimit,
+                            _uiState.value.userSettings.language
+                        )
+                    }
                 } else {
                     _uiState.update { it.copy(userMessage = "Added $amountMl ml") }
                 }
@@ -139,6 +170,16 @@ class HomeViewModel @Inject constructor(
                         "⚠️ Warning: Safe limit ($safeLimit ml) exceeded! Total: $newTotal ml."
                     }
                     _uiState.update { it.copy(userMessage = warningMsg) }
+
+                    // Push high-priority red alert notification outside the app
+                    context?.let { ctx ->
+                        NotificationHelper.showToxicityAlertNotification(
+                            ctx,
+                            newTotal,
+                            safeLimit,
+                            _uiState.value.userSettings.language
+                        )
+                    }
                 } else {
                     _uiState.update { it.copy(userMessage = "Logged $amount ml from bottle! 💧") }
                 }

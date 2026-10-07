@@ -159,4 +159,15 @@ class OnboardingViewModel @Inject constructor(
             }
         }
     }
+
+    fun skipOnboarding(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.skipOnboarding()
+                onSuccess()
+            } catch (_: Exception) {
+                onSuccess()
+            }
+        }
+    }
 }

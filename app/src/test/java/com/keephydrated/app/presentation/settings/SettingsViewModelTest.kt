@@ -170,4 +170,26 @@ class SettingsViewModelTest {
         coVerify(exactly = 1) { settingsRepository.updateRemindersEnabled(false) }
         verify(exactly = 1) { reminderScheduler.scheduleReminders(any(), false, any()) }
     }
+
+    @Test
+    fun `updateDroppyTipsEnabled delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateDroppyTipsEnabled(false)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateDroppyTipsEnabled(false) }
+        assertEquals(false, viewModel.uiState.value.droppyTipsEnabled)
+    }
+
+    @Test
+    fun `updateRemindAfterGoalReached delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateRemindAfterGoalReached(true)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateRemindAfterGoalReached(true) }
+        assertEquals(true, viewModel.uiState.value.remindAfterGoalReached)
+    }
 }

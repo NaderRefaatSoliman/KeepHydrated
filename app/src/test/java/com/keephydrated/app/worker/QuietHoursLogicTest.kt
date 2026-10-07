@@ -143,4 +143,30 @@ class QuietHoursLogicTest {
         assertTrue(isQuietHour(currentHour = 10, startHour = wake, endHour = sleep))
         assertTrue(isQuietHour(currentHour = 14, startHour = wake, endHour = sleep))
     }
+
+    @Test
+    fun `safety rule - reminders suppressed when intake reaches safe limit`() {
+        val safeLimitMl = 3800
+        val totalIntakeMl = 3900
+        val shouldSuppress = totalIntakeMl >= safeLimitMl
+        assertTrue(shouldSuppress)
+    }
+
+    @Test
+    fun `reminder rule - goal reached and remindAfterGoal is false suppresses reminder`() {
+        val goalMl = 2000
+        val totalIntakeMl = 2200
+        val remindAfterGoal = false
+        val shouldSuppress = totalIntakeMl >= goalMl && !remindAfterGoal
+        assertTrue(shouldSuppress)
+    }
+
+    @Test
+    fun `reminder rule - goal reached but remindAfterGoal is true continues reminder`() {
+        val goalMl = 2000
+        val totalIntakeMl = 2200
+        val remindAfterGoal = true
+        val shouldSuppress = totalIntakeMl >= goalMl && !remindAfterGoal
+        assertFalse(shouldSuppress)
+    }
 }

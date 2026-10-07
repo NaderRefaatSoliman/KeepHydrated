@@ -456,4 +456,52 @@ object NotificationHelper {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(KeepHydratedApp.CELEBRATION_NOTIFICATION_ID, builder.build())
     }
+
+    /**
+     * Pushes a high-priority red alert notification outside the app warning of water toxicity
+     * and hyponatremia when intake approaches or exceeds the physiological safe maximum limit.
+     */
+    fun showToxicityAlertNotification(
+        context: Context,
+        currentMl: Int,
+        maxLimitMl: Int,
+        language: String
+    ) {
+        val isArabic = language == "ar"
+        val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
+        val formattedMax = LocalizationUtils.formatNumber(maxLimitMl, isArabic)
+        val unit = if (isArabic) "مل" else "ml"
+
+        val title = if (isArabic) "⚠️ تجاوزت الحد الأقصى الآمن للماء!" else "⚠️ Safe Daily Water Limit Exceeded!"
+        val text = if (isArabic) {
+            "إجمالي شربك الآن $formattedCurrent $unit متجاوزاً الحد الأقصى ($formattedMax $unit). خطر التسمم المائي! توقف عن الشرب وتجنب أكثر من ٨٠٠ مل في الساعة."
+        } else {
+            "Total intake is $formattedCurrent $unit, exceeding safe ceiling ($formattedMax $unit). Hyponatremia risk! Stop drinking and pace yourself."
+        }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            3003,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, KeepHydratedApp.NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_water_cup)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setColor(0xFFD32F2F.toInt()) // Red Warning Style
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setVibrate(longArrayOf(0, 400, 200, 400))
+            .build()
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(3003, notification)
+    }
 }

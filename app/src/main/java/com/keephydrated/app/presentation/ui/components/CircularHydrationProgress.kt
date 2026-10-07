@@ -56,6 +56,7 @@ fun CircularHydrationProgress(
     currentMl: Int,
     goalMl: Int,
     frequentIntakeMl: Int = 250,
+    safeMaxDailyMl: Int = 4200,
     onFrequentIntakeClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     size: Dp = 260.dp,
@@ -70,6 +71,21 @@ fun CircularHydrationProgress(
 
     val percentage = if (goalMl > 0) ((currentMl.toFloat() / goalMl.toFloat()) * 100).toInt() else 0
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    val isApproachingMax = safeMaxDailyMl > 0 && currentMl >= (safeMaxDailyMl * 0.9f)
+    val isOverMax = safeMaxDailyMl > 0 && currentMl >= safeMaxDailyMl
+
+    val arcColor1 = when {
+        isOverMax -> Color(0xFFD32F2F)
+        isApproachingMax -> Color(0xFFFF9800)
+        else -> CyanSecondary
+    }
+    val arcColor2 = when {
+        isOverMax -> Color(0xFFB71C1C)
+        isApproachingMax -> Color(0xFFE65100)
+        else -> BluePrimary
+    }
+    val primaryTextColor = if (isOverMax) Color(0xFFB71C1C) else if (isApproachingMax) Color(0xFFE65100) else BluePrimary
 
     val formattedPercent = LocalizationUtils.formatNumber(percentage, isArabic)
     val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
@@ -168,9 +184,9 @@ fun CircularHydrationProgress(
             if (animatedProgress > 0f) {
                 drawArc(
                     brush = Brush.sweepGradient(
-                        0.0f to CyanSecondary,
-                        0.5f to BluePrimary,
-                        1.0f to BluePrimary
+                        0.0f to arcColor1,
+                        0.5f to arcColor2,
+                        1.0f to arcColor2
                     ),
                     startAngle = 135f,
                     sweepAngle = 270f * animatedProgress,
@@ -216,7 +232,7 @@ fun CircularHydrationProgress(
                 text = stringResource(R.string.progress_percentage, formattedPercent),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = BluePrimary,
+                    color = primaryTextColor,
                     fontSize = 36.sp
                 )
             )
