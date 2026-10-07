@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -87,6 +88,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,8 +115,7 @@ enum class SettingsCategory(
     BOTTLE(R.string.category_bottle, R.string.desc_category_bottle, Icons.Default.LocalDrink),
     REMINDERS(R.string.category_reminders, R.string.desc_category_reminders, Icons.Default.Schedule),
     SOUNDS(R.string.category_sounds, R.string.desc_category_sounds, Icons.Default.Notifications),
-    LANGUAGE(R.string.category_language, R.string.desc_category_language, Icons.Default.Language),
-    ABOUT(R.string.category_about, R.string.desc_category_about, Icons.Default.Info)
+    LANGUAGE(R.string.category_language, R.string.desc_category_language, Icons.Default.Language)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -249,6 +250,12 @@ fun SettingsScreen(
                             onClick = { selectedCategory = category }
                         )
                     }
+
+                    item {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        AboutFooterPanel()
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             } else {
                 // ==========================================
@@ -339,9 +346,6 @@ fun SettingsScreen(
                                 uiState = uiState,
                                 onSelectLanguage = { viewModel.updateLanguage(it) }
                             )
-                        }
-                        SettingsCategory.ABOUT -> {
-                            AboutSettingsDetail()
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
@@ -505,9 +509,6 @@ fun getCategorySummary(
         }
         SettingsCategory.LANGUAGE -> {
             if (uiState.language == "ar") "العربية (Arabic)" else "English"
-        }
-        SettingsCategory.ABOUT -> {
-            "KeepHydrated v2.0.0"
         }
     }
 }
@@ -1164,36 +1165,72 @@ fun LanguageSettingsDetail(
 }
 
 @Composable
-fun AboutSettingsDetail() {
+fun AboutFooterPanel() {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(2.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
-                Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.WaterDrop,
+                    contentDescription = null,
+                    tint = BluePrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = BluePrimary
+                    )
                 )
+                Spacer(modifier = Modifier.width(6.dp))
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = BluePrimary.copy(alpha = 0.12f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.app_version),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = BluePrimary
+                        ),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(4.dp))
+
+            Spacer(modifier = Modifier.height(6.dp))
+
             Text(
-                text = stringResource(R.string.app_version),
+                text = "by NaderRefaatSoliman",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = BluePrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             )
+
             Spacer(modifier = Modifier.height(4.dp))
+
             Text(
                 text = stringResource(R.string.app_motto),
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                ),
+                textAlign = TextAlign.Center
             )
         }
     }
