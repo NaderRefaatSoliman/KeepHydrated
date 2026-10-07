@@ -301,6 +301,7 @@ fun HistoryScreen(
             }
         }
     }
+    }
 }
 
 @Composable
