@@ -1,27 +1,58 @@
-name: Build Android APK
+name: Android ci cd 
 
 on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Build mode
+        required: true
+        type: choice
+        options:
+          - normal
+          - store
+        default: normal
+      version_name:
+        description: Version name written into the app (example 3.0.0). Required for a manual run.
+        required: true
+        type: string
+      track:
+        description: Play Console track. Used only when mode is store.
+        required: true
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+        default: internal
 
 permissions:
   contents: write
 
+concurrency:
+  group: keep-hydrated-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: Build & Test APK
+    name: Test and build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: zulu
           java-version: '17'
 
       - name: Setup Gradle
@@ -30,44 +61,91 @@ jobs:
       - name: Grant Execute Permission to gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
+      - name: Apply version from input
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          set -o pipefail
-          ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
-
-      - name: Upload Debug APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: KeepHydrated-Debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          set -euo pipefail
+          if [ -z "${{ inputs.version_name }}" ]; then
+            echo "version_name is required"
+            exit 1
+          fi
+          current=$(grep -E '^[[:space:]]*versionCode[[:space:]]*=' app/build.gradle.kts | head -1 | grep -Eo '[0-9]+')
+          next=$((current + 1))
+          echo "VERSION_CODE=${next}" >> "$GITHUB_ENV"
+          echo "VERSION_NAME=${{ inputs.version_name }}" >> "$GITHUB_ENV"
+          sed -i -E "s/versionCode = [0-9]+/versionCode = ${next}/" app/build.gradle.kts
+          sed -i -E "s/versionName = \"[^\"]*\"/versionName = \"${{ inputs.version_name }}\"/" app/build.gradle.kts
+          grep -E 'versionCode|versionName' app/build.gradle.kts
 
       - name: Run Unit Tests
         run: |
           set -o pipefail
           ./gradlew test --stacktrace --no-daemon 2>&1 | tee test.log
 
-      - name: Create or Update GitHub Release
-        if: success()
+      - name: Decode release keystore
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'store'
         run: |
-          gh release create "v3.0.0" \
-            app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-v3.0.0-debug.apk \
-            --title "KeepHydrated V3" \
-            --notes "KeepHydrated V3 Debug APK (100% Arabic localization, embedded About panel, Dr. Droppy mascot)" \
-            --latest || gh release upload "v3.0.0" app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-v3.0.0-debug.apk --clobber
+          set -euo pipefail
+          mkdir -p keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore/release.keystore
+          echo "KEYSTORE_PATH=${GITHUB_WORKSPACE}/keystore/release.keystore" >> "$GITHUB_ENV"
+
+      - name: Build Debug APK
+        if: github.event_name != 'workflow_dispatch' || inputs.mode == 'normal'
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
+
+      - name: Build signed release AAB
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'store'
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -o pipefail
+          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee build.log
+
+      - name: Upload Debug APK Artifact
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'normal'
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeepHydrated-${{ inputs.version_name }}-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+
+      
+      - name: Publish AAB to Play Console
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'store'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.keephydrated.app
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track }}
+          status: completed
+
+      - name: Commit bumped version after successful upload
+        if: github.event_name == 'workflow_dispatch' && success()
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/build.gradle.kts
+          git commit -m "chore: bump to ${VERSION_NAME} (${VERSION_CODE}) [skip ci]"
+          git push origin HEAD:main
+
+
+      - name: Create or Update GitHub Release
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Report Build Result to Branch
-        if: always()
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B build-logs
-          echo "Status: ${{ job.status }}" > build-status.txt
-          echo "Commit: ${{ github.sha }}" >> build-status.txt
-          echo "Date: $(date -u)" >> build-status.txt
-          if [ -f build.log ]; then git add -f build.log; fi
-          if [ -f test.log ]; then git add -f test.log; fi
-          git add -f build-status.txt
-          git commit -m "Build result for ${{ github.sha }}: ${{ job.status }}" || true
-          git push -f origin build-logs
+          set -euo pipefail
+          tag="v${VERSION_NAME}"
+          asset="app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-${VERSION_NAME}-${VERSION_CODE}-debug.apk"
+          notes="KeepHydrated ${VERSION_NAME} (versionCode ${VERSION_CODE}) debug APK"
+          gh release create "$tag" "$asset" --title "KeepHydrated ${VERSION_NAME}" --notes "$notes" --latest \
+            || gh release upload "$tag" "$asset" --clobber
+ 
