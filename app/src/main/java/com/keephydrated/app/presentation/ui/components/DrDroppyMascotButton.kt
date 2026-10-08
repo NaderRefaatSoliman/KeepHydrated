@@ -68,11 +68,11 @@ fun DrDroppyMascotButton(
         animationSpec = infiniteRepeatable(
             animation = keyframes {
                 durationMillis = 1400
-                0f at 0 with LinearOutSlowInEasing
-                -12f at 400 with FastOutSlowInEasing
-                -2f at 700 with LinearOutSlowInEasing
-                -6f at 900 with FastOutSlowInEasing
-                0f at 1200 with FastOutSlowInEasing
+                0f at 0 using LinearOutSlowInEasing
+                -12f at 400 using FastOutSlowInEasing
+                -2f at 700 using LinearOutSlowInEasing
+                -6f at 900 using FastOutSlowInEasing
+                0f at 1200 using FastOutSlowInEasing
                 0f at 1400
             },
             repeatMode = RepeatMode.Restart

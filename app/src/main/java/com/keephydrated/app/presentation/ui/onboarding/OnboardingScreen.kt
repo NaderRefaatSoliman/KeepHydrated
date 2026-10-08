@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
+import com.keephydrated.app.presentation.ui.components.LanguageSwitcher
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
 import com.keephydrated.app.util.LocalizationUtils
@@ -68,7 +69,9 @@ import com.keephydrated.app.util.LocalizationUtils
 fun OnboardingScreen(
     viewModel: OnboardingViewModel,
     onFinished: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    currentLanguage: String = "en",
+    onLanguageChanged: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -80,8 +83,14 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                LanguageSwitcher(
+                    currentLanguage = currentLanguage,
+                    onLanguageChanged = onLanguageChanged
+                )
+
                 TextButton(onClick = { viewModel.skipOnboarding(onFinished) }) {
                     Text(
                         text = stringResource(R.string.skip_for_now),

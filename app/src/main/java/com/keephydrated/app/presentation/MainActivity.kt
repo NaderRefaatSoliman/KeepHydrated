@@ -4,10 +4,17 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,12 +27,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,8 +47,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.keephydrated.app.R
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.presentation.navigation.Screen
+import com.keephydrated.app.presentation.ui.components.LanguageSwitcher
 import com.keephydrated.app.presentation.ui.history.HistoryScreen
 import com.keephydrated.app.presentation.ui.history.HistoryViewModel
 import com.keephydrated.app.presentation.ui.home.HomeScreen
@@ -110,6 +122,13 @@ class MainActivity : ComponentActivity() {
                 LocalLayoutDirection provides layoutDirection
             ) {
                 KeepHydratedTheme {
+                    val onLanguageChanged: (String) -> Unit = { newLang ->
+                        lifecycleScope.launch {
+                            settingsRepository.updateLanguage(newLang)
+                            LocaleHelper.setLocale(this@MainActivity, newLang)
+                        }
+                    }
+
                     val settings = userSettings
                     if (settings == null) {
                         Box(
@@ -122,10 +141,15 @@ class MainActivity : ComponentActivity() {
                         val onboardingViewModel: com.keephydrated.app.presentation.ui.onboarding.OnboardingViewModel = hiltViewModel(this@MainActivity)
                         com.keephydrated.app.presentation.ui.onboarding.OnboardingScreen(
                             viewModel = onboardingViewModel,
-                            onFinished = {}
+                            onFinished = {},
+                            currentLanguage = language,
+                            onLanguageChanged = onLanguageChanged
                         )
                     } else {
-                        KeepHydratedMain()
+                        KeepHydratedMain(
+                            currentLanguage = language,
+                            onLanguageChanged = onLanguageChanged
+                        )
                     }
                 }
             }
@@ -134,45 +158,87 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun KeepHydratedMain() {
+fun KeepHydratedMain(
+    currentLanguage: String = "en",
+    onLanguageChanged: (String) -> Unit = {}
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    var tabResetKey by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             val selectedTabIndex = Screen.items.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = BluePrimary
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
-                Screen.items.forEachIndexed { index, screen ->
-                    val selected = selectedTabIndex == index
-                    val title = stringResource(screen.titleResId)
-                    Tab(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        text = {
-                            Text(
-                                text = title,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                maxLines = 1
-                            )
-                        },
-                        icon = {
-                            Icon(screen.icon, contentDescription = title, modifier = Modifier.size(20.dp))
-                        }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_water_cup),
+                            contentDescription = null,
+                            tint = BluePrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = BluePrimary
+                        )
+                    }
+
+                    LanguageSwitcher(
+                        currentLanguage = currentLanguage,
+                        onLanguageChanged = onLanguageChanged
                     )
+                }
+
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = BluePrimary
+                ) {
+                    Screen.items.forEachIndexed { index, screen ->
+                        val selected = selectedTabIndex == index
+                        val title = stringResource(screen.titleResId)
+                        Tab(
+                            selected = selected,
+                            onClick = {
+                                tabResetKey++
+                                if (currentRoute != screen.route) {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            text = {
+                                Text(
+                                    text = title,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    maxLines = 1
+                                )
+                            },
+                            icon = {
+                                Icon(screen.icon, contentDescription = title, modifier = Modifier.size(20.dp))
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -184,13 +250,14 @@ fun KeepHydratedMain() {
         ) {
             composable(Screen.Home.route) {
                 val viewModel: HomeViewModel = hiltViewModel()
-                HomeScreen(viewModel = viewModel)
+                HomeScreen(viewModel = viewModel, resetGuideKey = tabResetKey)
             }
             composable(Screen.History.route) {
                 val viewModel: HistoryViewModel = hiltViewModel()
                 HistoryScreen(
                     viewModel = viewModel,
                     onNavigateToHome = {
+                        tabResetKey++
                         navController.navigate(Screen.Home.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -198,7 +265,8 @@ fun KeepHydratedMain() {
                             launchSingleTop = true
                             restoreState = true
                         }
-                    }
+                    },
+                    resetGuideKey = tabResetKey
                 )
             }
             composable(Screen.Settings.route) {
@@ -206,6 +274,7 @@ fun KeepHydratedMain() {
                 SettingsScreen(
                     viewModel = viewModel,
                     onNavigateToHome = {
+                        tabResetKey++
                         navController.navigate(Screen.Home.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -213,7 +282,8 @@ fun KeepHydratedMain() {
                             launchSingleTop = true
                             restoreState = true
                         }
-                    }
+                    },
+                    resetGuideKey = tabResetKey
                 )
             }
         }

@@ -71,12 +71,17 @@ import com.keephydrated.app.util.LocalizationUtils
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    resetGuideKey: Int = 0
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showCustomDialog by remember { mutableStateOf(false) }
     var showHealthGuide by remember { mutableStateOf(false) }
+
+    LaunchedEffect(resetGuideKey) {
+        showHealthGuide = false
+    }
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 

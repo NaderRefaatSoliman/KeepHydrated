@@ -72,7 +72,7 @@
     <string name="settings">الإعدادات</string>
     <string name="category_profile">الملف الصحي الشخصي وحساب الهدف</string>
     <string name="desc_category_profile">العمر، الوزن، النشاط الرياضي وحساب الهدف المثالي</string>
-    <string name="category_guide">دليل قطورة الصحي والتحذيرات</string>
+    <string name="category_guide">دليل د.قطرة الصحي والتحذيرات</string>
     <string name="desc_category_guide">أضرار الجفاف وحدود الأمان من التسمم المائي</string>
     <string name="category_goal">هدف الترطيب والإضافة السريعة</string>
     <string name="desc_category_goal">الهدف اليومي، كمية الشرب المفضلة وخيارات الإضافة</string>
@@ -113,10 +113,10 @@
     <string name="battery_unrestricted_desc">تم استثناء البطارية. التنبيهات اللحظية ومزامنة الساعة الذكية نشطة.</string>
 
     <!-- Onboarding & Personalized Health Calculator -->
-    <string name="onboarding_welcome_title">تعرّف على قطورة!</string>
+    <string name="onboarding_welcome_title">تعرّف على د.قطرة!</string>
     <string name="onboarding_welcome_subtitle">رفيقك اللطيف للترطيب الصحي. دعنا نحسب احتياجك اليومي المثالي من الماء وفق قياسات جسمك ونشاطك.</string>
     <string name="step_profile_title">بياناتك الصحية الشخصية</string>
-    <string name="step_profile_desc">أخبر قطورة ببعض المعلومات عنك:</string>
+    <string name="step_profile_desc">أخبر د.قطرة ببعض المعلومات عنك:</string>
     <string name="step_metrics_title">قياسات الجسم</string>
     <string name="label_name">الاسم أو اللقب</string>
     <string name="label_age">العمر (بالسنوات)</string>
@@ -139,7 +139,7 @@
     <string name="btn_recalculate">إعادة حساب الهدف</string>
 
     <!-- Health Guide Tour & Medical Advices -->
-    <string name="guide_tour_title">دليل قطورة الصحي للترطيب</string>
+    <string name="guide_tour_title">دليل د.قطرة الصحي للترطيب</string>
     <string name="guide_dehydration_title">مخاطر وأضرار قلة شرب الماء (الجفاف)</string>
     <string name="dehydration_intro">يؤدي عدم شرب كمية كافية من الماء إلى إجهاد فوري ومضاعفات صحية متعددة:</string>
     <string name="dehydration_point1_title">١. الجفاف الخفيف (فقدان ١-٢٪ من سوائل الجسم):</string>

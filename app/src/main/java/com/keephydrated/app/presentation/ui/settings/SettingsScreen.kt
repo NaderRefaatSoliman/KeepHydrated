@@ -123,7 +123,8 @@ enum class SettingsCategory(
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateToHome: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    resetGuideKey: Int = 0
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -133,6 +134,10 @@ fun SettingsScreen(
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     var selectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
+
+    LaunchedEffect(resetGuideKey) {
+        selectedCategory = null
+    }
 
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }

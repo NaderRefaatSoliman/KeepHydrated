@@ -61,7 +61,6 @@ import com.keephydrated.app.domain.model.AchievementStatus
 import com.keephydrated.app.domain.model.DailyHydrationSummary
 import com.keephydrated.app.domain.model.HistoryPeriod
 import com.keephydrated.app.presentation.ui.components.DrDroppyFloatingMascot
-import com.keephydrated.app.presentation.ui.components.DrDroppyMascotButton
 import com.keephydrated.app.presentation.ui.guide.HealthGuideScreen
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.util.LocalizationUtils
@@ -73,11 +72,16 @@ import java.util.Locale
 fun HistoryScreen(
     viewModel: HistoryViewModel,
     onNavigateToHome: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    resetGuideKey: Int = 0
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
     var showHealthGuide by remember { mutableStateOf(false) }
+
+    LaunchedEffect(resetGuideKey) {
+        showHealthGuide = false
+    }
 
     BackHandler(enabled = true) {
         if (showHealthGuide) {
@@ -106,12 +110,6 @@ fun HistoryScreen(
                                 contentDescription = stringResource(R.string.nav_home)
                             )
                         }
-                    },
-                    actions = {
-                        DrDroppyMascotButton(
-                            onClick = { showHealthGuide = true },
-                            modifier = Modifier.padding(end = 4.dp)
-                        )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,

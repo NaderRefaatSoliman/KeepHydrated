@@ -4,21 +4,10 @@
     android:viewportWidth="128"
     android:viewportHeight="128">
 
-    <!-- Left Arm & Hand (Waving cheerfully with fingers/thumb) -->
-    <path
-        android:fillColor="#0288D1"
-        android:pathData="M38,64 C28,60 16,52 14,44 C12.8,39 16,37 19,40 C21,43 23,45 23,41 C23,38 26,38 27,42 C29,39 32,40 31,44 C33,48 31,54 39,59 Z" />
-
-    <!-- Right Arm & Hand (Resting naturally on hip with rounded hand) -->
-    <path
-        android:fillColor="#0288D1"
-        android:pathData="M88,64 C98,66 108,72 110,80 C111,84 107,86 104,83 C102,81 101,84 98,82 C96,80 94,81 94,78 C93,74 96,69 88,66 Z" />
-
     <!-- Left Leg and Shoe -->
     <path
         android:fillColor="#01579B"
-        android:pathData="M48,96 C48,104 46,112 43,116 C41,118 36,118 33,116 C30,113 32,108 37,108 C40,108 42,104 43,98 Z" />
-    <!-- Left Shoe Sole/Cap -->
+        android:pathData="M48,98 C48,105 46,112 43,116 C41,118 36,118 33,116 C30,113 32,108 37,108 C40,108 42,104 43,98 Z" />
     <path
         android:fillColor="#0288D1"
         android:pathData="M32,114 C32,111 36,110 40,111 C43,112 44,115 42,118 C38,120 32,118 32,114 Z" />
@@ -26,11 +15,32 @@
     <!-- Right Leg and Shoe -->
     <path
         android:fillColor="#01579B"
-        android:pathData="M80,96 C80,104 82,112 85,116 C87,118 92,118 95,116 C98,113 96,108 91,108 C88,108 86,104 85,98 Z" />
-    <!-- Right Shoe Sole/Cap -->
+        android:pathData="M80,98 C80,105 82,112 85,116 C87,118 92,118 95,116 C98,113 96,108 91,108 C88,108 86,104 85,98 Z" />
     <path
         android:fillColor="#0288D1"
         android:pathData="M96,114 C96,111 92,110 88,111 C85,112 84,115 86,118 C90,120 96,118 96,114 Z" />
+
+    <!-- Left Arm & Cheerful Hand (Waving hello) -->
+    <path
+        android:fillColor="#00B0FF"
+        android:pathData="M37,65 C27,61 16,53 14,45 C12.8,40 16,38 19,41 C21,44 23,46 23,42 C23,39 26,39 27,43 C29,40 32,41 31,45 C33,49 31,55 38,60 Z" />
+    <!-- White Doctor Coat Sleeve (Left Arm) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#CFD8DC"
+        android:strokeWidth="1.2"
+        android:pathData="M32,57 C29,61 33,67 38,66 C41,64 39,58 34,56 Z" />
+
+    <!-- Right Arm & Hand (Resting naturally on hip) -->
+    <path
+        android:fillColor="#00B0FF"
+        android:pathData="M91,65 C100,67 110,73 112,81 C113,85 109,87 106,84 C104,82 103,85 100,83 C98,81 96,82 96,79 C95,75 98,70 90,67 Z" />
+    <!-- White Doctor Coat Sleeve (Right Arm) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#CFD8DC"
+        android:strokeWidth="1.2"
+        android:pathData="M96,63 C99,67 95,73 90,72 C87,70 89,64 94,62 Z" />
 
     <!-- Main Water Drop Body (Organic, ultra-smooth droplet) -->
     <path
@@ -51,74 +61,72 @@
     <!-- Rosy Cheeks -->
     <path
         android:fillColor="#FF8A80"
-        android:fillAlpha="0.75"
-        android:pathData="M43,72m-4.5,0a4.5,3.5 0 1,0 9,0a4.5,3.5 0 1,0 -9,0" />
+        android:fillAlpha="0.8"
+        android:pathData="M42,70m-5,0a5,3.8 0 1,0 10,0a5,3.8 0 1,0 -10,0" />
     <path
         android:fillColor="#FF8A80"
-        android:fillAlpha="0.75"
-        android:pathData="M85,72m-4.5,0a4.5,3.5 0 1,0 9,0a4.5,3.5 0 1,0 -9,0" />
+        android:fillAlpha="0.8"
+        android:pathData="M86,70m-5,0a5,3.8 0 1,0 10,0a5,3.8 0 1,0 -10,0" />
 
-    <!-- Big Expressive Eyes -->
+    <!-- Big Expressive Human-Friendly Eyes -->
     <!-- Left Eye -->
     <path
         android:fillColor="#0D1B2A"
-        android:pathData="M52,54m-5,0a5,6.5 0 1,0 10,0a5,6.5 0 1,0 -10,0" />
+        android:pathData="M52,53m-5,0a5,6.5 0 1,0 10,0a5,6.5 0 1,0 -10,0" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M53,50m-1.8,0a1.8,2.2 0 1,0 3.6,0a1.8,2.2 0 1,0 -3.6,0" />
+        android:pathData="M53,49m-2,0a2,2.4 0 1,0 4,0a2,2.4 0 1,0 -4,0" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M50,56m-1,0a1,1.2 0 1,0 2,0a1,1.2 0 1,0 -2,0" />
+        android:pathData="M50,55m-1.2,0a1.2,1.4 0 1,0 2.4,0a1.2,1.4 0 1,0 -2.4,0" />
 
     <!-- Right Eye -->
     <path
         android:fillColor="#0D1B2A"
-        android:pathData="M76,54m-5,0a5,6.5 0 1,0 10,0a5,6.5 0 1,0 -10,0" />
+        android:pathData="M76,53m-5,0a5,6.5 0 1,0 10,0a5,6.5 0 1,0 -10,0" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M77,50m-1.8,0a1.8,2.2 0 1,0 3.6,0a1.8,2.2 0 1,0 -3.6,0" />
+        android:pathData="M77,49m-2,0a2,2.4 0 1,0 4,0a2,2.4 0 1,0 -4,0" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M74,56m-1,0a1,1.2 0 1,0 2,0a1,1.2 0 1,0 -2,0" />
+        android:pathData="M74,55m-1.2,0a1.2,1.4 0 1,0 2.4,0a1.2,1.4 0 1,0 -2.4,0" />
 
-    <!-- Doctor Round Glasses Frames -->
+    <!-- Friendly Doctor Round Glasses -->
     <!-- Left Rim -->
     <path
-        android:fillColor="#15FFFFFF"
+        android:fillColor="#10FFFFFF"
         android:strokeColor="#1A237E"
         android:strokeWidth="2.4"
-        android:pathData="M52,54m-9.5,0a9.5,9.5 0 1,0 19,0a9.5,9.5 0 1,0 -19,0" />
-    <!-- Glare -->
+        android:pathData="M52,53m-9.5,0a9.5,9.5 0 1,0 19,0a9.5,9.5 0 1,0 -19,0" />
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFF"
         android:strokeAlpha="0.8"
         android:strokeWidth="1.4"
         android:strokeLineCap="round"
-        android:pathData="M45,49 L49,45" />
+        android:pathData="M45,48 L49,44" />
 
     <!-- Right Rim -->
     <path
-        android:fillColor="#15FFFFFF"
+        android:fillColor="#10FFFFFF"
         android:strokeColor="#1A237E"
         android:strokeWidth="2.4"
-        android:pathData="M76,54m-9.5,0a9.5,9.5 0 1,0 19,0a9.5,9.5 0 1,0 -19,0" />
-    <!-- Glare -->
+        android:pathData="M76,53m-9.5,0a9.5,9.5 0 1,0 19,0a9.5,9.5 0 1,0 -19,0" />
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFF"
         android:strokeAlpha="0.8"
         android:strokeWidth="1.4"
         android:strokeLineCap="round"
-        android:pathData="M69,49 L73,45" />
+        android:pathData="M69,48 L73,44" />
 
-    <!-- Bridge -->
+    <!-- Glasses Bridge -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#1A237E"
         android:strokeWidth="2.4"
         android:strokeLineCap="round"
-        android:pathData="M61.5,53 Q64,50 66.5,53" />
+        android:pathData="M61.5,52 Q64,49 66.5,52" />
 
     <!-- Temples -->
     <path
@@ -126,39 +134,80 @@
         android:strokeColor="#1A237E"
         android:strokeWidth="2"
         android:strokeLineCap="round"
-        android:pathData="M42.5,53 L34,54" />
+        android:pathData="M42.5,52 L34,53" />
     <path
         android:fillColor="#00000000"
         android:strokeColor="#1A237E"
         android:strokeWidth="2"
         android:strokeLineCap="round"
-        android:pathData="M85.5,53 L94,54" />
+        android:pathData="M85.5,52 L94,53" />
 
-    <!-- Cheerful Doctor Smile -->
+    <!-- Warm Cheerful Smile -->
     <path
         android:fillColor="#0D1B2A"
-        android:pathData="M57,69 C57,76 71,76 71,69 Z" />
+        android:pathData="M57,67 C57,75 71,75 71,67 Z" />
     <path
         android:fillColor="#FF5252"
-        android:pathData="M60,71 C61,75 67,75 68,71 Z" />
+        android:pathData="M60,69 C61,74 67,74 68,69 Z" />
 
-    <!-- Doctor Stethoscope -->
+    <!-- ==================== DOCTOR COAT (White Lab Coat) ==================== -->
+    <!-- Base Coat Body -->
+    <path
+        android:fillColor="#FAFAFA"
+        android:strokeColor="#CFD8DC"
+        android:strokeWidth="1.4"
+        android:pathData="M34,79 C36,93 47,104 64,104 C81,104 92,93 94,79 C84,77 75,81 64,83 C53,81 44,77 34,79 Z" />
+
+    <!-- Inner Doctor Shirt (Medical Cyan) -->
+    <path
+        android:fillColor="#4DD0E1"
+        android:pathData="M54,76 L74,76 L64,88 Z" />
+
+    <!-- Cute Doctor Tie (Royal Blue) -->
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M62,76 H66 L65,85 L64,87 L63,85 Z" />
+
+    <!-- Left Coat Lapel/Collar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="1.3"
+        android:pathData="M46,75 L59,88 L52,89 L42,78 Z" />
+
+    <!-- Right Coat Lapel/Collar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="1.3"
+        android:pathData="M82,75 L69,88 L76,89 L86,78 Z" />
+
+    <!-- Center Seam Line -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#37474F"
-        android:strokeWidth="2.6"
-        android:strokeLineCap="round"
-        android:pathData="M45,78 C44,87 52,94 60,93 L68,93 C76,94 84,87 83,78" />
-    <!-- Stethoscope Chest Piece Bell -->
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="1.4"
+        android:pathData="M64,88 L64,104" />
+
+    <!-- Coat Buttons -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M64,92m-1.5,0a1.5,1.5 0 1,0 3,0a1.5,1.5 0 1,0 -3,0" />
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M64,98m-1.5,0a1.5,1.5 0 1,0 3,0a1.5,1.5 0 1,0 -3,0" />
+
+    <!-- Doctor Breast Pocket -->
     <path
         android:fillColor="#ECEFF1"
-        android:strokeColor="#37474F"
-        android:strokeWidth="1.6"
-        android:pathData="M64,93m-4.5,0a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0" />
-    <!-- Red Cross on Stethoscope -->
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="1"
+        android:pathData="M73,88 H82 V95 C82,96 81,97 80,97 H75 C74,97 73,96 73,95 Z" />
+
+    <!-- Red Medical Cross on Pocket -->
     <path
-        android:fillColor="#D32F2F"
-        android:pathData="M63,90 H65 V92 H67 V94 H65 V96 H63 V94 H61 V92 H63 Z" />
+        android:fillColor="#E53935"
+        android:pathData="M77,89.5 H78.5 V91.5 H80.5 V93 H78.5 V95 H77 V93 H75 V91.5 H77 Z" />
 
     <!-- Doctor Forehead Reflector Headlamp Mirror -->
     <path
