@@ -6,6 +6,7 @@ import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.repository.SettingsRepository
 import com.keephydrated.app.presentation.ui.settings.SettingsViewModel
+import com.keephydrated.app.util.LocalizationUtils
 import com.keephydrated.app.worker.ReminderScheduler
 import io.mockk.coVerify
 import io.mockk.every
@@ -157,7 +158,8 @@ class SettingsViewModelTest {
         viewModel.updateDailyGoal(2800)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals("تم تحديث الهدف اليومي إلى ٢٨٠٠ مل", viewModel.uiState.value.userMessage)
+        val expectedGoal = LocalizationUtils.formatNumber(2800, true)
+        assertEquals("تم تحديث الهدف اليومي إلى $expectedGoal مل", viewModel.uiState.value.userMessage)
     }
 
     @Test

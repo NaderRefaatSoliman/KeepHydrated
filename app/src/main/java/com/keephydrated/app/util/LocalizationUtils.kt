@@ -24,7 +24,9 @@ object LocalizationUtils {
      */
     fun formatNumber(number: Number, isArabic: Boolean): String {
         val locale = if (isArabic) Locale("ar") else Locale.ENGLISH
-        return NumberFormat.getInstance(locale).format(number)
+        val nf = NumberFormat.getInstance(locale)
+        nf.isGroupingUsed = false
+        return nf.format(number)
     }
 
     /**
