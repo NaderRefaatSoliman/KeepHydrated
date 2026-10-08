@@ -15,6 +15,8 @@ import com.keephydrated.app.notification.NotificationHelper
 import com.keephydrated.app.util.LocalizationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,13 +27,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeViewModel internal constructor(
     private val getTodayHydrationUseCase: GetTodayHydrationUseCase,
     private val addWaterIntakeUseCase: AddWaterIntakeUseCase,
     private val deleteWaterIntakeUseCase: DeleteWaterIntakeUseCase,
@@ -39,22 +44,46 @@ class HomeViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val logBottleDrinkUseCase: LogBottleDrinkUseCase,
     private val refillBottleUseCase: RefillBottleUseCase,
-    @ApplicationContext private val context: Context? = null
+    @ApplicationContext private val context: Context? = null,
+    private val dateTickerFlow: Flow<LocalDate> = flowOf(LocalDate.now())
 ) : ViewModel() {
+
+    @Inject
+    constructor(
+        getTodayHydrationUseCase: GetTodayHydrationUseCase,
+        addWaterIntakeUseCase: AddWaterIntakeUseCase,
+        deleteWaterIntakeUseCase: DeleteWaterIntakeUseCase,
+        undoLastIntakeUseCase: UndoLastIntakeUseCase,
+        settingsRepository: SettingsRepository,
+        logBottleDrinkUseCase: LogBottleDrinkUseCase,
+        refillBottleUseCase: RefillBottleUseCase,
+        @ApplicationContext context: Context?
+    ) : this(
+        getTodayHydrationUseCase,
+        addWaterIntakeUseCase,
+        deleteWaterIntakeUseCase,
+        undoLastIntakeUseCase,
+        settingsRepository,
+        logBottleDrinkUseCase,
+        refillBottleUseCase,
+        context,
+        realDateTickerFlow()
+    )
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    // Real-time observer monitoring local phone date to guarantee midnight reset
-    private val dateTickerFlow: Flow<LocalDate> = flow {
-        var lastDate = LocalDate.now()
-        emit(lastDate)
-        while (true) {
-            delay(5_000)
-            val currentDate = LocalDate.now()
-            if (currentDate != lastDate) {
-                lastDate = currentDate
-                emit(currentDate)
+    companion object {
+        fun realDateTickerFlow(): Flow<LocalDate> = flow {
+            var lastDate = LocalDate.now()
+            emit(lastDate)
+            while (currentCoroutineContext().isActive) {
+                delay(30_000)
+                val currentDate = LocalDate.now()
+                if (currentDate != lastDate) {
+                    lastDate = currentDate
+                    emit(currentDate)
+                }
             }
         }
     }

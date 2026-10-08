@@ -17,7 +17,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -65,7 +67,7 @@ class HomeViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(): HomeViewModel {
+    private fun createViewModel(dateFlow: Flow<LocalDate> = flowOf(LocalDate.now())): HomeViewModel {
         return HomeViewModel(
             getTodayHydrationUseCase,
             addWaterIntakeUseCase,
@@ -73,7 +75,9 @@ class HomeViewModelTest {
             undoLastIntakeUseCase,
             settingsRepository,
             logBottleDrinkUseCase,
-            refillBottleUseCase
+            refillBottleUseCase,
+            null,
+            dateFlow
         )
     }
 
@@ -194,5 +198,31 @@ class HomeViewModelTest {
         assert(viewModel.uiState.value.userMessage?.contains("Warning") == true ||
                viewModel.uiState.value.userMessage?.contains("Safe limit") == true ||
                viewModel.uiState.value.userMessage?.contains("Added") == true)
+    }
+
+    @Test
+    fun `midnight date change triggers hydration reload for the new day`() = runTest {
+        val today = LocalDate.of(2026, 10, 8)
+        val tomorrow = today.plusDays(1)
+        val dateFlow = MutableSharedFlow<LocalDate>(replay = 1)
+        dateFlow.emit(today)
+
+        val todaySummary = DailyHydrationSummary(date = today, totalIntakeMl = 1500, goalMl = 2000)
+        val tomorrowSummary = DailyHydrationSummary(date = tomorrow, totalIntakeMl = 0, goalMl = 2000)
+
+        every { getTodayHydrationUseCase(today) } returns flowOf(todaySummary)
+        every { getTodayHydrationUseCase(tomorrow) } returns flowOf(tomorrowSummary)
+        settingsFlow.emit(UserSettings(dailyGoalMl = 2000))
+
+        val viewModel = createViewModel(dateFlow = dateFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1500, viewModel.uiState.value.currentIntakeMl)
+
+        // Simulate midnight passing
+        dateFlow.emit(tomorrow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(0, viewModel.uiState.value.currentIntakeMl)
     }
 }

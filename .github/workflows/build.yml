@@ -12,6 +12,7 @@ jobs:
   build:
     name: Build & Test APK
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Code
@@ -44,6 +45,17 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew test --stacktrace --no-daemon 2>&1 | tee test.log
+
+      - name: Create or Update GitHub Release
+        if: success()
+        run: |
+          gh release create "v3.0.0" \
+            app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-v3.0.0-debug.apk \
+            --title "KeepHydrated V3" \
+            --notes "KeepHydrated V3 Debug APK (100% Arabic localization, embedded About panel, Dr. Droppy mascot)" \
+            --latest || gh release upload "v3.0.0" app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-v3.0.0-debug.apk --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Report Build Result to Branch
         if: always()
