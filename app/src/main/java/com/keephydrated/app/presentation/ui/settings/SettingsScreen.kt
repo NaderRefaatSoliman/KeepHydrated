@@ -124,7 +124,9 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateToHome: () -> Unit = {},
     modifier: Modifier = Modifier,
-    resetGuideKey: Int = 0
+    resetGuideKey: Int = 0,
+    targetCategory: SettingsCategory? = null,
+    onClearTargetCategory: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -133,7 +135,14 @@ fun SettingsScreen(
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
+    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(targetCategory) }
+
+    LaunchedEffect(targetCategory) {
+        if (targetCategory != null) {
+            selectedCategory = targetCategory
+            onClearTargetCategory()
+        }
+    }
 
     LaunchedEffect(resetGuideKey) {
         selectedCategory = null

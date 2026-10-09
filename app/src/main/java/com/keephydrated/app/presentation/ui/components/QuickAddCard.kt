@@ -3,15 +3,20 @@ package com.keephydrated.app.presentation.ui.components
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
 import com.keephydrated.app.presentation.ui.theme.BlueOnPrimaryContainer
+import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.BluePrimaryContainer
 import com.keephydrated.app.util.LocalizationUtils
 
@@ -38,6 +44,7 @@ data class ContainerOption(
 @Composable
 fun QuickAddSection(
     onAddWater: (Int) -> Unit,
+    onCustomAddClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val containers = listOf(
@@ -58,8 +65,9 @@ fun QuickAddSection(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            // 4 preset container quick-add buttons
             containers.forEach { container ->
                 QuickAddCard(
                     container = container,
@@ -67,6 +75,12 @@ fun QuickAddSection(
                     modifier = Modifier.weight(1f)
                 )
             }
+
+            // 5th custom add button (+) in matching shape and style
+            CustomAddCard(
+                onClick = onCustomAddClick,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -92,16 +106,16 @@ fun QuickAddCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 4.dp)
+                .padding(vertical = 10.dp, horizontal = 2.dp)
         ) {
             Text(
                 text = container.emoji,
-                fontSize = 24.sp
+                fontSize = 22.sp
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.ml_format, formattedAmount),
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = BlueOnPrimaryContainer
                 ),
@@ -113,7 +127,63 @@ fun QuickAddCard(
                 text = stringResource(container.titleResId),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 11.sp,
-                    color = BlueOnPrimaryContainer.copy(alpha = 0.85f)
+                    color = BlueOnPrimaryContainer.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Medium
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun CustomAddCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = BluePrimaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier.clickable(onClick = onClick)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 2.dp)
+        ) {
+            Box(
+                modifier = Modifier.size(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.custom_add),
+                    tint = BluePrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "+",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = BlueOnPrimaryContainer
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = stringResource(R.string.container_custom),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    color = BlueOnPrimaryContainer.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Medium
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

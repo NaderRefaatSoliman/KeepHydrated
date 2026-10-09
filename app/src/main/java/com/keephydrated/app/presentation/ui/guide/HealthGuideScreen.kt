@@ -1,5 +1,6 @@
 package com.keephydrated.app.presentation.ui.guide
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.keephydrated.app.R
 import com.keephydrated.app.domain.model.UserSettings
 import com.keephydrated.app.domain.util.HydrationCalculator
@@ -200,6 +202,65 @@ fun HealthGuideContent(
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF37474F)
+                    )
+                )
+            }
+        }
+
+        // Separate Box in RED for Safe Max Daily Limit and Hourly Limit
+        val formattedMaxHourly = LocalizationUtils.formatNumber(rec.maxHourlyMl, isArabic)
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
+            border = BorderStroke(1.5.dp, Color(0xFFD32F2F)),
+            elevation = CardDefaults.cardElevation(2.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = Color(0xFFD32F2F),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.guide_safe_limits_box_title),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB71C1C)
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = stringResource(R.string.guide_safe_daily_limit_title, formattedMax),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFC62828)
+                    )
+                )
+                Text(
+                    text = stringResource(R.string.guide_safe_daily_limit_desc),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = Color(0xFF37474F),
+                        lineHeight = 16.sp
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = stringResource(R.string.guide_safe_hourly_limit_title, formattedMaxHourly),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFC62828)
+                    )
+                )
+                Text(
+                    text = stringResource(R.string.guide_safe_hourly_limit_desc),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = Color(0xFF37474F),
+                        lineHeight = 16.sp
                     )
                 )
             }

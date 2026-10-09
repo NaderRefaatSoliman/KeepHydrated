@@ -120,7 +120,10 @@ class HistoryViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(7, state.chartData.size)
-        val expectedDay = LocalDate.now().format(DateTimeFormatter.ofPattern("EEE", Locale("ar")))
-        assertEquals(expectedDay, state.chartData.last().label)
+        val today = LocalDate.now()
+        val daysSinceSaturday = (today.dayOfWeek.value % 7 + 1) % 7
+        val saturday = today.minusDays(daysSinceSaturday.toLong())
+        val expectedDay = saturday.format(DateTimeFormatter.ofPattern("EEE", Locale("ar")))
+        assertEquals(expectedDay, state.chartData.first().label)
     }
 }

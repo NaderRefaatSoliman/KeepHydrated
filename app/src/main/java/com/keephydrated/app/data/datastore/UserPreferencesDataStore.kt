@@ -288,6 +288,9 @@ class UserPreferencesDataStore @Inject constructor(
             if (recommendedGoalMl != null && recommendedGoalMl > 0) {
                 preferences[PreferencesKeys.DAILY_GOAL] = recommendedGoalMl
             }
+            if (name.isNotBlank() && age > 0 && weightKg > 0 && heightCm > 0) {
+                preferences[PreferencesKeys.IS_ONBOARDING_COMPLETED] = true
+            }
         }
     }
 

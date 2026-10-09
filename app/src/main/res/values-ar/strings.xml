@@ -36,11 +36,12 @@
     <string name="container_glass">كوب</string>
     <string name="container_can">علبة</string>
     <string name="container_bottle">قارورة</string>
+    <string name="container_custom">مخصص</string>
 
     <!-- Bottle Tracking Mode -->
     <string name="bottle_mode_title">وضع تتبع زجاجة الماء</string>
     <string name="bottle_mode_desc">تتبع زجاجة الماء الخاصة بك وتلقي تذكيرات بشربها وإعادة تعبئتها.</string>
-    <string name="bottle_status_active">جلسة الزجاجة نشطة</string>
+    <string name="bottle_status_active">تتبع الزجاجة</string>
     <string name="bottle_capacity">سعة الزجاجة</string>
     <string name="bottle_target_duration">المدة المحددة للانتهاء من الزجاجة</string>
     <string name="bottle_remaining">المتبقي في الزجاجة: %1$s / %2$s مل</string>
@@ -139,7 +140,7 @@
     <string name="btn_recalculate">إعادة حساب الهدف</string>
 
     <!-- Health Guide Tour & Medical Advices -->
-    <string name="guide_tour_title">دليل د.قطرة الصحي للترطيب</string>
+    <string name="guide_tour_title">دليل د.قطرة</string>
     <string name="guide_dehydration_title">مخاطر وأضرار قلة شرب الماء (الجفاف)</string>
     <string name="dehydration_intro">يؤدي عدم شرب كمية كافية من الماء إلى إجهاد فوري ومضاعفات صحية متعددة:</string>
     <string name="dehydration_point1_title">١. الجفاف الخفيف (فقدان ١-٢٪ من سوائل الجسم):</string>
@@ -158,6 +159,13 @@
     <string name="toxicity_safe_ceiling_desc">حد الأمان الأقصى لجسمك هو %1$s مل يومياً. تجاوز هذا الحد يسبب تخفيفاً خطيراً للأملاح والمعادن بالدم.</string>
     <string name="toxicity_symptoms_title">أعراض التسمم المائي ونقص صوديوم الدم:</string>
     <string name="toxicity_symptoms_desc">• الإنذارات المبكرة: صداع نابض، غثيان، انتفاخ، تشنج عضلي، وكثرة التبول شديد الشفافية.\n• الأعراض الحرجة: تورم خلايا المخ (الوذمة الدماغية)، تشوش ذهني، دوار شديد، نوبات تشنج، وغيبوبة (حالة طوارئ طبية خطيرة تستدعي الإسعاف فوراً).</string>
+
+    <!-- Safe Limits Box in Guide -->
+    <string name="guide_safe_limits_box_title">⚠️ الحدود القصوى الآمنة للشرب (تحذير من الإفراط)</string>
+    <string name="guide_safe_daily_limit_title">الحد الأقصى اليومي الآمن: %1$s مل</string>
+    <string name="guide_safe_daily_limit_desc">تجنب تجاوز هذا الإجمالي خلال اليوم الواحد للوقاية من التسمم المائي وتمدد أملاح الدم.</string>
+    <string name="guide_safe_hourly_limit_title">الحد الأقصى للشرب في الساعة: %1$s مل / ساعة</string>
+    <string name="guide_safe_hourly_limit_desc">تستطيع الكلى السليمة تصريف ٨٠٠ إلى ١٠٠٠ مل فقط في الساعة. لا تشرب أكثر من لتر واحد في ساعة واحدة أبداً!</string>
 
     <!-- Dialog Strings -->
     <string name="dialog_custom_water_desc">أدخل كمية الماء بالمليلتر (مل):</string>
@@ -188,7 +196,7 @@
     <string name="lang_arabic">العربية (Arabic)</string>
 
     <!-- About Section (Clean - no change details) -->
-    <string name="app_version">الإصدار 2.0.0</string>
+    <string name="app_version">الإصدار 3.0.0</string>
     <string name="app_motto">رفيقك الذكي للحفاظ على ترطيب صحي وطاقة متجددة طوال اليوم.</string>
 
     <!-- Notifications -->
@@ -218,6 +226,7 @@
     <string name="complete_profile_action">إكمال الملف الشخصي</string>
     <string name="setting_droppy_tips">إظهار نصائح د.قطرة التفاعلية</string>
     <string name="setting_remind_after_goal">مواصلة التذكير بعد تحقيق الهدف اليومي</string>
+    <string name="setting_remind_after_goal_desc">إيقاف أو مواصلة التذكير بعد تحقيق الهدف. تتوقف التذكيرات إجبارياً عند الحد الأقصى الآمن.</string>
 
     <!-- Dialogs -->
     <string name="dialog_save">حفظ</string>

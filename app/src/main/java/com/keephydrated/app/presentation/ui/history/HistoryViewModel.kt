@@ -72,8 +72,10 @@ class HistoryViewModel @Inject constructor(
 
         when (period) {
             HistoryPeriod.WEEK -> {
-                // Last 7 days including today
-                val days = (6 downTo 0).map { today.minusDays(it.toLong()) }
+                // Week starting on Saturday
+                val daysSinceSaturday = (today.dayOfWeek.value % 7 + 1) % 7
+                val startOfSaturdayWeek = today.minusDays(daysSinceSaturday.toLong())
+                val days = (0..6).map { startOfSaturdayWeek.plusDays(it.toLong()) }
                 val weekSummaries = days.map { date ->
                     summaryByDate[date] ?: DailyHydrationSummary(
                         date = date,
@@ -101,7 +103,7 @@ class HistoryViewModel @Inject constructor(
                 return HistoryUiState(
                     selectedPeriod = period,
                     dailySummaries = allSummariesCache,
-                    periodSummaries = weekSummaries.reversed(),
+                    periodSummaries = weekSummaries,
                     chartData = chartData,
                     averageIntakeMl = avg,
                     daysGoalMetCount = done,

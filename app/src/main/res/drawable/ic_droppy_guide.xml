@@ -4,37 +4,53 @@
     android:viewportWidth="128"
     android:viewportHeight="128">
 
-    <!-- Left Leg and Shoe -->
+    <!-- Human-Inspired Doctor Trousers & Shoes (Left Leg) -->
     <path
-        android:fillColor="#01579B"
-        android:pathData="M48,98 C48,105 46,112 43,116 C41,118 36,118 33,116 C30,113 32,108 37,108 C40,108 42,104 43,98 Z" />
+        android:fillColor="#1565C0"
+        android:pathData="M46,96 L42,112 L49,112 L50,96 Z" />
     <path
-        android:fillColor="#0288D1"
-        android:pathData="M32,114 C32,111 36,110 40,111 C43,112 44,115 42,118 C38,120 32,118 32,114 Z" />
+        android:fillColor="#37474F"
+        android:pathData="M40,111 C36,111 34,113 34,116 C34,118 36,119 46,119 C50,119 51,116 50,113 L47,111 Z" />
+    <path
+        android:fillColor="#90A4AE"
+        android:pathData="M34,118 H50 V119 H34 Z" />
 
-    <!-- Right Leg and Shoe -->
+    <!-- Human-Inspired Doctor Trousers & Shoes (Right Leg) -->
     <path
-        android:fillColor="#01579B"
-        android:pathData="M80,98 C80,105 82,112 85,116 C87,118 92,118 95,116 C98,113 96,108 91,108 C88,108 86,104 85,98 Z" />
+        android:fillColor="#1565C0"
+        android:pathData="M78,96 L79,112 L86,112 L82,96 Z" />
     <path
-        android:fillColor="#0288D1"
-        android:pathData="M96,114 C96,111 92,110 88,111 C85,112 84,115 86,118 C90,120 96,118 96,114 Z" />
+        android:fillColor="#37474F"
+        android:pathData="M78,111 L77,113 C76,116 77,119 82,119 C92,119 94,118 94,116 C94,113 92,111 88,111 Z" />
+    <path
+        android:fillColor="#90A4AE"
+        android:pathData="M78,118 H94 V119 H78 Z" />
 
-    <!-- Left Arm & Cheerful Hand (Waving hello) -->
+    <!-- Human-Inspired Cheerful Waving Hand & Arm (Left Arm) -->
+    <!-- Arm -->
     <path
         android:fillColor="#00B0FF"
-        android:pathData="M37,65 C27,61 16,53 14,45 C12.8,40 16,38 19,41 C21,44 23,46 23,42 C23,39 26,39 27,43 C29,40 32,41 31,45 C33,49 31,55 38,60 Z" />
+        android:pathData="M37,65 C28,60 21,50 18,42 C17,39 20,38 22,40 C24,43 28,52 35,58 Z" />
+    <!-- Human Hand with Thumb and 4 Fingers (Waving) -->
+    <path
+        android:fillColor="#00B0FF"
+        android:pathData="M18,42 C16,42 14,39 15,36 C16,33 19,34 20,37 C21,34 24,34 24,37 C25,34 28,35 27,39 C28,37 31,38 30,42 C29,45 25,47 21,46 Z" />
     <!-- White Doctor Coat Sleeve (Left Arm) -->
     <path
         android:fillColor="#FFFFFF"
         android:strokeColor="#CFD8DC"
         android:strokeWidth="1.2"
-        android:pathData="M32,57 C29,61 33,67 38,66 C41,64 39,58 34,56 Z" />
+        android:pathData="M31,56 C28,60 33,67 38,66 C41,64 39,58 34,55 Z" />
 
-    <!-- Right Arm & Hand (Resting naturally on hip) -->
+    <!-- Human-Inspired Arm & Hand Resting on Hip (Right Arm) -->
+    <!-- Arm -->
     <path
         android:fillColor="#00B0FF"
-        android:pathData="M91,65 C100,67 110,73 112,81 C113,85 109,87 106,84 C104,82 103,85 100,83 C98,81 96,82 96,79 C95,75 98,70 90,67 Z" />
+        android:pathData="M91,65 C98,67 106,73 108,80 C109,83 107,85 104,83 C101,80 97,74 91,68 Z" />
+    <!-- Hand on hip with fingers -->
+    <path
+        android:fillColor="#00B0FF"
+        android:pathData="M104,83 C104,85 101,87 99,85 C97,83 98,80 101,79 C98,79 97,76 100,75 C102,74 105,77 105,80 Z" />
     <!-- White Doctor Coat Sleeve (Right Arm) -->
     <path
         android:fillColor="#FFFFFF"
@@ -57,16 +73,6 @@
         android:fillColor="#FFFFFF"
         android:fillAlpha="0.75"
         android:pathData="M60,18 C60,18 48,34 45,46 C44,52 47,54 49,49 C52,42 60,26 60,18 Z" />
-
-    <!-- Rosy Cheeks -->
-    <path
-        android:fillColor="#FF8A80"
-        android:fillAlpha="0.8"
-        android:pathData="M42,70m-5,0a5,3.8 0 1,0 10,0a5,3.8 0 1,0 -10,0" />
-    <path
-        android:fillColor="#FF8A80"
-        android:fillAlpha="0.8"
-        android:pathData="M86,70m-5,0a5,3.8 0 1,0 10,0a5,3.8 0 1,0 -10,0" />
 
     <!-- Big Expressive Human-Friendly Eyes -->
     <!-- Left Eye -->
@@ -142,13 +148,19 @@
         android:strokeLineCap="round"
         android:pathData="M85.5,52 L94,53" />
 
-    <!-- Warm Cheerful Smile -->
+    <!-- Warm Cheerful Smile with Tooth Effect (No red cheek circles!) -->
+    <!-- Open Mouth -->
     <path
         android:fillColor="#0D1B2A"
-        android:pathData="M57,67 C57,75 71,75 71,67 Z" />
+        android:pathData="M56,66 C56,76 72,76 72,66 Z" />
+    <!-- Pink Tongue -->
     <path
         android:fillColor="#FF5252"
-        android:pathData="M60,69 C61,74 67,74 68,69 Z" />
+        android:pathData="M59,70 C60,75 68,75 69,70 Z" />
+    <!-- Cute White Upper Front Tooth Effect -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M61,66 H67 C67,69.5 66,70.5 64,70.5 C62,70.5 61,69.5 61,66 Z" />
 
     <!-- ==================== DOCTOR COAT (White Lab Coat) ==================== -->
     <!-- Base Coat Body -->

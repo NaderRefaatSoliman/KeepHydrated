@@ -40,6 +40,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,7 +61,7 @@ fun DrDroppyMascotButton(
     modifier: Modifier = Modifier,
     size: Dp = 56.dp
 ) {
-    // Increased level of animation: bouncy vertical jump + slight playful tilt + breathing
+    // Increased level of animation: bouncy vertical jump + arm/hand waving motion + breathing
     val infiniteTransition = rememberInfiniteTransition(label = "droppyJumpTransition")
 
     val verticalJump by infiniteTransition.animateFloat(
@@ -80,14 +82,22 @@ fun DrDroppyMascotButton(
         label = "verticalJump"
     )
 
-    val playfulRotation by infiniteTransition.animateFloat(
-        initialValue = -3f,
-        targetValue = 3f,
+    // Hand/arm waving angle animation
+    val wavingAngle by infiniteTransition.animateFloat(
+        initialValue = -6f,
+        targetValue = 8f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            animation = keyframes {
+                durationMillis = 900
+                -6f at 0 using FastOutSlowInEasing
+                8f at 220 using FastOutSlowInEasing
+                -4f at 450 using FastOutSlowInEasing
+                7f at 680 using FastOutSlowInEasing
+                -6f at 900 using FastOutSlowInEasing
+            },
+            repeatMode = RepeatMode.Restart
         ),
-        label = "playfulRotation"
+        label = "wavingAngle"
     )
 
     val breathingScale by infiniteTransition.animateFloat(
@@ -105,7 +115,10 @@ fun DrDroppyMascotButton(
             .size(size)
             .scale(breathingScale)
             .offset(y = verticalJump.dp)
-            .rotate(playfulRotation)
+            .graphicsLayer {
+                rotationZ = wavingAngle
+                transformOrigin = TransformOrigin(0.35f, 0.70f)
+            }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

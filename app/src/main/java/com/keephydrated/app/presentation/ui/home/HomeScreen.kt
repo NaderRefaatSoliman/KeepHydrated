@@ -72,7 +72,8 @@ import com.keephydrated.app.util.LocalizationUtils
 fun HomeScreen(
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
-    resetGuideKey: Int = 0
+    resetGuideKey: Int = 0,
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -127,8 +128,10 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
-                        // Complete Profile Reminder Banner (if onboarding was skipped)
-                        if (!uiState.userSettings.isOnboardingCompleted) {
+                        // Complete Profile Reminder Banner (if onboarding was skipped and fields not yet filled)
+                        val isProfileIncomplete = !uiState.userSettings.isOnboardingCompleted &&
+                            (uiState.userSettings.userAge <= 0 || uiState.userSettings.userWeightKg <= 0 || uiState.userSettings.userHeightCm <= 0)
+                        if (isProfileIncomplete) {
                             item {
                                 Card(
                                     shape = RoundedCornerShape(16.dp),
@@ -161,7 +164,7 @@ fun HomeScreen(
                                         }
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Button(
-                                            onClick = { showHealthGuide = true },
+                                            onClick = onNavigateToProfile,
                                             shape = RoundedCornerShape(10.dp),
                                             colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
                                         ) {
@@ -191,20 +194,33 @@ fun HomeScreen(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            // Safe Daily Upper Limit Badge
+                            // Safe Daily Upper Limit Badge in RED Box
                             val formattedSafeLimit = LocalizationUtils.formatNumber(uiState.safeMaxDailyMl, isArabic)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                color = Color(0xFFFFEBEE),
+                                border = BorderStroke(1.dp, Color(0xFFE57373)),
+                                modifier = Modifier.padding(top = 4.dp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.safe_daily_limit_badge, formattedSafeLimit),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    ),
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = Color(0xFFD32F2F),
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.safe_daily_limit_badge, formattedSafeLimit),
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFD32F2F)
+                                        )
+                                    )
+                                }
                             }
 
                             // Undo Icon Button Placed Ergonomically Directly Beneath Tracking Circle
@@ -313,7 +329,8 @@ fun HomeScreen(
 
                         item {
                             QuickAddSection(
-                                onAddWater = { amount -> viewModel.addWater(amount) }
+                                onAddWater = { amount -> viewModel.addWater(amount) },
+                                onCustomAddClick = { showCustomDialog = true }
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                         }
@@ -388,22 +405,6 @@ fun HomeScreen(
                             onClick = { showHealthGuide = true },
                             showTips = uiState.userSettings.droppyTipsEnabled
                         )
-                    }
-
-                    // Floating Action Button for Custom Add
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        contentAlignment = if (isArabic) Alignment.BottomStart else Alignment.BottomEnd
-                    ) {
-                        FloatingActionButton(
-                            onClick = { showCustomDialog = true },
-                            containerColor = BluePrimary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.custom_add))
-                        }
                     }
                 }
             }

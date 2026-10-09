@@ -36,11 +36,12 @@
     <string name="container_glass">Glass</string>
     <string name="container_can">Can</string>
     <string name="container_bottle">Bottle</string>
+    <string name="container_custom">Custom</string>
 
     <!-- Bottle Tracking Mode -->
     <string name="bottle_mode_title">Bottle Tracking Mode</string>
     <string name="bottle_mode_desc">Track your water bottle intake and get refill reminders.</string>
-    <string name="bottle_status_active">Bottle Session Active</string>
+    <string name="bottle_status_active">Bottle Tracking</string>
     <string name="bottle_capacity">Bottle Capacity</string>
     <string name="bottle_target_duration">Target Drink Duration</string>
     <string name="bottle_remaining">Remaining in bottle: %1$s / %2$s ml</string>
@@ -72,7 +73,7 @@
     <string name="settings">Settings</string>
     <string name="category_profile">Personal Health Profile &amp; Calculator</string>
     <string name="desc_category_profile">Age, weight, sports activity &amp; personalized goal</string>
-    <string name="category_guide">Droppy\'s Health Guide &amp; Warnings</string>
+    <string name="category_guide">Dr. Droppy Health Guide &amp; Warnings</string>
     <string name="desc_category_guide">Dehydration hazards &amp; water toxicity safety</string>
     <string name="category_goal">Hydration Target &amp; Quick Add</string>
     <string name="desc_category_goal">Daily goal, frequent sip amount &amp; quick-add options</string>
@@ -139,7 +140,7 @@
     <string name="btn_recalculate">Recalculate Target</string>
 
     <!-- Health Guide Tour & Medical Advices -->
-    <string name="guide_tour_title">Droppy\'s Hydration &amp; Health Guide</string>
+    <string name="guide_tour_title">Dr. Droppy</string>
     <string name="guide_dehydration_title">Dangers &amp; Bad Effects of Dehydration</string>
     <string name="dehydration_intro">Not drinking enough water triggers significant strain on human physiology:</string>
     <string name="dehydration_point1_title">1. Mild Dehydration (1–2% loss):</string>
@@ -158,6 +159,13 @@
     <string name="toxicity_safe_ceiling_desc">Your personal safe maximum intake is %1$s ml per day. Exceeding this dilutes essential blood electrolytes.</string>
     <string name="toxicity_symptoms_title">Symptoms of Water Toxicity (Hyponatremia):</string>
     <string name="toxicity_symptoms_desc">• Early Warning: Persistent headache, nausea, bloating, muscle cramps, and excessive clear urination.\n• Severe / Critical: Confusion, drowsiness, disorientation, seizures, cerebral edema, and coma. (Requires urgent emergency hospital care).</string>
+
+    <!-- Safe Limits Box in Guide -->
+    <string name="guide_safe_limits_box_title">⚠️ Safe Maximum Intake Limits (Overhydration Warning)</string>
+    <string name="guide_safe_daily_limit_title">Safe Daily Upper Limit: %1$s ml</string>
+    <string name="guide_safe_daily_limit_desc">Do not exceed this total in a single day to prevent hyponatremia (water toxicity).</string>
+    <string name="guide_safe_hourly_limit_title">Maximum Hourly Limit: %1$s ml / hour</string>
+    <string name="guide_safe_hourly_limit_desc">Adult kidneys can only filter ~800 to 1,000 ml per hour. Never drink more than 1 liter in a single hour!</string>
 
     <!-- Dialog Strings -->
     <string name="dialog_custom_water_desc">Enter the water amount in milliliters (ml):</string>
@@ -188,7 +196,7 @@
     <string name="lang_arabic">العربية (Arabic)</string>
 
     <!-- About Section (Clean - no change details) -->
-    <string name="app_version">Version 2.0.0</string>
+    <string name="app_version">Version 3.0.0</string>
     <string name="app_motto">Your smart personal companion for daily healthy hydration and wellness.</string>
 
     <!-- Notifications -->
@@ -218,6 +226,7 @@
     <string name="complete_profile_action">Complete Profile</string>
     <string name="setting_droppy_tips">Show Dr. Droppy tips bubble</string>
     <string name="setting_remind_after_goal">Keep reminding after reaching daily goal</string>
+    <string name="setting_remind_after_goal_desc">Stop or continue reminders once target is met. Reminders will always strictly stop at safe upper limit.</string>
 
     <!-- Dialogs -->
     <string name="dialog_save">Save</string>
