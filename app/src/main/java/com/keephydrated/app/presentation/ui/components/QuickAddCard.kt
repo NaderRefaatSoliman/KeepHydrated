@@ -126,7 +126,7 @@ fun QuickAddCard(
             Text(
                 text = stringResource(container.titleResId),
                 style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = BlueOnPrimaryContainer.copy(alpha = 0.85f),
                     fontWeight = FontWeight.Medium
                 ),
@@ -181,7 +181,7 @@ fun CustomAddCard(
             Text(
                 text = stringResource(R.string.container_custom),
                 style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = BlueOnPrimaryContainer.copy(alpha = 0.85f),
                     fontWeight = FontWeight.Medium
                 ),

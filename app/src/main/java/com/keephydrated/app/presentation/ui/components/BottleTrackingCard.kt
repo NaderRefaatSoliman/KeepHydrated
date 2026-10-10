@@ -333,7 +333,7 @@ fun BottleTrackingCard(
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
 
@@ -396,7 +396,7 @@ fun BottleTrackingCard(
                 colors = ButtonDefaults.buttonColors(containerColor = CyanSecondary),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(44.dp)
+                    .defaultMinSize(minHeight = 44.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,

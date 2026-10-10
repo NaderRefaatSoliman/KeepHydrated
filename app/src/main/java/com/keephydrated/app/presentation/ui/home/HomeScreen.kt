@@ -165,13 +165,15 @@ fun HomeScreen(
                                         Button(
                                             onClick = onNavigateToProfile,
                                             shape = RoundedCornerShape(10.dp),
-                                            colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+                                            colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
+                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
                                         ) {
                                             Text(
                                                 text = stringResource(R.string.complete_profile_action),
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                maxLines = 1
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 2
                                             )
                                         }
                                     }

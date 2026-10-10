@@ -134,8 +134,7 @@ fun SettingsScreen(
     onNavigateToHome: () -> Unit = {},
     modifier: Modifier = Modifier,
     resetGuideKey: Int = 0,
-    activeCategory: SettingsCategory? = null,
-    onCategoryChange: (SettingsCategory?) -> Unit = {}
+    openProfileKey: Int = 0
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -144,20 +143,19 @@ fun SettingsScreen(
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    var localSelectedCategory by remember { mutableStateOf<SettingsCategory?>(activeCategory) }
-    val currentSelectedCategory = localSelectedCategory ?: activeCategory
+    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
     var showHealthGuideScreen by remember { mutableStateOf(false) }
 
-    LaunchedEffect(activeCategory) {
-        if (activeCategory != null) {
-            localSelectedCategory = activeCategory
+    LaunchedEffect(openProfileKey) {
+        if (openProfileKey > 0) {
+            selectedCategory = SettingsCategory.PROFILE
+            showHealthGuideScreen = false
         }
     }
 
     LaunchedEffect(resetGuideKey) {
         if (resetGuideKey > 0) {
-            localSelectedCategory = null
-            onCategoryChange(null)
+            selectedCategory = null
             showHealthGuideScreen = false
         }
     }
@@ -201,9 +199,8 @@ fun SettingsScreen(
     BackHandler(enabled = true) {
         if (showHealthGuideScreen) {
             showHealthGuideScreen = false
-        } else if (currentSelectedCategory != null) {
-            localSelectedCategory = null
-            onCategoryChange(null)
+        } else if (selectedCategory != null) {
+            selectedCategory = null
         } else {
             onNavigateToHome()
         }
@@ -220,20 +217,21 @@ fun SettingsScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = if (currentSelectedCategory != null) {
-                                stringResource(currentSelectedCategory.titleResId)
+                            text = if (selectedCategory != null) {
+                                stringResource(selectedCategory!!.titleResId)
                             } else {
                                 stringResource(R.string.settings)
                             },
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     },
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                if (currentSelectedCategory != null) {
-                                    localSelectedCategory = null
-                                    onCategoryChange(null)
+                                if (selectedCategory != null) {
+                                    selectedCategory = null
                                 } else {
                                     onNavigateToHome()
                                 }
@@ -241,7 +239,7 @@ fun SettingsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = if (currentSelectedCategory != null) stringResource(R.string.back) else stringResource(R.string.nav_home)
+                                contentDescription = if (selectedCategory != null) stringResource(R.string.back) else stringResource(R.string.nav_home)
                             )
                         }
                     },
@@ -270,7 +268,7 @@ fun SettingsScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                if (currentSelectedCategory == null) {
+                if (selectedCategory == null) {
                     // ==========================================
                     // MAIN SETTINGS: LIST OF MAIN CATEGORIES
                     // ==========================================
@@ -285,10 +283,7 @@ fun SettingsScreen(
                             SettingsCategoryItem(
                                 category = category,
                                 summary = getCategorySummary(category, uiState, isArabic),
-                                onClick = {
-                                    localSelectedCategory = category
-                                    onCategoryChange(category)
-                                }
+                                onClick = { selectedCategory = category }
                             )
                         }
 
@@ -310,15 +305,14 @@ fun SettingsScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        when (currentSelectedCategory) {
+                        when (selectedCategory!!) {
                             SettingsCategory.PROFILE -> {
                                 ProfileSettingsDetail(
                                     uiState = uiState,
                                     isArabic = isArabic,
                                     onSaveProfile = { name, age, sex, weight, height, activity, goal ->
                                         viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
-                                        localSelectedCategory = null
-                                        onCategoryChange(null)
+                                        selectedCategory = null
                                     }
                                 )
                             }
