@@ -229,4 +229,16 @@ class SettingsViewModelTest {
         viewModel.targetCategory = null
         assertEquals(null, viewModel.targetCategory)
     }
+
+    @Test
+    fun `showHealthGuideScreen state toggles properly`() {
+        val viewModel = createViewModel()
+        assertEquals(false, viewModel.showHealthGuideScreen)
+
+        viewModel.showHealthGuideScreen = true
+        assertEquals(true, viewModel.showHealthGuideScreen)
+
+        viewModel.showHealthGuideScreen = false
+        assertEquals(false, viewModel.showHealthGuideScreen)
+    }
 }

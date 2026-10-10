@@ -146,7 +146,7 @@ fun SettingsScreen(
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     val selectedCategory = viewModel.targetCategory
-    var showHealthGuideScreen by remember { mutableStateOf(false) }
+    val showHealthGuideScreen = viewModel.showHealthGuideScreen
 
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
@@ -186,7 +186,7 @@ fun SettingsScreen(
     // Handle back button: returns to category list or goes to Home tab
     BackHandler(enabled = true) {
         if (showHealthGuideScreen) {
-            showHealthGuideScreen = false
+            viewModel.showHealthGuideScreen = false
         } else if (selectedCategory != null) {
             viewModel.targetCategory = null
         } else {
@@ -197,7 +197,7 @@ fun SettingsScreen(
     if (showHealthGuideScreen) {
         HealthGuideScreen(
             userSettings = uiState.toUserSettings(),
-            onBackClick = { showHealthGuideScreen = false }
+            onBackClick = { viewModel.showHealthGuideScreen = false }
         )
     } else {
         Scaffold(
@@ -219,7 +219,7 @@ fun SettingsScreen(
                         IconButton(
                             onClick = {
                                 if (showHealthGuideScreen) {
-                                    showHealthGuideScreen = false
+                                    viewModel.showHealthGuideScreen = false
                                 } else if (selectedCategory != null) {
                                     viewModel.targetCategory = null
                                 } else {
@@ -235,7 +235,7 @@ fun SettingsScreen(
                     },
                     actions = {
                         DrDroppyMascotButton(
-                            onClick = { showHealthGuideScreen = true },
+                            onClick = { viewModel.showHealthGuideScreen = true },
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     },
@@ -354,7 +354,7 @@ fun SettingsScreen(
                             DrDroppySettingsDetail(
                                 uiState = uiState,
                                 isArabic = isArabic,
-                                onOpenGuide = { showHealthGuideScreen = true },
+                                onOpenGuide = { viewModel.showHealthGuideScreen = true },
                                 onToggleDroppyTips = { viewModel.updateDroppyTipsEnabled(it) }
                             )
                         }

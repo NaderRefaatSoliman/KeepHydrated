@@ -226,6 +226,7 @@ fun KeepHydratedMain(
                             selected = selected,
                             onClick = {
                                 tabResetKey++
+                                settingsViewModel.showHealthGuideScreen = false
                                 if (screen.route == Screen.Settings.route) {
                                     settingsViewModel.targetCategory = null
                                 }

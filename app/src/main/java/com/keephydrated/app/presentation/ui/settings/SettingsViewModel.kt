@@ -41,6 +41,7 @@ class SettingsViewModel @Inject constructor(
     private var previewPlayer: MediaPlayer? = null
 
     var targetCategory by mutableStateOf<SettingsCategory?>(null)
+    var showHealthGuideScreen by mutableStateOf(false)
 
     init {
         observeSettings()
