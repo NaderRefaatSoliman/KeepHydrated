@@ -144,14 +144,22 @@ fun SettingsScreen(
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    var localSelectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
-    val currentSelectedCategory = activeCategory ?: localSelectedCategory
+    var localSelectedCategory by remember { mutableStateOf<SettingsCategory?>(activeCategory) }
+    val currentSelectedCategory = localSelectedCategory ?: activeCategory
     var showHealthGuideScreen by remember { mutableStateOf(false) }
 
+    LaunchedEffect(activeCategory) {
+        if (activeCategory != null) {
+            localSelectedCategory = activeCategory
+        }
+    }
+
     LaunchedEffect(resetGuideKey) {
-        localSelectedCategory = null
-        onCategoryChange(null)
-        showHealthGuideScreen = false
+        if (resetGuideKey > 0) {
+            localSelectedCategory = null
+            onCategoryChange(null)
+            showHealthGuideScreen = false
+        }
     }
 
     var showGoalDialog by remember { mutableStateOf(false) }
@@ -1605,8 +1613,38 @@ fun WakingDayScheduleDialog(
     var wakeHour by remember { mutableIntStateOf(currentStartHour) }
     var sleepHour by remember { mutableIntStateOf(currentEndHour) }
     var stepHours by remember { mutableIntStateOf(2) }
-    var customWakeInput by remember { mutableStateOf(currentStartHour.toString()) }
-    var customSleepInput by remember { mutableStateOf(currentEndHour.toString()) }
+
+    fun to12HourPair(h24: Int): Pair<Int, Boolean> {
+        val h = (h24 % 24 + 24) % 24
+        return when {
+            h == 0 -> 12 to false
+            h < 12 -> h to false
+            h == 12 -> 12 to true
+            else -> (h - 12) to true
+        }
+    }
+
+    fun to24Hour(hour12: Int, isPm: Boolean): Int {
+        val h = hour12.coerceIn(1, 12)
+        return when {
+            !isPm && h == 12 -> 0
+            !isPm -> h
+            isPm && h == 12 -> 12
+            else -> h + 12
+        }
+    }
+
+    val initWake = remember(currentStartHour) { to12HourPair(currentStartHour) }
+    val initSleep = remember(currentEndHour) { to12HourPair(currentEndHour) }
+
+    var wakeHour12Str by remember { mutableStateOf(initWake.first.toString()) }
+    var wakeMinuteStr by remember { mutableStateOf("00") }
+    var wakeIsPm by remember { mutableStateOf(initWake.second) }
+
+    var sleepHour12Str by remember { mutableStateOf(initSleep.first.toString()) }
+    var sleepMinuteStr by remember { mutableStateOf("00") }
+    var sleepIsPm by remember { mutableStateOf(initSleep.second) }
+
     var showCustomHoursInput by remember { mutableStateOf(false) }
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -1634,7 +1672,12 @@ fun WakingDayScheduleDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(stringResource(R.string.label_wake_time), fontWeight = FontWeight.SemiBold)
-                    Text(LocalizationUtils.formatHour(wakeHour, isArabic), fontWeight = FontWeight.Bold, color = BluePrimary)
+                    val m = wakeMinuteStr.toIntOrNull() ?: 0
+                    Text(
+                        LocalizationUtils.formatTime(wakeHour, m, isArabic),
+                        fontWeight = FontWeight.Bold,
+                        color = BluePrimary
+                    )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
@@ -1646,7 +1689,10 @@ fun WakingDayScheduleDialog(
                             selected = wakeHour == h,
                             onClick = {
                                 wakeHour = h
-                                customWakeInput = h.toString()
+                                val pair = to12HourPair(h)
+                                wakeHour12Str = pair.first.toString()
+                                wakeMinuteStr = "00"
+                                wakeIsPm = pair.second
                             },
                             label = { Text(LocalizationUtils.formatHour(h, isArabic), fontSize = 11.sp) },
                             modifier = Modifier.height(30.dp)
@@ -1662,7 +1708,12 @@ fun WakingDayScheduleDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(stringResource(R.string.label_sleep_time), fontWeight = FontWeight.SemiBold)
-                    Text(LocalizationUtils.formatHour(sleepHour, isArabic), fontWeight = FontWeight.Bold, color = BluePrimary)
+                    val m = sleepMinuteStr.toIntOrNull() ?: 0
+                    Text(
+                        LocalizationUtils.formatTime(sleepHour, m, isArabic),
+                        fontWeight = FontWeight.Bold,
+                        color = BluePrimary
+                    )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
@@ -1674,7 +1725,10 @@ fun WakingDayScheduleDialog(
                             selected = sleepHour == h,
                             onClick = {
                                 sleepHour = h
-                                customSleepInput = h.toString()
+                                val pair = to12HourPair(h)
+                                sleepHour12Str = pair.first.toString()
+                                sleepMinuteStr = "00"
+                                sleepIsPm = pair.second
                             },
                             label = { Text(LocalizationUtils.formatHour(h, isArabic), fontSize = 11.sp) },
                             modifier = Modifier.height(30.dp)
@@ -1682,7 +1736,7 @@ fun WakingDayScheduleDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -1702,33 +1756,122 @@ fun WakingDayScheduleDialog(
                 }
 
                 if (showCustomHoursInput) {
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Wake Time Custom Section
+                    Text(
+                        text = stringResource(R.string.enter_wake_hour),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, color = BluePrimary)
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         OutlinedTextField(
-                            value = customWakeInput,
+                            value = wakeHour12Str,
                             onValueChange = { input ->
-                                customWakeInput = input
-                                input.toIntOrNull()?.let { if (it in 0..23) wakeHour = it }
+                                wakeHour12Str = input
+                                input.toIntOrNull()?.let {
+                                    if (it in 1..12) wakeHour = to24Hour(it, wakeIsPm)
+                                }
                             },
-                            label = { Text(stringResource(R.string.enter_wake_hour), fontSize = 10.sp) },
+                            label = { Text(if (isArabic) "ساعة" else "Hour", fontSize = 10.sp) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
+                        Text(":", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         OutlinedTextField(
-                            value = customSleepInput,
+                            value = wakeMinuteStr,
                             onValueChange = { input ->
-                                customSleepInput = input
-                                input.toIntOrNull()?.let { if (it in 0..23) sleepHour = it }
+                                if (input.length <= 2) wakeMinuteStr = input
                             },
-                            label = { Text(stringResource(R.string.enter_sleep_hour), fontSize = 10.sp) },
+                            label = { Text(if (isArabic) "دقيقة" else "Min", fontSize = 10.sp) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            FilterChip(
+                                selected = !wakeIsPm,
+                                onClick = {
+                                    wakeIsPm = false
+                                    wakeHour12Str.toIntOrNull()?.let { wakeHour = to24Hour(it, false) }
+                                },
+                                label = { Text(if (isArabic) "ص" else "AM", fontSize = 10.sp) },
+                                modifier = Modifier.height(32.dp)
+                            )
+                            FilterChip(
+                                selected = wakeIsPm,
+                                onClick = {
+                                    wakeIsPm = true
+                                    wakeHour12Str.toIntOrNull()?.let { wakeHour = to24Hour(it, true) }
+                                },
+                                label = { Text(if (isArabic) "م" else "PM", fontSize = 10.sp) },
+                                modifier = Modifier.height(32.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Sleep Time Custom Section
+                    Text(
+                        text = stringResource(R.string.enter_sleep_hour),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, color = BluePrimary)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = sleepHour12Str,
+                            onValueChange = { input ->
+                                sleepHour12Str = input
+                                input.toIntOrNull()?.let {
+                                    if (it in 1..12) sleepHour = to24Hour(it, sleepIsPm)
+                                }
+                            },
+                            label = { Text(if (isArabic) "ساعة" else "Hour", fontSize = 10.sp) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        Text(":", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        OutlinedTextField(
+                            value = sleepMinuteStr,
+                            onValueChange = { input ->
+                                if (input.length <= 2) sleepMinuteStr = input
+                            },
+                            label = { Text(if (isArabic) "دقيقة" else "Min", fontSize = 10.sp) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            FilterChip(
+                                selected = !sleepIsPm,
+                                onClick = {
+                                    sleepIsPm = false
+                                    sleepHour12Str.toIntOrNull()?.let { sleepHour = to24Hour(it, false) }
+                                },
+                                label = { Text(if (isArabic) "ص" else "AM", fontSize = 10.sp) },
+                                modifier = Modifier.height(32.dp)
+                            )
+                            FilterChip(
+                                selected = sleepIsPm,
+                                onClick = {
+                                    sleepIsPm = true
+                                    sleepHour12Str.toIntOrNull()?.let { sleepHour = to24Hour(it, true) }
+                                },
+                                label = { Text(if (isArabic) "م" else "PM", fontSize = 10.sp) },
+                                modifier = Modifier.height(32.dp)
+                            )
+                        }
                     }
                 }
 

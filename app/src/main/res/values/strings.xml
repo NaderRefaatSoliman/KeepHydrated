@@ -97,9 +97,9 @@
     <string name="theme_light">Light Mode ☀️</string>
     <string name="theme_dark">Dark Mode 🌙</string>
     <string name="open_droppy_guide">Open Dr. Droppy Health Guide 🩺</string>
-    <string name="custom_hours_input">Custom Hours Input</string>
-    <string name="enter_wake_hour">Wake Hour (0 - 23):</string>
-    <string name="enter_sleep_hour">Sleep Hour (0 - 23):</string>
+    <string name="custom_hours_input">Custom hours</string>
+    <string name="enter_wake_hour">Wake time (Hour : Min):</string>
+    <string name="enter_sleep_hour">Sleep time (Hour : Min):</string>
 
     <!-- Settings Options -->
     <string name="daily_target">Daily Target</string>

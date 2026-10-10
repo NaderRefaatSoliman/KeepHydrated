@@ -228,12 +228,24 @@ fun KeepHydratedMain(
                                 tabResetKey++
                                 activeSettingsCategory = null
                                 if (currentRoute != screen.route) {
-                                    navController.navigate(screen.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    if (screen.route == Screen.Home.route) {
+                                        if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
+                                            navController.navigate(Screen.Home.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                    } else {
+                                        navController.navigate(screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
                                 }
                             },
@@ -267,9 +279,10 @@ fun KeepHydratedMain(
                         activeSettingsCategory = com.keephydrated.app.presentation.ui.settings.SettingsCategory.PROFILE
                         navController.navigate(Screen.Settings.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = false
+                                saveState = true
                             }
                             launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )
@@ -281,12 +294,14 @@ fun KeepHydratedMain(
                     onNavigateToHome = {
                         tabResetKey++
                         activeSettingsCategory = null
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     },
                     resetGuideKey = tabResetKey
@@ -299,12 +314,14 @@ fun KeepHydratedMain(
                     onNavigateToHome = {
                         tabResetKey++
                         activeSettingsCategory = null
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     },
                     resetGuideKey = tabResetKey,

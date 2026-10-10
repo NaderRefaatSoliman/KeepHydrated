@@ -46,4 +46,28 @@ object LocalizationUtils {
         }
         return "$formattedNumber $period"
     }
+
+    /**
+     * Formats hour and minute into localized 12-hour format with AM/PM (ص / م).
+     */
+    fun formatTime(hour: Int, minute: Int, isArabic: Boolean): String {
+        val localizedHour = when {
+            hour == 0 || hour == 12 -> 12
+            hour < 12 -> hour
+            else -> hour - 12
+        }
+        val formattedHour = formatNumber(localizedHour, isArabic)
+        val clampedMinute = minute.coerceIn(0, 59)
+        val formattedMinute = if (isArabic) {
+            if (clampedMinute < 10) "٠${formatNumber(clampedMinute, isArabic)}" else formatNumber(clampedMinute, isArabic)
+        } else {
+            if (clampedMinute < 10) "0$clampedMinute" else "$clampedMinute"
+        }
+        val period = if (hour < 12) {
+            if (isArabic) "ص" else "AM"
+        } else {
+            if (isArabic) "م" else "PM"
+        }
+        return "$formattedHour:$formattedMinute $period"
+    }
 }

@@ -97,9 +97,9 @@
     <string name="theme_light">الوضع الفاتح ☀️</string>
     <string name="theme_dark">الوضع الداكن 🌙</string>
     <string name="open_droppy_guide">فتح دليل د.قطرة الصحي 🩺</string>
-    <string name="custom_hours_input">إدخال يدوي مخصص للساعات</string>
-    <string name="enter_wake_hour">ساعة الاستيقاظ (٠ - ٢٣):</string>
-    <string name="enter_sleep_hour">ساعة النوم (٠ - ٢٣):</string>
+    <string name="custom_hours_input">أوقات مخصصة</string>
+    <string name="enter_wake_hour">وقت الاستيقاظ (ساعة : دقيقة):</string>
+    <string name="enter_sleep_hour">وقت النوم (ساعة : دقيقة):</string>
     <string name="freq_every_30m">كل ٣٠ دقيقة</string>
 
     <!-- Settings Options -->
