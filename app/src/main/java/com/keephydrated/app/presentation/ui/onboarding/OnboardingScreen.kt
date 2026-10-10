@@ -74,7 +74,7 @@ fun OnboardingScreen(
     onLanguageChanged: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val isArabic = currentLanguage == "ar"
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -93,7 +93,7 @@ fun OnboardingScreen(
 
                 TextButton(onClick = { viewModel.skipOnboarding(onFinished) }) {
                     Text(
-                        text = stringResource(R.string.skip_for_now),
+                        text = if (isArabic) "تخطي الآن" else "Skip for now",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -113,7 +113,7 @@ fun OnboardingScreen(
                         onClick = { viewModel.prevStep() },
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(stringResource(R.string.btn_back))
+                        Text(if (isArabic) "السابق" else "Back")
                     }
                 } else {
                     Spacer(modifier = Modifier.width(1.dp))
@@ -125,7 +125,7 @@ fun OnboardingScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(stringResource(R.string.btn_next))
+                        Text(if (isArabic) "التالي" else "Next")
                     }
                 } else {
                     Button(
@@ -133,7 +133,10 @@ fun OnboardingScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(stringResource(R.string.btn_finish_onboarding), fontWeight = FontWeight.Bold)
+                        Text(
+                            text = if (isArabic) "اعتماد الهدف والبدء 💧" else "Set Target & Begin 💧",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

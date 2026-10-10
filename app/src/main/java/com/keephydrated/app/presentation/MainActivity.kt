@@ -112,15 +112,11 @@ class MainActivity : ComponentActivity() {
                     setLayoutDirection(targetLocale)
                 }
             }
-            val baseContext = LocalContext.current
-            val localizedContext = remember(baseContext, localizedConfig) {
-                baseContext.createConfigurationContext(localizedConfig)
-            }
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(localizedConfig, resources.displayMetrics)
 
             LaunchedEffect(language) {
                 LocaleHelper.setLocale(this@MainActivity, language)
-                @Suppress("DEPRECATION")
-                resources.updateConfiguration(localizedConfig, resources.displayMetrics)
             }
 
             val isDarkTheme = when (userSettings?.themeMode) {
@@ -130,7 +126,6 @@ class MainActivity : ComponentActivity() {
             }
 
             CompositionLocalProvider(
-                LocalContext provides localizedContext,
                 LocalConfiguration provides localizedConfig,
                 LocalLayoutDirection provides layoutDirection
             ) {
