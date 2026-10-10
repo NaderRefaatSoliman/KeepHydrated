@@ -128,10 +128,9 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
-                        // Complete Profile Reminder Banner (if onboarding was skipped and fields not yet filled)
-                        val isProfileIncomplete = !uiState.userSettings.isOnboardingCompleted &&
-                            (uiState.userSettings.userAge <= 0 || uiState.userSettings.userWeightKg <= 0 || uiState.userSettings.userHeightCm <= 0)
-                        if (isProfileIncomplete) {
+                        // Complete Profile Reminder Banner (shown when onboarding was skipped until user saves completed profile)
+                        val showProfileReminder = uiState.userSettings.isOnboardingSkipped && !uiState.userSettings.isOnboardingCompleted
+                        if (showProfileReminder) {
                             item {
                                 Card(
                                     shape = RoundedCornerShape(16.dp),
@@ -320,7 +319,6 @@ fun HomeScreen(
                                 BottleTrackingCard(
                                     bottleStatus = uiState.bottleStatus,
                                     frequentAmountMl = uiState.frequentIntakeMl,
-                                    onDrinkSip = { viewModel.drinkFromBottle() },
                                     onRefillBottle = { viewModel.refillBottle() }
                                 )
                                 Spacer(modifier = Modifier.height(20.dp))

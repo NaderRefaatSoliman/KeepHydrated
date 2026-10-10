@@ -85,6 +85,34 @@ enum class CelebrationSound(
     OCEAN_TRIUMPH("celebration_wave", "Ocean Triumph", "Uplifting coastal surge with soaring chimes", "celebration_wave"),
     SYSTEM_DEFAULT("system_default", "System Default", "Standard celebration notification", "");
 
+    fun getLocalizedDisplayName(isArabic: Boolean): String {
+        return if (isArabic) {
+            when (this) {
+                CHIME_FANFARE -> "نغمة كأس النصر"
+                VICTORY_SPLASH -> "رذاذ النصر المنعش"
+                SPARKLING_BUBBLES -> "فقاعات احتفالية مبهرة"
+                OCEAN_TRIUMPH -> "هدير المحيط المنتصر"
+                SYSTEM_DEFAULT -> "نغمة النظام الافتراضية"
+            }
+        } else {
+            displayName
+        }
+    }
+
+    fun getLocalizedDescription(isArabic: Boolean): String {
+        return if (isArabic) {
+            when (this) {
+                CHIME_FANFARE -> "رنين نصر متألق عند إكمال الهدف"
+                VICTORY_SPLASH -> "موجة رذاذ مرحة واحتفالية"
+                SPARKLING_BUBBLES -> "فقاعات مائية مبهجة مع أجراس"
+                OCEAN_TRIUMPH -> "موجة صاعدة ملهمة مع أصوات رنانة"
+                SYSTEM_DEFAULT -> "تنبيه الهاتف الافتراضي"
+            }
+        } else {
+            description
+        }
+    }
+
     companion object {
         fun fromId(id: String?): CelebrationSound {
             return entries.find { it.id == id } ?: CHIME_FANFARE
@@ -123,7 +151,8 @@ data class UserSettings(
     val isOnboardingCompleted: Boolean = false,
     val isOnboardingSkipped: Boolean = false,
     val droppyTipsEnabled: Boolean = true,
-    val remindAfterGoalReached: Boolean = false
+    val remindAfterGoalReached: Boolean = false,
+    val themeMode: String = "system" // "system", "light", "dark"
 ) {
     fun toBottleStatus(): BottleStatus {
         return BottleStatus(

@@ -42,4 +42,5 @@ interface SettingsRepository {
     suspend fun skipOnboarding()
     suspend fun updateDroppyTipsEnabled(enabled: Boolean)
     suspend fun updateRemindAfterGoalReached(enabled: Boolean)
+    suspend fun updateThemeMode(themeMode: String)
 }

@@ -114,4 +114,8 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateRemindAfterGoalReached(enabled: Boolean) {
         preferencesDataStore.updateRemindAfterGoalReached(enabled)
     }
+
+    override suspend fun updateThemeMode(themeMode: String) {
+        preferencesDataStore.updateThemeMode(themeMode)
+    }
 }

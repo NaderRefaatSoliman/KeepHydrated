@@ -146,7 +146,17 @@ fun DrDroppyFloatingMascot(
             "لا تتجاوز لتر ماء في الساعة الواحدة لحماية كليتيك! 🩺",
             "ابدأ يومك بكوب ماء منعش لتنشيط جسمك! ✨",
             "الماء يحسن تركيزك وطاقتك اليومية! 🧠",
-            "تجنب الإفراط المفاجئ في الشرب، الاعتدال سر الصحة! ⚖️"
+            "تجنب الإفراط المفاجئ في الشرب، الاعتدال سر الصحة! ⚖️",
+            "شرب الماء قبل الوجبات بـ ٣٠ دقيقة يساعد على تحسين الهضم! 🥗",
+            "لون البول الفاتح الشفاف علامة ممتازة على رطوبة جسمك المثالية! 🎯",
+            "اشرب الماء بانتظام أثناء ممارسة الرياضة لتعويض الأملاح المفقودة! 🏃‍♂️",
+            "الترطيب الجيد يمنع الصداع النصفي ويزيد نضارة بشرتك! 🌟",
+            "الماء البارد ينعش الجسم والماء الفاتر يهدئ المعدة! 🚰",
+            "الشعور بالعطش يعني أن جسمك بدأ بالفعل في الجفاف، اشرب الآن! ⏳",
+            "تناول الخضروات والفواكه يمنحك ترطيباً طبيعياً غنياً بالألياف! 🍉",
+            "كوب ماء قبل النوم يحافظ على نشاط دورتك الدموية أثناء الراحة! 🌙",
+            "استبدل المشروبات الغازية بالماء لصحة أفضل لكليتيك وقلبك! ❤️",
+            "الترطيب الكافي يحمي المفاصل ويقلل من آلام الظهر والإجهاد! 💪"
         )
     } else {
         listOf(
@@ -154,7 +164,17 @@ fun DrDroppyFloatingMascot(
             "Kidneys excrete max 800-1,000 ml/hr. Sip wisely! 🩺",
             "Start your morning with a fresh glass of water! ✨",
             "Proper hydration boosts energy and focus! 🧠",
-            "Avoid chugging water all at once; consistency is key! ⚖️"
+            "Avoid chugging water all at once; consistency is key! ⚖️",
+            "Drinking water 30 min before meals aids digestion! 🥗",
+            "Pale, light-colored urine is a great sign of optimal hydration! 🎯",
+            "Replenish fluids regularly during workouts and exercise! 🏃‍♂️",
+            "Staying hydrated relieves tension headaches and refreshes skin! 🌟",
+            "Room-temp water is soothing, cool water is refreshing! 🚰",
+            "Feeling thirsty means mild dehydration has already started—drink up! ⏳",
+            "Fresh fruits like watermelon provide natural, electrolyte-rich hydration! 🍉",
+            "A glass of water before bed keeps circulation smooth overnight! 🌙",
+            "Swap sugary sodas for water to protect your kidneys and heart! ❤️",
+            "Healthy hydration cushions joints and reduces physical fatigue! 💪"
         )
     }
 

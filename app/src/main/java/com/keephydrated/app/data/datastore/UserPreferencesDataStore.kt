@@ -65,6 +65,7 @@ class UserPreferencesDataStore @Inject constructor(
         val IS_ONBOARDING_SKIPPED = booleanPreferencesKey("is_onboarding_skipped")
         val DROPPY_TIPS_ENABLED = booleanPreferencesKey("droppy_tips_enabled")
         val REMIND_AFTER_GOAL_REACHED = booleanPreferencesKey("remind_after_goal_reached")
+        val THEME_MODE = stringPreferencesKey("app_theme_mode")
     }
 
     val userSettingsFlow: Flow<UserSettings> = context.dataStore.data
@@ -116,6 +117,7 @@ class UserPreferencesDataStore @Inject constructor(
             val isOnboardingSkipped = preferences[PreferencesKeys.IS_ONBOARDING_SKIPPED] ?: false
             val droppyTipsEnabled = preferences[PreferencesKeys.DROPPY_TIPS_ENABLED] ?: true
             val remindAfterGoalReached = preferences[PreferencesKeys.REMIND_AFTER_GOAL_REACHED] ?: false
+            val themeMode = preferences[PreferencesKeys.THEME_MODE] ?: "system"
 
             UserSettings(
                 dailyGoalMl = dailyGoal,
@@ -147,7 +149,8 @@ class UserPreferencesDataStore @Inject constructor(
                 isOnboardingCompleted = isOnboardingCompleted,
                 isOnboardingSkipped = isOnboardingSkipped,
                 droppyTipsEnabled = droppyTipsEnabled,
-                remindAfterGoalReached = remindAfterGoalReached
+                remindAfterGoalReached = remindAfterGoalReached,
+                themeMode = themeMode
             )
         }
 
@@ -315,6 +318,12 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun updateRemindAfterGoalReached(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.REMIND_AFTER_GOAL_REACHED] = enabled
+        }
+    }
+
+    suspend fun updateThemeMode(themeMode: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.THEME_MODE] = themeMode
         }
     }
 }

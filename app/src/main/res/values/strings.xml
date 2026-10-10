@@ -75,6 +75,8 @@
     <string name="desc_category_profile">Age, weight, sports activity &amp; personalized goal</string>
     <string name="category_guide">Dr. Droppy Health Guide &amp; Warnings</string>
     <string name="desc_category_guide">Dehydration hazards &amp; water toxicity safety</string>
+    <string name="category_droppy">Dr. Droppy Companion</string>
+    <string name="desc_category_droppy">Health guide, interactive mascot tips &amp; advice</string>
     <string name="category_goal">Hydration Target &amp; Quick Add</string>
     <string name="desc_category_goal">Daily goal, frequent sip amount &amp; quick-add options</string>
     <string name="category_bottle">Bottle Tracking Mode</string>
@@ -83,10 +85,21 @@
     <string name="desc_category_reminders">Periodic intervals, routine hours &amp; battery setup</string>
     <string name="category_sounds">Notification &amp; Sounds</string>
     <string name="desc_category_sounds">Reminder tones, celebration sound &amp; test notification</string>
+    <string name="category_theme">App Appearance &amp; Theme</string>
+    <string name="desc_category_theme">Light, dark, or system default mode</string>
     <string name="category_language">Language / اللغة</string>
     <string name="desc_category_language">Switch between English and Arabic</string>
     <string name="category_about">About</string>
     <string name="desc_category_about">App version and information</string>
+
+    <!-- Theme Modes -->
+    <string name="theme_system">System Default</string>
+    <string name="theme_light">Light Mode ☀️</string>
+    <string name="theme_dark">Dark Mode 🌙</string>
+    <string name="open_droppy_guide">Open Dr. Droppy Health Guide 🩺</string>
+    <string name="custom_hours_input">Custom Hours Input</string>
+    <string name="enter_wake_hour">Wake Hour (0 - 23):</string>
+    <string name="enter_sleep_hour">Sleep Hour (0 - 23):</string>
 
     <!-- Settings Options -->
     <string name="daily_target">Daily Target</string>
@@ -184,6 +197,7 @@
     <string name="label_wake_time">Wake-up Time:</string>
     <string name="label_sleep_time">Bedtime / Sleep:</string>
     <string name="label_reminder_frequency">Reminder Frequency:</string>
+    <string name="freq_every_30m">Every 30 min</string>
     <string name="freq_every_1h">Every 1h</string>
     <string name="freq_every_2h">Every 2h</string>
     <string name="freq_every_3h">Every 3h</string>
@@ -196,7 +210,7 @@
     <string name="lang_arabic">العربية (Arabic)</string>
 
     <!-- About Section (Clean - no change details) -->
-    <string name="app_version">Version 3.0.0</string>
+    <string name="app_version">Version 1.0.0</string>
     <string name="app_motto">Your smart personal companion for daily healthy hydration and wellness.</string>
 
     <!-- Notifications -->

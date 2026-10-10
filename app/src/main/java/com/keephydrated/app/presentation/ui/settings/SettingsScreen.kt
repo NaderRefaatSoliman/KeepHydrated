@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,11 +34,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PlayArrow
@@ -51,6 +54,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -85,6 +89,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -96,6 +101,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.keephydrated.app.R
+import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.presentation.ui.components.DrDroppyMascotButton
@@ -111,10 +117,12 @@ enum class SettingsCategory(
 ) {
     PROFILE(R.string.category_profile, R.string.desc_category_profile, Icons.Default.Tune),
     GUIDE(R.string.category_guide, R.string.desc_category_guide, Icons.Default.Info),
+    DROPPY(R.string.category_droppy, R.string.desc_category_droppy, Icons.Default.MedicalServices),
     GOAL(R.string.category_goal, R.string.desc_category_goal, Icons.Default.TrackChanges),
     BOTTLE(R.string.category_bottle, R.string.desc_category_bottle, Icons.Default.LocalDrink),
     REMINDERS(R.string.category_reminders, R.string.desc_category_reminders, Icons.Default.Schedule),
     SOUNDS(R.string.category_sounds, R.string.desc_category_sounds, Icons.Default.Notifications),
+    THEME(R.string.category_theme, R.string.desc_category_theme, Icons.Default.Brightness4),
     LANGUAGE(R.string.category_language, R.string.desc_category_language, Icons.Default.Language)
 }
 
@@ -344,15 +352,29 @@ fun SettingsScreen(
                                 onToggleRemindAfterGoal = { viewModel.updateRemindAfterGoalReached(it) }
                             )
                         }
+                        SettingsCategory.DROPPY -> {
+                            DrDroppySettingsDetail(
+                                uiState = uiState,
+                                isArabic = isArabic,
+                                onOpenGuide = { selectedCategory = SettingsCategory.GUIDE },
+                                onToggleDroppyTips = { viewModel.updateDroppyTipsEnabled(it) }
+                            )
+                        }
                         SettingsCategory.SOUNDS -> {
                             SoundsSettingsDetail(
                                 uiState = uiState,
                                 isArabic = isArabic,
-                                context = context,
                                 onSelectSound = { viewModel.updateNotificationSound(it) },
                                 onPreviewSound = { viewModel.previewSound(context, it) },
-                                onSendTestAlert = { viewModel.sendTestNotification(context) },
-                                onToggleDroppyTips = { viewModel.updateDroppyTipsEnabled(it) }
+                                onSelectCelebrationSound = { viewModel.updateCelebrationSound(it) },
+                                onPreviewCelebrationSound = { viewModel.previewCelebrationSound(context, it) },
+                                onSendTestAlert = { viewModel.sendTestNotification(context) }
+                            )
+                        }
+                        SettingsCategory.THEME -> {
+                            ThemeSettingsDetail(
+                                currentTheme = uiState.themeMode,
+                                onSelectTheme = { viewModel.updateThemeMode(it) }
                             )
                         }
                         SettingsCategory.LANGUAGE -> {
@@ -515,6 +537,20 @@ fun getCategorySummary(
                 }
             } else {
                 if (isArabic) "معطل" else "Disabled"
+            }
+        }
+        SettingsCategory.DROPPY -> {
+            if (uiState.droppyTipsEnabled) {
+                if (isArabic) "النصائح مفعلة • الدليل متاح" else "Tips Active • Guide Ready"
+            } else {
+                if (isArabic) "النصائح معطلة • الدليل متاح" else "Tips Off • Guide Ready"
+            }
+        }
+        SettingsCategory.THEME -> {
+            when (uiState.themeMode) {
+                "light" -> stringResource(R.string.theme_light)
+                "dark" -> stringResource(R.string.theme_dark)
+                else -> stringResource(R.string.theme_system)
             }
         }
         SettingsCategory.SOUNDS -> {
@@ -1059,11 +1095,11 @@ fun RemindersSettingsDetail(
 fun SoundsSettingsDetail(
     uiState: SettingsUiState,
     isArabic: Boolean,
-    context: android.content.Context,
     onSelectSound: (String) -> Unit,
     onPreviewSound: (NotificationSound) -> Unit,
-    onSendTestAlert: () -> Unit,
-    onToggleDroppyTips: (Boolean) -> Unit = {}
+    onSelectCelebrationSound: (String) -> Unit,
+    onPreviewCelebrationSound: (CelebrationSound) -> Unit,
+    onSendTestAlert: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -1072,9 +1108,24 @@ fun SoundsSettingsDetail(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // 1. Test Alert Button at the TOP!
+            Button(
+                onClick = onSendTestAlert,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+            ) {
+                Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.test_alert), fontWeight = FontWeight.Bold)
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
+
+            // 2. Reminder Notification Tone
             Text(
                 text = stringResource(R.string.reminder_tone),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, color = BluePrimary)
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -1105,7 +1156,92 @@ fun SoundsSettingsDetail(
                 }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
+
+            // 3. Goal Achievement Celebration Notification Tone
+            Text(
+                text = stringResource(R.string.celebration_tone),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, color = BluePrimary)
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+
+            CelebrationSound.entries.forEach { sound ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelectCelebrationSound(sound.id) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = uiState.celebrationSound == sound.id,
+                        onClick = { onSelectCelebrationSound(sound.id) }
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = sound.getLocalizedDisplayName(isArabic), fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = sound.getLocalizedDescription(isArabic),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                    IconButton(onClick = { onPreviewCelebrationSound(sound) }) {
+                        Icon(Icons.Default.PlayArrow, contentDescription = "Play celebration sound")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DrDroppySettingsDetail(
+    uiState: SettingsUiState,
+    isArabic: Boolean,
+    onOpenGuide: () -> Unit,
+    onToggleDroppyTips: (Boolean) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_droppy_guide),
+                    contentDescription = stringResource(R.string.dr_droppy_name),
+                    modifier = Modifier.size(56.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = stringResource(R.string.category_droppy),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = BluePrimary)
+                    )
+                    Text(
+                        text = stringResource(R.string.desc_category_droppy),
+                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onOpenGuide,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.LocalHospital, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.open_droppy_guide), fontWeight = FontWeight.Bold)
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1115,7 +1251,12 @@ fun SoundsSettingsDetail(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.setting_droppy_tips),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Text(
+                        text = if (isArabic) "عرض فقاعة نصائح صحية دورية بجوار شخصية د.قطرة"
+                               else "Show friendly periodic health tips beside Dr. Droppy",
+                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                     )
                 }
                 Switch(
@@ -1123,17 +1264,50 @@ fun SoundsSettingsDetail(
                     onCheckedChange = onToggleDroppyTips
                 )
             }
+        }
+    }
+}
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+@Composable
+fun ThemeSettingsDetail(
+    currentTheme: String,
+    onSelectTheme: (String) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.category_theme),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, color = BluePrimary)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
-                onClick = onSendTestAlert,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
-            ) {
-                Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(stringResource(R.string.test_alert))
+            listOf(
+                "system" to stringResource(R.string.theme_system),
+                "light" to stringResource(R.string.theme_light),
+                "dark" to stringResource(R.string.theme_dark)
+            ).forEach { (mode, label) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelectTheme(mode) }
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = currentTheme == mode,
+                        onClick = { onSelectTheme(mode) }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                }
             }
         }
     }
@@ -1427,6 +1601,9 @@ fun WakingDayScheduleDialog(
     var wakeHour by remember { mutableIntStateOf(currentStartHour) }
     var sleepHour by remember { mutableIntStateOf(currentEndHour) }
     var stepHours by remember { mutableIntStateOf(2) }
+    var customWakeInput by remember { mutableStateOf(currentStartHour.toString()) }
+    var customSleepInput by remember { mutableStateOf(currentEndHour.toString()) }
+    var showCustomHoursInput by remember { mutableStateOf(false) }
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
@@ -1440,7 +1617,7 @@ fun WakingDayScheduleDialog(
             }
         },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(
                     text = stringResource(R.string.dialog_waking_schedule_desc),
                     style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1463,7 +1640,10 @@ fun WakingDayScheduleDialog(
                     listOf(5, 6, 7, 8, 9, 10).forEach { h ->
                         FilterChip(
                             selected = wakeHour == h,
-                            onClick = { wakeHour = h },
+                            onClick = {
+                                wakeHour = h
+                                customWakeInput = h.toString()
+                            },
                             label = { Text(LocalizationUtils.formatHour(h, isArabic), fontSize = 11.sp) },
                             modifier = Modifier.height(30.dp)
                         )
@@ -1488,9 +1668,62 @@ fun WakingDayScheduleDialog(
                     listOf(20, 21, 22, 23, 0).forEach { h ->
                         FilterChip(
                             selected = sleepHour == h,
-                            onClick = { sleepHour = h },
+                            onClick = {
+                                sleepHour = h
+                                customSleepInput = h.toString()
+                            },
                             label = { Text(LocalizationUtils.formatHour(h, isArabic), fontSize = 11.sp) },
                             modifier = Modifier.height(30.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showCustomHoursInput = !showCustomHoursInput }
+                ) {
+                    Checkbox(
+                        checked = showCustomHoursInput,
+                        onCheckedChange = { showCustomHoursInput = it }
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        stringResource(R.string.custom_hours_input),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
+
+                if (showCustomHoursInput) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = customWakeInput,
+                            onValueChange = { input ->
+                                customWakeInput = input
+                                input.toIntOrNull()?.let { if (it in 0..23) wakeHour = it }
+                            },
+                            label = { Text(stringResource(R.string.enter_wake_hour), fontSize = 10.sp) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = customSleepInput,
+                            onValueChange = { input ->
+                                customSleepInput = input
+                                input.toIntOrNull()?.let { if (it in 0..23) sleepHour = it }
+                            },
+                            label = { Text(stringResource(R.string.enter_sleep_hour), fontSize = 10.sp) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
                         )
                     }
                 }
@@ -1505,9 +1738,10 @@ fun WakingDayScheduleDialog(
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     listOf(
+                        0 to stringResource(R.string.freq_every_30m),
                         1 to stringResource(R.string.freq_every_1h),
                         2 to stringResource(R.string.freq_every_2h),
                         3 to stringResource(R.string.freq_every_3h)
@@ -1515,7 +1749,7 @@ fun WakingDayScheduleDialog(
                         FilterChip(
                             selected = stepHours == step,
                             onClick = { stepHours = step },
-                            label = { Text(label, fontSize = 12.sp) },
+                            label = { Text(label, fontSize = 10.sp) },
                             modifier = Modifier.weight(1f)
                         )
                     }

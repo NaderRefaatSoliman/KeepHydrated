@@ -32,6 +32,7 @@ data class SettingsUiState(
     val isOnboardingCompleted: Boolean = true,
     val droppyTipsEnabled: Boolean = true,
     val remindAfterGoalReached: Boolean = false,
+    val themeMode: String = "system",
     val isLoading: Boolean = true,
     val userMessage: String? = null
 ) {
@@ -62,7 +63,8 @@ data class SettingsUiState(
             userActivityLevel = userActivityLevel,
             isOnboardingCompleted = isOnboardingCompleted,
             droppyTipsEnabled = droppyTipsEnabled,
-            remindAfterGoalReached = remindAfterGoalReached
+            remindAfterGoalReached = remindAfterGoalReached,
+            themeMode = themeMode
         )
     }
 }

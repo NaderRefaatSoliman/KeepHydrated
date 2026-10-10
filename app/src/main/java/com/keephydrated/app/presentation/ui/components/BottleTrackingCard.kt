@@ -57,9 +57,9 @@ import com.keephydrated.app.util.LocalizationUtils
 fun BottleTrackingCard(
     bottleStatus: BottleStatus,
     frequentAmountMl: Int,
-    onDrinkSip: () -> Unit,
     onRefillBottle: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDrinkSip: () -> Unit = {}
 ) {
     val progress = bottleStatus.progressFraction
     val animatedProgress by animateFloatAsState(
@@ -347,52 +347,31 @@ fun BottleTrackingCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Action Buttons: Drink Sip & Refill Bottle (Fully scalable with maxLines & softWrap)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // Action Button: Refill Bottle (Drinking is logged through the 5 Quick Add options below)
+            Button(
+                onClick = onRefillBottle,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = CyanSecondary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
             ) {
-                Button(
-                    onClick = onDrinkSip,
-                    enabled = bottleStatus.remainingMl > 0,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BluePrimary
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    tint = Color(0xFF004D40),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.bottle_refill_action),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color(0xFF004D40),
+                        fontWeight = FontWeight.Bold
                     ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.bottle_drink_sip, formattedSip),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                OutlinedButton(
-                    onClick = onRefillBottle,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.bottle_refill_action),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,6 +112,10 @@ class MainActivity : ComponentActivity() {
                     setLayoutDirection(targetLocale)
                 }
             }
+            val baseContext = LocalContext.current
+            val localizedContext = remember(baseContext, localizedConfig) {
+                baseContext.createConfigurationContext(localizedConfig)
+            }
 
             LaunchedEffect(language) {
                 LocaleHelper.setLocale(this@MainActivity, language)
@@ -118,11 +123,18 @@ class MainActivity : ComponentActivity() {
                 resources.updateConfiguration(localizedConfig, resources.displayMetrics)
             }
 
+            val isDarkTheme = when (userSettings?.themeMode) {
+                "light" -> false
+                "dark" -> true
+                else -> isSystemInDarkTheme()
+            }
+
             CompositionLocalProvider(
+                LocalContext provides localizedContext,
                 LocalConfiguration provides localizedConfig,
                 LocalLayoutDirection provides layoutDirection
             ) {
-                KeepHydratedTheme {
+                KeepHydratedTheme(darkTheme = isDarkTheme) {
                     val onLanguageChanged: (String) -> Unit = { newLang ->
                         lifecycleScope.launch {
                             settingsRepository.updateLanguage(newLang)

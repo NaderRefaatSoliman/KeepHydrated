@@ -206,4 +206,15 @@ class SettingsViewModelTest {
         coVerify(exactly = 1) { settingsRepository.updateRemindAfterGoalReached(true) }
         assertEquals(true, viewModel.uiState.value.remindAfterGoalReached)
     }
+
+    @Test
+    fun `updateThemeMode delegates to repository`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateThemeMode("dark")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { settingsRepository.updateThemeMode("dark") }
+        assertEquals("dark", viewModel.uiState.value.themeMode)
+    }
 }

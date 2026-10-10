@@ -30,11 +30,28 @@ object NotificationHelper {
     private const val WATER_COLOR = 0xFF0288D1.toInt()
 
     /**
-     * Converts vector drawable ic_water_cup into a crisp high-res Bitmap for setLargeIcon.
+     * Converts vector drawable ic_water_cup into a crisp high-res Bitmap.
      */
     fun getWaterCupBitmap(context: Context): Bitmap? {
         return try {
             val drawable = ContextCompat.getDrawable(context, R.drawable.ic_water_cup) ?: return null
+            val size = 192
+            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            bitmap
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Converts Dr. Droppy mascot vector drawable into a crisp high-res Bitmap for the side largeIcon.
+     */
+    fun getDroppyBitmap(context: Context): Bitmap? {
+        return try {
+            val drawable = ContextCompat.getDrawable(context, R.drawable.ic_droppy_guide) ?: return null
             val size = 192
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -89,7 +106,7 @@ object NotificationHelper {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
-        val headerText = "💧 $formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
+        val headerText = "🥛💧 $formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
         canvas.drawText(headerText, width / 2f, 44f, headerPaint)
 
         // 3. Horizontal Tube Container
@@ -201,6 +218,7 @@ object NotificationHelper {
             settings.defaultQuickAddMl
         }
         val formattedQuickAmount = LocalizationUtils.formatNumber(quickAddAmount, isArabic)
+        val unit = if (isArabic) "مل" else "ml"
 
         val quickAddIntent = Intent(context, WaterIntakeNotificationReceiver::class.java).apply {
             action = WaterIntakeNotificationReceiver.ACTION_QUICK_ADD
@@ -224,7 +242,7 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val actionTitle = if (isArabic) "+ $formattedQuickAmount مل 💧" else "+ $quickAddAmount ml 💧"
+        val actionTitle = "+ $formattedQuickAmount $unit 🥛💧"
         val quickAddAction = NotificationCompat.Action.Builder(
             R.drawable.ic_notification_water_cup,
             actionTitle,
@@ -239,14 +257,14 @@ object NotificationHelper {
             val formattedVol = LocalizationUtils.formatNumber(bottleStatus.volumeMl, isArabic)
             val formattedRem = LocalizationUtils.formatNumber(bottleStatus.remainingMl, isArabic)
             title = localizedContext.getString(R.string.bottle_reminder_title)
-            bodyText = localizedContext.getString(
+            bodyText = "🥛💧 " + localizedContext.getString(
                 R.string.bottle_reminder_msg,
                 formattedVol,
                 formattedRem
             )
         } else {
             title = localizedContext.getString(R.string.reminder_title)
-            bodyText = localizedContext.getString(R.string.reminder_tap_text, formattedQuickAmount)
+            bodyText = "🥛💧 " + localizedContext.getString(R.string.reminder_tap_text, formattedQuickAmount)
         }
 
         val wearableExtender = NotificationCompat.WearableExtender()
@@ -268,7 +286,8 @@ object NotificationHelper {
             .addAction(quickAddAction)
             .extend(wearableExtender)
 
-        cupBitmap?.let { builder.setLargeIcon(it) }
+        val droppyBitmap = getDroppyBitmap(context)
+        (droppyBitmap ?: cupBitmap)?.let { builder.setLargeIcon(it) }
 
         if (soundUri != null) {
             builder.setSound(soundUri)

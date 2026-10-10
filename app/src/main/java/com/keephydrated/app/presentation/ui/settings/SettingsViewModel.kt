@@ -72,9 +72,35 @@ class SettingsViewModel @Inject constructor(
                         isOnboardingCompleted = settings.isOnboardingCompleted,
                         droppyTipsEnabled = settings.droppyTipsEnabled,
                         remindAfterGoalReached = settings.remindAfterGoalReached,
+                        themeMode = settings.themeMode,
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    fun updateThemeMode(mode: String) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateThemeMode(mode)
+                val isArabic = _uiState.value.language == "ar"
+                val msg = if (isArabic) {
+                    when (mode) {
+                        "light" -> "تم تفعيل الوضع الفاتح"
+                        "dark" -> "تم تفعيل الوضع الداكن"
+                        else -> "تم تفعيل مظهر النظام التلقائي"
+                    }
+                } else {
+                    when (mode) {
+                        "light" -> "Light mode enabled"
+                        "dark" -> "Dark mode enabled"
+                        else -> "System theme enabled"
+                    }
+                }
+                _uiState.update { it.copy(themeMode = mode, userMessage = msg) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = e.message ?: "Failed to update theme") }
             }
         }
     }

@@ -75,6 +75,8 @@
     <string name="desc_category_profile">العمر، الوزن، النشاط الرياضي وحساب الهدف المثالي</string>
     <string name="category_guide">دليل د.قطرة الصحي والتحذيرات</string>
     <string name="desc_category_guide">أضرار الجفاف وحدود الأمان من التسمم المائي</string>
+    <string name="category_droppy">د.قطرة (الرفيق الطبي)</string>
+    <string name="desc_category_droppy">الدليل الصحي وإظهار نصائح الرفيق التفاعلية</string>
     <string name="category_goal">هدف الترطيب والإضافة السريعة</string>
     <string name="desc_category_goal">الهدف اليومي، كمية الشرب المفضلة وخيارات الإضافة</string>
     <string name="category_bottle">وضع تتبع زجاجة الماء</string>
@@ -83,10 +85,22 @@
     <string name="desc_category_reminders">الفترات الزمنية الدورية وساعات الروتين وإعدادات البطارية</string>
     <string name="category_sounds">الإشعارات والأصوات</string>
     <string name="desc_category_sounds">نغمات التذكير وصوت الاحتفال وتجربة التنبيه</string>
+    <string name="category_theme">مظهر وسمة التطبيق</string>
+    <string name="desc_category_theme">الوضع الفاتح، الداكن، أو تلقائي حسب النظام</string>
     <string name="category_language">اللغة / Language</string>
     <string name="desc_category_language">التبديل الفوري بين اللغتين العربية والإنجليزية</string>
     <string name="category_about">حول التطبيق</string>
     <string name="desc_category_about">إصدار التطبيق ومعلومات موجزة عنه</string>
+
+    <!-- Theme Modes -->
+    <string name="theme_system">تلقائي حسب النظام</string>
+    <string name="theme_light">الوضع الفاتح ☀️</string>
+    <string name="theme_dark">الوضع الداكن 🌙</string>
+    <string name="open_droppy_guide">فتح دليل د.قطرة الصحي 🩺</string>
+    <string name="custom_hours_input">إدخال يدوي مخصص للساعات</string>
+    <string name="enter_wake_hour">ساعة الاستيقاظ (٠ - ٢٣):</string>
+    <string name="enter_sleep_hour">ساعة النوم (٠ - ٢٣):</string>
+    <string name="freq_every_30m">كل ٣٠ دقيقة</string>
 
     <!-- Settings Options -->
     <string name="daily_target">الهدف اليومي</string>
@@ -196,7 +210,7 @@
     <string name="lang_arabic">العربية (Arabic)</string>
 
     <!-- About Section (Clean - no change details) -->
-    <string name="app_version">الإصدار 3.0.0</string>
+    <string name="app_version">الإصدار 1.0.0</string>
     <string name="app_motto">رفيقك الذكي للحفاظ على ترطيب صحي وطاقة متجددة طوال اليوم.</string>
 
     <!-- Notifications -->
