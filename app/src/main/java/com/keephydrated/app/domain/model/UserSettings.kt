@@ -11,9 +11,10 @@ enum class NotificationSound(
     val description: String,
     val resName: String
 ) {
-    WATER_DROP("water_drop", "Water Droplet", "Crisp, refreshing single water drop", "water_drop"),
-    WATER_DROP_ECHO("water_drop_echo", "Water Drop Echo", "Resonant droplet with serene cavern echoes", "water_drop_echo"),
-    WATER_FLOW("water_flow", "Natural Water Flow", "Continuous peaceful stream flowing over smooth pebbles", "water_flow"),
+    WATER_FLOW("water_flow", "Water Flow", "Continuous peaceful stream flowing over smooth pebbles", "water_flow"),
+    CLASSIC("classic", "Classic", "Clean, gentle classic reminder chime", "classic"),
+    WATER_DROP("water_drop", "Water Drop", "Crisp, refreshing single water drop", "water_drop"),
+    WATER_DROP_ECHO("water_drop_echo", "Drop Echo", "Resonant droplet with serene cavern echoes", "water_drop_echo"),
     BOTTLE_FILL("bottle_fill", "Bottle Filling", "Rising water pitch filling a bottle", "bottle_fill"),
     GENTLE_STREAM("gentle_stream", "Gentle Stream", "Peaceful flowing brook", "gentle_stream"),
     WATER_BUBBLE("water_bubble", "Water Bubbles", "Playful rising water bubbles", "water_bubble"),
@@ -27,9 +28,10 @@ enum class NotificationSound(
     fun getLocalizedDisplayName(isArabic: Boolean): String {
         return if (isArabic) {
             when (this) {
+                WATER_FLOW -> "تدفق الماء"
+                CLASSIC -> "كلاسيكي"
                 WATER_DROP -> "قطرة ماء"
                 WATER_DROP_ECHO -> "صدى قطرة ماء"
-                WATER_FLOW -> "تدفق الماء الطبيعي"
                 BOTTLE_FILL -> "تعبئة القارورة بالماء"
                 GENTLE_STREAM -> "جدول ماء هادئ"
                 WATER_BUBBLE -> "فقاعات الماء"
@@ -48,9 +50,10 @@ enum class NotificationSound(
     fun getLocalizedDescription(isArabic: Boolean): String {
         return if (isArabic) {
             when (this) {
+                WATER_FLOW -> "خرير ماء رقراق متدفق بين الحصى"
+                CLASSIC -> "نغمة رنين كلاسيكية هادئة ونقية"
                 WATER_DROP -> "صوت نقي وواضح لقطرة ماء منعشة"
                 WATER_DROP_ECHO -> "قطرة ماء رنانة مع صدى هادئ وجميل"
-                WATER_FLOW -> "خرير ماء رقراق متدفق بين الحصى"
                 BOTTLE_FILL -> "صوت تصاعدي طبيعي لملء قارورة بالماء"
                 GENTLE_STREAM -> "مجرى مائي لطيف وهادئ في الطبيعة"
                 WATER_BUBBLE -> "فقاعات مائية متصاعدة ومرحة"
