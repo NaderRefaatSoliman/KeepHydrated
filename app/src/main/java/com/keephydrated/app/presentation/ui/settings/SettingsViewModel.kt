@@ -4,6 +4,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keephydrated.app.domain.model.CelebrationSound
@@ -36,6 +39,8 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     private var previewPlayer: MediaPlayer? = null
+
+    var targetCategory by mutableStateOf<SettingsCategory?>(null)
 
     init {
         observeSettings()

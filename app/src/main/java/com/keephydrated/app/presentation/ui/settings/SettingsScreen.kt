@@ -136,8 +136,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateToHome: () -> Unit = {},
     modifier: Modifier = Modifier,
-    resetGuideKey: Int = 0,
-    openProfileKey: Int = 0
+    resetGuideKey: Int = 0
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -146,22 +145,8 @@ fun SettingsScreen(
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
+    val selectedCategory = viewModel.targetCategory
     var showHealthGuideScreen by remember { mutableStateOf(false) }
-
-    LaunchedEffect(openProfileKey) {
-        if (openProfileKey > 0) {
-            selectedCategory = SettingsCategory.PROFILE
-            showHealthGuideScreen = false
-        }
-    }
-
-    LaunchedEffect(resetGuideKey) {
-        if (resetGuideKey > 0) {
-            selectedCategory = null
-            showHealthGuideScreen = false
-        }
-    }
 
     var showGoalDialog by remember { mutableStateOf(false) }
     var showCustomIntervalDialog by remember { mutableStateOf(false) }
@@ -203,7 +188,7 @@ fun SettingsScreen(
         if (showHealthGuideScreen) {
             showHealthGuideScreen = false
         } else if (selectedCategory != null) {
-            selectedCategory = null
+            viewModel.targetCategory = null
         } else {
             onNavigateToHome()
         }
@@ -221,7 +206,7 @@ fun SettingsScreen(
                     title = {
                         Text(
                             text = if (selectedCategory != null) {
-                                stringResource(selectedCategory!!.titleResId)
+                                stringResource(selectedCategory.titleResId)
                             } else {
                                 stringResource(R.string.settings)
                             },
@@ -233,8 +218,10 @@ fun SettingsScreen(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                if (selectedCategory != null) {
-                                    selectedCategory = null
+                                if (showHealthGuideScreen) {
+                                    showHealthGuideScreen = false
+                                } else if (selectedCategory != null) {
+                                    viewModel.targetCategory = null
                                 } else {
                                     onNavigateToHome()
                                 }
@@ -286,7 +273,7 @@ fun SettingsScreen(
                             SettingsCategoryItem(
                                 category = category,
                                 summary = getCategorySummary(category, uiState, isArabic),
-                                onClick = { selectedCategory = category }
+                                onClick = { viewModel.targetCategory = category }
                             )
                         }
 
@@ -308,14 +295,14 @@ fun SettingsScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        when (selectedCategory!!) {
+                        when (selectedCategory) {
                             SettingsCategory.PROFILE -> {
                                 ProfileSettingsDetail(
                                     uiState = uiState,
                                     isArabic = isArabic,
                                     onSaveProfile = { name, age, sex, weight, height, activity, goal ->
                                         viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
-                                        selectedCategory = null
+                                        viewModel.targetCategory = null
                                     }
                                 )
                             }

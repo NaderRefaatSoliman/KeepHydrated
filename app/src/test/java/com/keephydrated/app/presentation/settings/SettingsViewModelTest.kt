@@ -217,4 +217,16 @@ class SettingsViewModelTest {
         coVerify(exactly = 1) { settingsRepository.updateThemeMode("dark") }
         assertEquals("dark", viewModel.uiState.value.themeMode)
     }
+
+    @Test
+    fun `targetCategory state holds requested category`() {
+        val viewModel = createViewModel()
+        assertEquals(null, viewModel.targetCategory)
+
+        viewModel.targetCategory = com.keephydrated.app.presentation.ui.settings.SettingsCategory.PROFILE
+        assertEquals(com.keephydrated.app.presentation.ui.settings.SettingsCategory.PROFILE, viewModel.targetCategory)
+
+        viewModel.targetCategory = null
+        assertEquals(null, viewModel.targetCategory)
+    }
 }

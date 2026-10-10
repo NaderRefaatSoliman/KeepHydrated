@@ -174,7 +174,7 @@ fun KeepHydratedMain(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     var tabResetKey by remember { mutableIntStateOf(0) }
-    var profileOpenRequestKey by remember { mutableIntStateOf(0) }
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -226,8 +226,12 @@ fun KeepHydratedMain(
                             selected = selected,
                             onClick = {
                                 tabResetKey++
+                                if (screen.route == Screen.Settings.route) {
+                                    settingsViewModel.targetCategory = null
+                                }
                                 if (currentRoute != screen.route) {
                                     if (screen.route == Screen.Home.route) {
+                                        settingsViewModel.targetCategory = null
                                         if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
                                             navController.navigate(Screen.Home.route) {
                                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -275,13 +279,12 @@ fun KeepHydratedMain(
                     viewModel = viewModel,
                     resetGuideKey = tabResetKey,
                     onNavigateToProfile = {
-                        profileOpenRequestKey++
+                        settingsViewModel.targetCategory = com.keephydrated.app.presentation.ui.settings.SettingsCategory.PROFILE
                         navController.navigate(Screen.Settings.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
                             launchSingleTop = true
-                            restoreState = false
                         }
                     }
                 )
@@ -306,11 +309,11 @@ fun KeepHydratedMain(
                 )
             }
             composable(Screen.Settings.route) {
-                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
-                    viewModel = viewModel,
+                    viewModel = settingsViewModel,
                     onNavigateToHome = {
                         tabResetKey++
+                        settingsViewModel.targetCategory = null
                         if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
                             navController.navigate(Screen.Home.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -321,8 +324,7 @@ fun KeepHydratedMain(
                             }
                         }
                     },
-                    resetGuideKey = tabResetKey,
-                    openProfileKey = profileOpenRequestKey
+                    resetGuideKey = tabResetKey
                 )
             }
         }
