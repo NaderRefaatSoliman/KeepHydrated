@@ -429,6 +429,7 @@ fun SettingsScreen(
             }
         )
     }
+    }
 }
 
 @Composable
