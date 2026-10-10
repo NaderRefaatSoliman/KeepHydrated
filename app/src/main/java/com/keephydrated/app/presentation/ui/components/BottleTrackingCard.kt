@@ -36,10 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -180,23 +182,45 @@ fun BottleTrackingCard(
 
                         // Outer Bottle Silhouette (Frosted Translucent Container)
                         val bodyPath = Path().apply {
-                            moveTo(w * 0.28f, bottleBodyTop)
+                            moveTo(w * 0.30f, bottleBodyTop)
                             // Shoulder to upper body
-                            cubicTo(w * 0.15f, bottleBodyTop + bodyHeight * 0.05f, leftX, bottleBodyTop + bodyHeight * 0.12f, leftX, bottleBodyTop + bodyHeight * 0.25f)
+                            cubicTo(w * 0.16f, bottleBodyTop + bodyHeight * 0.06f, leftX, bottleBodyTop + bodyHeight * 0.12f, leftX, bottleBodyTop + bodyHeight * 0.24f)
                             // Waist contour indentation (ergonomic grip)
-                            cubicTo(leftX, bottleBodyTop + bodyHeight * 0.45f, leftX + 4f, bottleBodyTop + bodyHeight * 0.52f, leftX + 4f, bottleBodyTop + bodyHeight * 0.60f)
-                            cubicTo(leftX + 4f, bottleBodyTop + bodyHeight * 0.68f, leftX, bottleBodyTop + bodyHeight * 0.75f, leftX, bottleBodyTop + bodyHeight * 0.88f)
+                            cubicTo(leftX, bottleBodyTop + bodyHeight * 0.44f, leftX + 4f, bottleBodyTop + bodyHeight * 0.52f, leftX + 4f, bottleBodyTop + bodyHeight * 0.60f)
+                            cubicTo(leftX + 4f, bottleBodyTop + bodyHeight * 0.68f, leftX, bottleBodyTop + bodyHeight * 0.76f, leftX, bottleBodyTop + bodyHeight * 0.88f)
                             // Rounded bottom-left corner
-                            quadraticBezierTo(leftX, bottleBodyBottom, leftX + 12f, bottleBodyBottom)
+                            quadraticBezierTo(leftX, bottleBodyBottom, leftX + 11f, bottleBodyBottom)
                             // Base bottom line
-                            lineTo(rightX - 12f, bottleBodyBottom)
+                            lineTo(rightX - 11f, bottleBodyBottom)
                             // Rounded bottom-right corner
-                            quadraticBezierTo(rightX, bottleBodyBottom, rightX, bottleBodyBottom - 12f)
+                            quadraticBezierTo(rightX, bottleBodyBottom, rightX, bottleBodyBottom - 11f)
                             // Right side ergonomic grip
-                            cubicTo(rightX, bottleBodyTop + bodyHeight * 0.75f, rightX - 4f, bottleBodyTop + bodyHeight * 0.68f, rightX - 4f, bottleBodyTop + bodyHeight * 0.60f)
-                            cubicTo(rightX - 4f, bottleBodyTop + bodyHeight * 0.52f, rightX, bottleBodyTop + bodyHeight * 0.45f, rightX, bottleBodyTop + bodyHeight * 0.25f)
+                            cubicTo(rightX, bottleBodyTop + bodyHeight * 0.76f, rightX - 4f, bottleBodyTop + bodyHeight * 0.68f, rightX - 4f, bottleBodyTop + bodyHeight * 0.60f)
+                            cubicTo(rightX - 4f, bottleBodyTop + bodyHeight * 0.52f, rightX, bottleBodyTop + bodyHeight * 0.44f, rightX, bottleBodyTop + bodyHeight * 0.24f)
                             // Shoulder to neck
-                            cubicTo(rightX, bottleBodyTop + bodyHeight * 0.12f, w * 0.85f, bottleBodyTop + bodyHeight * 0.05f, w * 0.72f, bottleBodyTop)
+                            cubicTo(rightX, bottleBodyTop + bodyHeight * 0.12f, w * 0.84f, bottleBodyTop + bodyHeight * 0.06f, w * 0.70f, bottleBodyTop)
+                            close()
+                        }
+
+                        // Inner Bottle Cavity Path (slight inset matching glass wall thickness)
+                        val inset = 1.6f
+                        val iLeft = leftX + inset
+                        val iRight = rightX - inset
+                        val iTop = bottleBodyTop + inset
+                        val iBottom = bottleBodyBottom - inset
+                        val iHeight = iBottom - iTop
+
+                        val innerBodyPath = Path().apply {
+                            moveTo(w * 0.30f + inset * 0.5f, iTop)
+                            cubicTo(w * 0.16f + inset, iTop + iHeight * 0.06f, iLeft, iTop + iHeight * 0.12f, iLeft, iTop + iHeight * 0.24f)
+                            cubicTo(iLeft, iTop + iHeight * 0.44f, iLeft + 4f, iTop + iHeight * 0.52f, iLeft + 4f, iTop + iHeight * 0.60f)
+                            cubicTo(iLeft + 4f, iTop + iHeight * 0.68f, iLeft, iTop + iHeight * 0.76f, iLeft, iTop + iHeight * 0.88f)
+                            quadraticBezierTo(iLeft, iBottom, iLeft + 10f, iBottom)
+                            lineTo(iRight - 10f, iBottom)
+                            quadraticBezierTo(iRight, iBottom, iRight, iBottom - 10f)
+                            cubicTo(iRight, iTop + iHeight * 0.76f, iRight - 4f, iTop + iHeight * 0.68f, iRight - 4f, iTop + iHeight * 0.60f)
+                            cubicTo(iRight - 4f, iTop + iHeight * 0.52f, iRight, iTop + iHeight * 0.44f, iRight, iTop + iHeight * 0.24f)
+                            cubicTo(iRight, iTop + iHeight * 0.12f, w * 0.84f - inset, iTop + iHeight * 0.06f, w * 0.70f - inset * 0.5f, iTop)
                             close()
                         }
 
@@ -206,46 +230,64 @@ fun BottleTrackingCard(
                             color = Color(0xFFE1F5FE).copy(alpha = 0.85f)
                         )
 
-                        // 5. Liquid Fill (clipped inside bottle contour)
+                        // 5. Liquid Fill (clipped inside exact bottle contour)
                         val remainingFraction = (1f - animatedProgress).coerceIn(0f, 1f)
-                        if (remainingFraction > 0.02f) {
-                            val liquidLevelY = bottleBodyBottom - (bodyHeight * remainingFraction)
-                            val liquidColor = if (bottleStatus.needsRefill) Color(0xFFFFA726) else Color(0xFF00B0FF)
+                        if (remainingFraction > 0.01f) {
+                            val liquidLevelY = iBottom - (iHeight * remainingFraction)
+                            val liquidBaseColor = if (bottleStatus.needsRefill) Color(0xFFFFA726) else Color(0xFF00B0FF)
+                            val liquidTopColor = if (bottleStatus.needsRefill) Color(0xFFFFCC80) else Color(0xFF40C4FF)
 
-                            val liquidPath = Path().apply {
-                                moveTo(leftX + 2f, bottleBodyBottom - 4f)
-                                lineTo(leftX + 2f, liquidLevelY)
-                                // Wave Meniscus
-                                quadraticBezierTo(w * 0.5f, liquidLevelY - 2.5f, rightX - 2f, liquidLevelY)
-                                lineTo(rightX - 2f, bottleBodyBottom - 4f)
-                                quadraticBezierTo(rightX - 2f, bottleBodyBottom, rightX - 10f, bottleBodyBottom)
-                                lineTo(leftX + 10f, bottleBodyBottom)
-                                quadraticBezierTo(leftX + 2f, bottleBodyBottom, leftX + 2f, bottleBodyBottom - 4f)
-                                close()
+                            clipPath(path = innerBodyPath) {
+                                // Draw water with vertical depth gradient
+                                drawRect(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(liquidTopColor, liquidBaseColor),
+                                        startY = liquidLevelY,
+                                        endY = iBottom
+                                    ),
+                                    topLeft = Offset(0f, liquidLevelY),
+                                    size = Size(w, iBottom - liquidLevelY + 4f)
+                                )
+
+                                // Water wave surface meniscus
+                                val wavePath = Path().apply {
+                                    moveTo(0f, liquidLevelY)
+                                    quadraticBezierTo(w * 0.5f, liquidLevelY - 2.5f, w, liquidLevelY)
+                                    lineTo(w, liquidLevelY + 6f)
+                                    lineTo(0f, liquidLevelY + 6f)
+                                    close()
+                                }
+                                drawPath(
+                                    path = wavePath,
+                                    color = Color.White.copy(alpha = 0.35f)
+                                )
+
+                                // Wave surface highlight crest
+                                drawLine(
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    start = Offset(0f, liquidLevelY),
+                                    end = Offset(w, liquidLevelY),
+                                    strokeWidth = 1.8f,
+                                    cap = StrokeCap.Round
+                                )
+
+                                // Rising ambient water bubbles
+                                drawCircle(
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    radius = 2.2f,
+                                    center = Offset(w * 0.44f, (liquidLevelY + iBottom) * 0.52f)
+                                )
+                                drawCircle(
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    radius = 1.6f,
+                                    center = Offset(w * 0.58f, (liquidLevelY + iBottom) * 0.68f)
+                                )
+                                drawCircle(
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    radius = 1.2f,
+                                    center = Offset(w * 0.36f, (liquidLevelY + iBottom) * 0.38f)
+                                )
                             }
-
-                            drawPath(path = liquidPath, color = liquidColor)
-
-                            // Wave Surface Highlight Line
-                            drawLine(
-                                color = Color.White.copy(alpha = 0.8f),
-                                start = Offset(leftX + 4f, liquidLevelY),
-                                end = Offset(rightX - 4f, liquidLevelY),
-                                strokeWidth = 1.8f,
-                                cap = StrokeCap.Round
-                            )
-
-                            // Small Bubbles
-                            drawCircle(
-                                color = Color.White.copy(alpha = 0.7f),
-                                radius = 2.2f,
-                                center = Offset(w * 0.45f, (liquidLevelY + bottleBodyBottom) * 0.5f)
-                            )
-                            drawCircle(
-                                color = Color.White.copy(alpha = 0.6f),
-                                radius = 1.6f,
-                                center = Offset(w * 0.60f, (liquidLevelY + bottleBodyBottom) * 0.65f)
-                            )
                         }
 
                         // 6. Bottle Glass Border
