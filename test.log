@@ -1,0 +1,375 @@
+Fetching distribution.
+Downloading https://services.gradle.org/distributions/gradle-8.6-bin.zip
+............10%.............20%............30%.............40%.............50%............60%.............70%.............80%............90%.............100%
+
+Welcome to Gradle 8.6!
+
+Here are the highlights of this release:
+ - Configurable encryption key for configuration cache
+ - Build init improvements
+ - Build authoring improvements
+
+For more details see https://docs.gradle.org/8.6/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.6/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:buildKotlinToolingMetadata
+> Task :app:checkReleaseAarMetadata
+> Task :app:generateReleaseResValues
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :app:packageReleaseResources
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeReleaseResources
+> Task :app:parseReleaseLocalResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:processReleaseManifestForPackage
+> Task :app:preReleaseUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileRelease
+> Task :app:javaPreCompileReleaseUnitTest
+> Task :app:processDebugResources
+> Task :app:processReleaseResources
+> Task :app:kaptGenerateStubsReleaseKotlin
+> Task :app:kaptGenerateStubsDebugKotlin
+> Task :app:kaptDebugKotlin
+> Task :app:kaptReleaseKotlin
+
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/notification/NotificationHelper.kt:314:13 Variable 'isArabic' is never used
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/presentation/ui/components/BottleTrackingCard.kt:64:5 Parameter 'onDrinkSip' is never used
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/presentation/ui/components/BottleTrackingCard.kt:78:9 Variable 'formattedSip' is never used
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/presentation/ui/onboarding/OnboardingScreen.kt:380:50 'DirectionsRun: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.DirectionsRun
+
+> Task :app:compileReleaseKotlin
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/notification/NotificationHelper.kt:314:13 Variable 'isArabic' is never used
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/presentation/ui/components/BottleTrackingCard.kt:64:5 Parameter 'onDrinkSip' is never used
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/presentation/ui/components/BottleTrackingCard.kt:78:9 Variable 'formattedSip' is never used
+w: file:///home/runner/work/KeepHydrated/KeepHydrated/app/src/main/java/com/keephydrated/app/presentation/ui/onboarding/OnboardingScreen.kt:380:50 'DirectionsRun: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.DirectionsRun
+
+> Task :app:compileReleaseJavaWithJavac
+> Task :app:compileDebugJavaWithJavac
+> Task :app:hiltAggregateDepsDebug
+> Task :app:hiltAggregateDepsRelease
+> Task :app:hiltJavaCompileDebug
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:transformDebugClassesWithAsm
+> Task :app:hiltJavaCompileRelease
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:processReleaseJavaRes
+> Task :app:bundleReleaseClassesToCompileJar
+> Task :app:transformReleaseClassesWithAsm
+> Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:kaptGenerateStubsDebugUnitTestKotlin
+> Task :app:kaptGenerateStubsReleaseUnitTestKotlin
+
+> Task :app:kaptDebugUnitTestKotlin
+warning: The following options were not recognized by any processor: '[dagger.fastInit, dagger.hilt.android.internal.disableAndroidSuperclassValidation, dagger.hilt.android.internal.projectType, dagger.hilt.internal.useAggregatingRootProcessor, kapt.kotlin.generated]'
+
+> Task :app:kaptReleaseUnitTestKotlin
+warning: The following options were not recognized by any processor: '[dagger.fastInit, dagger.hilt.android.internal.disableAndroidSuperclassValidation, dagger.hilt.android.internal.projectType, dagger.hilt.internal.useAggregatingRootProcessor, kapt.kotlin.generated]'
+
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:compileReleaseUnitTestKotlin
+> Task :app:compileReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :app:hiltAggregateDepsDebugUnitTest
+> Task :app:hiltJavaCompileDebugUnitTest NO-SOURCE
+> Task :app:hiltAggregateDepsReleaseUnitTest
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:hiltJavaCompileReleaseUnitTest NO-SOURCE
+> Task :app:processReleaseUnitTestJavaRes
+> Task :app:transformDebugUnitTestClassesWithAsm
+> Task :app:transformReleaseUnitTestClassesWithAsm
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :app:testDebugUnitTest
+
+com.keephydrated.app.data.repository.HydrationRepositoryImplTest > deleteLatestIntakeForDate deletes latest when found and returns true PASSED
+
+com.keephydrated.app.data.repository.HydrationRepositoryImplTest > getIntakesForDate converts entity to domain models correctly PASSED
+
+com.keephydrated.app.data.repository.HydrationRepositoryImplTest > insertIntake delegates to dao with mapped entity PASSED
+
+com.keephydrated.app.domain.usecase.AddWaterIntakeUseCaseTest > invoke with positive amount inserts intake into repository PASSED
+
+com.keephydrated.app.domain.usecase.AddWaterIntakeUseCaseTest > invoke with negative amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.AddWaterIntakeUseCaseTest > invoke with zero amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.GetTodayHydrationUseCaseTest > invoke reflects goal achieved when total exceeds or equals goal PASSED
+
+com.keephydrated.app.domain.usecase.GetTodayHydrationUseCaseTest > invoke computes correct total intake and progress percentage PASSED
+
+com.keephydrated.app.domain.usecase.LogBottleDrinkUseCaseTest > invoke inserts intake into hydration repo and records bottle drink PASSED
+
+com.keephydrated.app.domain.usecase.LogBottleDrinkUseCaseTest > invoke with zero or negative amount does nothing PASSED
+
+com.keephydrated.app.domain.usecase.RefillBottleUseCaseTest > invoke delegates to settings repository refillBottle PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderIntervalMinutes with valid minutes calls repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateDefaultQuickAddMl with valid amount updates repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderInterval with too high hours throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderIntervalMinutes above 720 throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderInterval with zero hours throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateCelebrationSound updates repository with valid celebration sound PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateCustomReminderHours with invalid hour throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderInterval with valid hours calls repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateCustomReminderHours with valid 24h range updates repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderMode updates mode in repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateDefaultQuickAddMl with too low amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateDefaultQuickAddMl with too high amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateGoal with too low value throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateNotificationSound updates repository with valid sound id PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderIntervalMinutes below 15 throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateGoal with too high value throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateQuickAddOnNotificationClick updates repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateGoal with valid value calls repository PASSED
+
+com.keephydrated.app.domain.util.HydrationCalculatorTest > calculate handles intense athlete appropriately PASSED
+
+com.keephydrated.app.domain.util.HydrationCalculatorTest > calculate returns appropriate recommendation for older sedentary female PASSED
+
+com.keephydrated.app.domain.util.HydrationCalculatorTest > calculate returns appropriate recommendation for young active male PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > switching to Year period computes 12 months chart data PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > Arabic language setting formats chart day labels in Arabic PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > history summaries correctly compute average intake and goals met PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > switching to Month period computes monthly chart data PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > addWater beyond safe limit emits toxicity warning message PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > undoLastIntake in Arabic emits Arabic message PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > drinkFromBottle triggers LogBottleDrinkUseCase PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > midnight date change triggers hydration reload for the new day PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > initial state reflects today summary from use case PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > undoLastIntake updates userMessage when successful PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > addWater triggers AddWaterIntakeUseCase PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > refillBottle triggers RefillBottleUseCase PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateDailyGoal delegates to repository and updates message PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateThemeMode delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateUserProfile delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > initial state reflects settings from repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateDroppyTipsEnabled delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateLanguage delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateDailyGoal in Arabic updates Arabic userMessage PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateBottleModeEnabled delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateFrequentIntakeMl delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > toggleReminders reschedules reminders in ReminderScheduler PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateRemindAfterGoalReached delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateBottleConfig delegates to repository PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > reminder rule - goal reached and remindAfterGoal is false suppresses reminder PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > reminder rule - goal reached but remindAfterGoal is true continues reminder PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > waking day preset calculation - overnight schedule PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > custom routine - correctly triggers only on user selected hours across 24h PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > waking day preset calculation - daytime schedule PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > overnight schedule - correctly identifies quiet period PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > standard day hours - outside active hours is quiet PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > standard day hours - within active hours is not quiet PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > safety rule - reminders suppressed when intake reaches safe limit PASSED
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :app:testReleaseUnitTest
+
+com.keephydrated.app.data.repository.HydrationRepositoryImplTest > deleteLatestIntakeForDate deletes latest when found and returns true PASSED
+
+com.keephydrated.app.data.repository.HydrationRepositoryImplTest > getIntakesForDate converts entity to domain models correctly PASSED
+
+com.keephydrated.app.data.repository.HydrationRepositoryImplTest > insertIntake delegates to dao with mapped entity PASSED
+
+com.keephydrated.app.domain.usecase.AddWaterIntakeUseCaseTest > invoke with positive amount inserts intake into repository PASSED
+
+com.keephydrated.app.domain.usecase.AddWaterIntakeUseCaseTest > invoke with negative amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.AddWaterIntakeUseCaseTest > invoke with zero amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.GetTodayHydrationUseCaseTest > invoke reflects goal achieved when total exceeds or equals goal PASSED
+
+com.keephydrated.app.domain.usecase.GetTodayHydrationUseCaseTest > invoke computes correct total intake and progress percentage PASSED
+
+com.keephydrated.app.domain.usecase.LogBottleDrinkUseCaseTest > invoke inserts intake into hydration repo and records bottle drink PASSED
+
+com.keephydrated.app.domain.usecase.LogBottleDrinkUseCaseTest > invoke with zero or negative amount does nothing PASSED
+
+com.keephydrated.app.domain.usecase.RefillBottleUseCaseTest > invoke delegates to settings repository refillBottle PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderIntervalMinutes with valid minutes calls repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateDefaultQuickAddMl with valid amount updates repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderInterval with too high hours throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderIntervalMinutes above 720 throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderInterval with zero hours throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateCelebrationSound updates repository with valid celebration sound PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateCustomReminderHours with invalid hour throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderInterval with valid hours calls repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateCustomReminderHours with valid 24h range updates repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderMode updates mode in repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateDefaultQuickAddMl with too low amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateDefaultQuickAddMl with too high amount throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateGoal with too low value throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateNotificationSound updates repository with valid sound id PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateReminderIntervalMinutes below 15 throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateGoal with too high value throws IllegalArgumentException PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateQuickAddOnNotificationClick updates repository PASSED
+
+com.keephydrated.app.domain.usecase.SaveUserSettingsUseCaseTest > updateGoal with valid value calls repository PASSED
+
+com.keephydrated.app.domain.util.HydrationCalculatorTest > calculate handles intense athlete appropriately PASSED
+
+com.keephydrated.app.domain.util.HydrationCalculatorTest > calculate returns appropriate recommendation for older sedentary female PASSED
+
+com.keephydrated.app.domain.util.HydrationCalculatorTest > calculate returns appropriate recommendation for young active male PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > switching to Year period computes 12 months chart data PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > Arabic language setting formats chart day labels in Arabic PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > history summaries correctly compute average intake and goals met PASSED
+
+com.keephydrated.app.presentation.history.HistoryViewModelTest > switching to Month period computes monthly chart data PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > addWater beyond safe limit emits toxicity warning message PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > undoLastIntake in Arabic emits Arabic message PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > drinkFromBottle triggers LogBottleDrinkUseCase PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > midnight date change triggers hydration reload for the new day PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > initial state reflects today summary from use case PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > undoLastIntake updates userMessage when successful PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > addWater triggers AddWaterIntakeUseCase PASSED
+
+com.keephydrated.app.presentation.home.HomeViewModelTest > refillBottle triggers RefillBottleUseCase PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateDailyGoal delegates to repository and updates message PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateThemeMode delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateUserProfile delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > initial state reflects settings from repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateDroppyTipsEnabled delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateLanguage delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateDailyGoal in Arabic updates Arabic userMessage PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateBottleModeEnabled delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateFrequentIntakeMl delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > toggleReminders reschedules reminders in ReminderScheduler PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateRemindAfterGoalReached delegates to repository PASSED
+
+com.keephydrated.app.presentation.settings.SettingsViewModelTest > updateBottleConfig delegates to repository PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > reminder rule - goal reached and remindAfterGoal is false suppresses reminder PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > reminder rule - goal reached but remindAfterGoal is true continues reminder PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > waking day preset calculation - overnight schedule PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > custom routine - correctly triggers only on user selected hours across 24h PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > waking day preset calculation - daytime schedule PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > overnight schedule - correctly identifies quiet period PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > standard day hours - outside active hours is quiet PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > standard day hours - within active hours is not quiet PASSED
+
+com.keephydrated.app.worker.QuietHoursLogicTest > safety rule - reminders suppressed when intake reaches safe limit PASSED
+
+> Task :app:test
+
+BUILD SUCCESSFUL in 2m 46s
+66 actionable tasks: 66 executed
