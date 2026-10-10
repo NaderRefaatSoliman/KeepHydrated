@@ -51,9 +51,14 @@ class HistoryViewModelTest {
 
     @Test
     fun `history summaries correctly compute average intake and goals met`() = runTest {
+        val today = LocalDate.now()
+        val daysSinceSaturday = (today.dayOfWeek.value % 7 + 1) % 7
+        val saturday = today.minusDays(daysSinceSaturday.toLong())
+        val sunday = saturday.plusDays(1)
+
         val summaries = listOf(
-            DailyHydrationSummary(date = LocalDate.now(), totalIntakeMl = 2500, goalMl = 2000), // achieved
-            DailyHydrationSummary(date = LocalDate.now().minusDays(1), totalIntakeMl = 1500, goalMl = 2000) // partial
+            DailyHydrationSummary(date = saturday, totalIntakeMl = 2500, goalMl = 2000), // achieved
+            DailyHydrationSummary(date = sunday, totalIntakeMl = 1500, goalMl = 2000) // partial
         )
         historyFlow.emit(summaries)
         settingsFlow.emit(UserSettings(dailyGoalMl = 2000))
