@@ -134,29 +134,17 @@ jobs:
           git commit -m "chore: bump to ${VERSION_NAME} (${VERSION_CODE}) [skip ci]"
           git push origin HEAD:main
 
-      - name: Create or Update GitHub Release
-        if: success() && (github.event_name != 'workflow_dispatch' || inputs.mode == 'normal')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          tag="v3.0.0"
-          asset="app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-v3.0.0-debug.apk"
-          notes="KeepHydrated V3 (versionCode 3) debug APK"
-          gh release create "$tag" "$asset" --title "KeepHydrated V3" --notes "$notes" --latest \
-            || gh release upload "$tag" "$asset" --clobber
-
-      - name: Report Build Result to Branch
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B build-logs
-          echo "Status: ${{ job.status }}" > build-status.txt
-          echo "Commit: ${{ github.sha }}" >> build-status.txt
-          echo "Date: $(date -u)" >> build-status.txt
-          if [ -f build.log ]; then git add -f build.log; fi
-          if [ -f test.log ]; then git add -f test.log; fi
-          git add -f build-status.txt
-          git commit -m "Build result for ${{ github.sha }}: ${{ job.status }}" || true
-          git push -f origin build-logs
+      # - name: Create or Update GitHub Release
+      #   if: success() && github.event_name == 'workflow_dispatch'
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     set -euo pipefail
+      #     tag="v${VERSION_NAME}"
+      #     asset="app/build/outputs/apk/debug/app-debug.apk#KeepHydrated-${VERSION_NAME}-${VERSION_CODE}-debug.apk"
+      #     notes="KeepHydrated ${VERSION_NAME} (versionCode ${VERSION_CODE}) debug APK"
+      #     gh release create "$tag" "$asset" \
+      #       --title "KeepHydrated ${VERSION_NAME}" \
+      #       --notes "$notes" \
+      #       --latest \
+      #       || gh release upload "$tag" "$asset" --clobber
