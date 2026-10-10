@@ -196,7 +196,15 @@
     <string name="dialog_waking_schedule_desc">Define your sleep and awake schedule to automatically generate routine reminder hours:</string>
     <string name="label_wake_time">Wake-up Time:</string>
     <string name="label_sleep_time">Bedtime / Sleep:</string>
-    <string name="label_reminder_frequency">Reminder Frequency:</string>
+    <string name="label_reminder_every">Reminder every:</string>
+    <string name="total_sleep_hours">Total sleeping time:</string>
+    <string name="sleep_hours_and_mins">%1$sh %2$sm</string>
+    <string name="sleep_hours_only">%1$s hours</string>
+    <string name="freq_15m">15m</string>
+    <string name="freq_30m">30m</string>
+    <string name="freq_1h">1h</string>
+    <string name="freq_2h">2h</string>
+    <string name="freq_3h">3h</string>
     <string name="freq_every_30m">Every 30 min</string>
     <string name="freq_every_1h">Every 1h</string>
     <string name="freq_every_2h">Every 2h</string>

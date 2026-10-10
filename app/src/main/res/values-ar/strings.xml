@@ -197,7 +197,17 @@
     <string name="dialog_waking_schedule_desc">حدد مواعيد استيقاظك ونومك لضبط ساعات التذكير الروتينية تلقائياً:</string>
     <string name="label_wake_time">وقت الاستيقاظ:</string>
     <string name="label_sleep_time">وقت النوم:</string>
+    <string name="label_reminder_every">التذكير كل:</string>
+    <string name="total_sleep_hours">إجمالي ساعات النوم:</string>
+    <string name="sleep_hours_and_mins">%1$s س و %2$s د</string>
+    <string name="sleep_hours_only">%1$s ساعات</string>
+    <string name="freq_15m">١٥ د</string>
+    <string name="freq_30m">٣٠ د</string>
+    <string name="freq_1h">١ س</string>
+    <string name="freq_2h">٢ س</string>
+    <string name="freq_3h">٣ س</string>
     <string name="label_reminder_frequency">وتيرة التذكير:</string>
+    <string name="freq_every_30m">كل ٣٠ دقيقة</string>
     <string name="freq_every_1h">كل ساعة</string>
     <string name="freq_every_2h">كل ساعتين</string>
     <string name="freq_every_3h">كل ٣ ساعات</string>

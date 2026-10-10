@@ -384,29 +384,38 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun applyWakingDayPreset(wakeHour: Int, sleepHour: Int, stepHours: Int = 2) {
+    fun applyWakingDayPreset(wakeHour: Int, sleepHour: Int, stepMinutes: Int = 120) {
         viewModelScope.launch {
             try {
                 settingsRepository.updateActiveHours(wakeHour, sleepHour)
-                val step = stepHours.coerceIn(1, 4)
+
+                val intervalMinutes = when (stepMinutes) {
+                    1 -> 60
+                    2 -> 120
+                    3 -> 180
+                    else -> stepMinutes.coerceIn(15, 360)
+                }
+                settingsRepository.updateReminderIntervalMinutes(intervalMinutes)
+
+                val stepH = (intervalMinutes / 60).coerceIn(1, 4)
                 val generatedHours = mutableSetOf<Int>()
 
                 if (wakeHour <= sleepHour) {
                     var h = wakeHour
                     while (h <= sleepHour) {
                         generatedHours.add(h)
-                        h += step
+                        h += stepH
                     }
                 } else {
                     var h = wakeHour
                     while (h < 24) {
                         generatedHours.add(h)
-                        h += step
+                        h += stepH
                     }
-                    var m = h % 24
+                    var m = 0
                     while (m <= sleepHour) {
                         generatedHours.add(m)
-                        m += step
+                        m += stepH
                     }
                 }
 

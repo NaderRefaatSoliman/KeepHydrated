@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -1607,7 +1608,7 @@ fun WakingDayScheduleDialog(
 ) {
     var wakeHour by remember { mutableIntStateOf(currentStartHour) }
     var sleepHour by remember { mutableIntStateOf(currentEndHour) }
-    var stepHours by remember { mutableIntStateOf(2) }
+    var stepHours by remember { mutableIntStateOf(120) }
 
     fun to12HourPair(h24: Int): Pair<Int, Boolean> {
         val h = (h24 % 24 + 24) % 24
@@ -1854,7 +1855,7 @@ fun WakingDayScheduleDialog(
                                     sleepIsPm = false
                                     sleepHour12Str.toIntOrNull()?.let { sleepHour = to24Hour(it, false) }
                                 },
-                                label = { Text(if (isArabic) "ص" else "AM", fontSize = 10.sp) },
+                                label = { Text(if (isArabic) "ص" else "AM", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
                                 modifier = Modifier.height(32.dp)
                             )
                             FilterChip(
@@ -1863,9 +1864,69 @@ fun WakingDayScheduleDialog(
                                     sleepIsPm = true
                                     sleepHour12Str.toIntOrNull()?.let { sleepHour = to24Hour(it, true) }
                                 },
-                                label = { Text(if (isArabic) "م" else "PM", fontSize = 10.sp) },
+                                label = { Text(if (isArabic) "م" else "PM", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
                                 modifier = Modifier.height(32.dp)
                             )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Total Sleeping Duration Card
+                    val wakeM = wakeMinuteStr.toIntOrNull()?.coerceIn(0, 59) ?: 0
+                    val sleepM = sleepMinuteStr.toIntOrNull()?.coerceIn(0, 59) ?: 0
+                    val wakeTotalMin = wakeHour * 60 + wakeM
+                    val sleepTotalMin = sleepHour * 60 + sleepM
+                    val sleepDurationMin = if (wakeTotalMin >= sleepTotalMin) {
+                        wakeTotalMin - sleepTotalMin
+                    } else {
+                        (24 * 60 - sleepTotalMin) + wakeTotalMin
+                    }
+                    val sleepH = sleepDurationMin / 60
+                    val sleepMin = sleepDurationMin % 60
+                    val formattedSleepH = LocalizationUtils.formatNumber(sleepH, isArabic)
+                    val formattedSleepM = LocalizationUtils.formatNumber(sleepMin, isArabic)
+
+                    val sleepTimeDisplay = if (sleepMin > 0) {
+                        stringResource(R.string.sleep_hours_and_mins, formattedSleepH, formattedSleepM)
+                    } else {
+                        stringResource(R.string.sleep_hours_only, formattedSleepH)
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+                        border = BorderStroke(1.dp, BluePrimary.copy(alpha = 0.3f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Hotel,
+                                contentDescription = null,
+                                tint = BluePrimary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.total_sleep_hours),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                )
+                                Text(
+                                    text = sleepTimeDisplay,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = BluePrimary
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -1873,26 +1934,28 @@ fun WakingDayScheduleDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = stringResource(R.string.label_reminder_frequency),
+                    text = stringResource(R.string.label_reminder_every),
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
+                Spacer(modifier = Modifier.height(6.dp))
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     listOf(
-                        0 to stringResource(R.string.freq_every_30m),
-                        1 to stringResource(R.string.freq_every_1h),
-                        2 to stringResource(R.string.freq_every_2h),
-                        3 to stringResource(R.string.freq_every_3h)
-                    ).forEach { (step, label) ->
+                        15 to stringResource(R.string.freq_15m),
+                        30 to stringResource(R.string.freq_30m),
+                        60 to stringResource(R.string.freq_1h),
+                        120 to stringResource(R.string.freq_2h),
+                        180 to stringResource(R.string.freq_3h)
+                    ).forEach { (mins, label) ->
                         FilterChip(
-                            selected = stepHours == step,
-                            onClick = { stepHours = step },
-                            label = { Text(label, fontSize = 10.sp) },
-                            modifier = Modifier.weight(1f)
+                            selected = stepHours == mins,
+                            onClick = { stepHours = mins },
+                            label = { Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
+                            modifier = Modifier.defaultMinSize(minHeight = 32.dp)
                         )
                     }
                 }
