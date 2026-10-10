@@ -65,9 +65,10 @@ object NotificationHelper {
 
     /**
      * Creates a horizontal glass tube / cylinder filled with water dynamically based on target percentage,
-     * rendered on a clean full white notification card with water blue filling.
+     * rendered on a clean full white notification card featuring the exact app logo (cup with drop above it).
      */
     fun createWaterTubeBitmap(
+        context: Context,
         currentMl: Int,
         goalMl: Int,
         percent: Int,
@@ -93,7 +94,17 @@ object NotificationHelper {
         }
         canvas.drawRoundRect(bgRect, 20f, 20f, cardBorderPaint)
 
-        // 2. Header Text: Current Intake vs Goal
+        // 2. Draw App Logo (cup of water with a droplet above it)
+        val cupDrawable = ContextCompat.getDrawable(context, R.drawable.ic_water_cup)
+        if (cupDrawable != null) {
+            val logoSize = 42
+            val logoY = 10
+            val logoX = if (isArabic) (width - 64) else 24
+            cupDrawable.setBounds(logoX, logoY, logoX + logoSize, logoY + logoSize)
+            cupDrawable.draw(canvas)
+        }
+
+        // 3. Header Text: Current Intake vs Goal
         val formattedCurrent = LocalizationUtils.formatNumber(currentMl, isArabic)
         val formattedGoal = LocalizationUtils.formatNumber(goalMl, isArabic)
         val formattedPercent = LocalizationUtils.formatNumber(percent, isArabic)
@@ -106,10 +117,10 @@ object NotificationHelper {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
-        val headerText = "🥛💧 $formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
-        canvas.drawText(headerText, width / 2f, 44f, headerPaint)
+        val headerText = "$formattedCurrent / $formattedGoal $unit ($formattedPercent$pctSign)"
+        canvas.drawText(headerText, width / 2f, 42f, headerPaint)
 
-        // 3. Horizontal Tube Container
+        // 4. Horizontal Tube Container
         val tubeLeft = 36f
         val tubeTop = 68f
         val tubeRight = width - 36f
@@ -242,7 +253,7 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val actionTitle = "+ $formattedQuickAmount $unit 🥛💧"
+        val actionTitle = if (isArabic) "+ $formattedQuickAmount $unit 💧" else "+ $quickAddAmount ml 💧"
         val quickAddAction = NotificationCompat.Action.Builder(
             R.drawable.ic_notification_water_cup,
             actionTitle,
@@ -257,14 +268,14 @@ object NotificationHelper {
             val formattedVol = LocalizationUtils.formatNumber(bottleStatus.volumeMl, isArabic)
             val formattedRem = LocalizationUtils.formatNumber(bottleStatus.remainingMl, isArabic)
             title = localizedContext.getString(R.string.bottle_reminder_title)
-            bodyText = "🥛💧 " + localizedContext.getString(
+            bodyText = localizedContext.getString(
                 R.string.bottle_reminder_msg,
                 formattedVol,
                 formattedRem
             )
         } else {
             title = localizedContext.getString(R.string.reminder_title)
-            bodyText = "🥛💧 " + localizedContext.getString(R.string.reminder_tap_text, formattedQuickAmount)
+            bodyText = localizedContext.getString(R.string.reminder_tap_text, formattedQuickAmount)
         }
 
         val wearableExtender = NotificationCompat.WearableExtender()
@@ -305,6 +316,7 @@ object NotificationHelper {
 
         val sound = NotificationSound.fromId(settings.notificationSound)
         val soundUri = KeepHydratedApp.getSoundUri(context, sound)
+        val droppyBitmap = getDroppyBitmap(context)
         val cupBitmap = getWaterCupBitmap(context)
 
         val refillIntent = Intent(context, WaterIntakeNotificationReceiver::class.java).apply {
@@ -351,7 +363,7 @@ object NotificationHelper {
             .addAction(refillAction)
             .extend(wearableExtender)
 
-        cupBitmap?.let { builder.setLargeIcon(it) }
+        (droppyBitmap ?: cupBitmap)?.let { builder.setLargeIcon(it) }
 
         if (soundUri != null) {
             builder.setSound(soundUri)
@@ -394,8 +406,9 @@ object NotificationHelper {
 
         val title = customTitle ?: localizedContext.getString(R.string.logged_confirmation_title, formattedAmount)
         val text = customMessage ?: localizedContext.getString(R.string.logged_confirmation_body, formattedTotal, formattedGoal, formattedPercent)
+        val droppyBitmap = getDroppyBitmap(context)
         val cupBitmap = getWaterCupBitmap(context)
-        val tubeBitmap = createWaterTubeBitmap(newTotalMl, goalMl, percent, isArabic)
+        val tubeBitmap = createWaterTubeBitmap(context, newTotalMl, goalMl, percent, isArabic)
 
         val notification = NotificationCompat.Builder(context, KeepHydratedApp.SILENT_ACK_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_water_cup)
@@ -414,7 +427,7 @@ object NotificationHelper {
                     .bigPicture(tubeBitmap)
                     .setSummaryText(text)
             )
-            .apply { cupBitmap?.let { setLargeIcon(it) } }
+            .apply { (droppyBitmap ?: cupBitmap)?.let { setLargeIcon(it) } }
             .build()
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -446,6 +459,7 @@ object NotificationHelper {
         val sound = CelebrationSound.fromId(celebrationSoundId)
         val channelId = KeepHydratedApp.getCelebrationChannelIdForSound(sound.id)
         val soundUri = KeepHydratedApp.getCelebrationSoundUri(context, sound)
+        val droppyBitmap = getDroppyBitmap(context)
         val cupBitmap = getWaterCupBitmap(context)
 
         val wearableExtender = NotificationCompat.WearableExtender()
@@ -466,7 +480,7 @@ object NotificationHelper {
             .setVibrate(longArrayOf(0, 300, 150, 300, 150, 450))
             .extend(wearableExtender)
 
-        cupBitmap?.let { builder.setLargeIcon(it) }
+        (droppyBitmap ?: cupBitmap)?.let { builder.setLargeIcon(it) }
 
         if (soundUri != null) {
             builder.setSound(soundUri)
@@ -508,7 +522,10 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, KeepHydratedApp.NOTIFICATION_CHANNEL_ID)
+        val droppyBitmap = getDroppyBitmap(context)
+        val cupBitmap = getWaterCupBitmap(context)
+
+        val builder = NotificationCompat.Builder(context, KeepHydratedApp.NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_water_cup)
             .setContentTitle(title)
             .setContentText(text)
@@ -518,9 +535,10 @@ object NotificationHelper {
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setVibrate(longArrayOf(0, 400, 200, 400))
-            .build()
+
+        (droppyBitmap ?: cupBitmap)?.let { builder.setLargeIcon(it) }
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(3003, notification)
+        notificationManager.notify(3003, builder.build())
     }
 }

@@ -174,7 +174,7 @@ fun KeepHydratedMain(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     var tabResetKey by remember { mutableIntStateOf(0) }
-    var settingsTargetCategory by remember { mutableStateOf<com.keephydrated.app.presentation.ui.settings.SettingsCategory?>(null) }
+    var activeSettingsCategory by remember { mutableStateOf<com.keephydrated.app.presentation.ui.settings.SettingsCategory?>(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -226,7 +226,7 @@ fun KeepHydratedMain(
                             selected = selected,
                             onClick = {
                                 tabResetKey++
-                                settingsTargetCategory = null
+                                activeSettingsCategory = null
                                 if (currentRoute != screen.route) {
                                     navController.navigate(screen.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
@@ -264,13 +264,12 @@ fun KeepHydratedMain(
                     viewModel = viewModel,
                     resetGuideKey = tabResetKey,
                     onNavigateToProfile = {
-                        settingsTargetCategory = com.keephydrated.app.presentation.ui.settings.SettingsCategory.PROFILE
+                        activeSettingsCategory = com.keephydrated.app.presentation.ui.settings.SettingsCategory.PROFILE
                         navController.navigate(Screen.Settings.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                                saveState = false
                             }
                             launchSingleTop = true
-                            restoreState = true
                         }
                     }
                 )
@@ -281,7 +280,7 @@ fun KeepHydratedMain(
                     viewModel = viewModel,
                     onNavigateToHome = {
                         tabResetKey++
-                        settingsTargetCategory = null
+                        activeSettingsCategory = null
                         navController.navigate(Screen.Home.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -299,7 +298,7 @@ fun KeepHydratedMain(
                     viewModel = viewModel,
                     onNavigateToHome = {
                         tabResetKey++
-                        settingsTargetCategory = null
+                        activeSettingsCategory = null
                         navController.navigate(Screen.Home.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -309,8 +308,8 @@ fun KeepHydratedMain(
                         }
                     },
                     resetGuideKey = tabResetKey,
-                    targetCategory = settingsTargetCategory,
-                    onClearTargetCategory = { settingsTargetCategory = null }
+                    activeCategory = activeSettingsCategory,
+                    onCategoryChange = { activeSettingsCategory = it }
                 )
             }
         }

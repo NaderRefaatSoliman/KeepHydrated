@@ -106,6 +106,7 @@ import com.keephydrated.app.domain.model.CelebrationSound
 import com.keephydrated.app.domain.model.NotificationSound
 import com.keephydrated.app.domain.model.ReminderMode
 import com.keephydrated.app.presentation.ui.components.DrDroppyMascotButton
+import com.keephydrated.app.presentation.ui.guide.HealthGuideScreen
 import com.keephydrated.app.presentation.ui.theme.BluePrimary
 import com.keephydrated.app.presentation.ui.theme.CyanSecondary
 import com.keephydrated.app.util.BatteryOptimizationHelper
@@ -117,7 +118,6 @@ enum class SettingsCategory(
     val icon: ImageVector
 ) {
     PROFILE(R.string.category_profile, R.string.desc_category_profile, Icons.Default.Tune),
-    GUIDE(R.string.category_guide, R.string.desc_category_guide, Icons.Default.Info),
     DROPPY(R.string.category_droppy, R.string.desc_category_droppy, Icons.Default.MedicalServices),
     GOAL(R.string.category_goal, R.string.desc_category_goal, Icons.Default.TrackChanges),
     BOTTLE(R.string.category_bottle, R.string.desc_category_bottle, Icons.Default.LocalDrink),
@@ -134,8 +134,8 @@ fun SettingsScreen(
     onNavigateToHome: () -> Unit = {},
     modifier: Modifier = Modifier,
     resetGuideKey: Int = 0,
-    targetCategory: SettingsCategory? = null,
-    onClearTargetCategory: () -> Unit = {}
+    activeCategory: SettingsCategory? = null,
+    onCategoryChange: (SettingsCategory?) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -144,17 +144,14 @@ fun SettingsScreen(
 
     val isArabic = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(targetCategory) }
-
-    LaunchedEffect(targetCategory) {
-        if (targetCategory != null) {
-            selectedCategory = targetCategory
-            onClearTargetCategory()
-        }
-    }
+    var localSelectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
+    val currentSelectedCategory = activeCategory ?: localSelectedCategory
+    var showHealthGuideScreen by remember { mutableStateOf(false) }
 
     LaunchedEffect(resetGuideKey) {
-        selectedCategory = null
+        localSelectedCategory = null
+        onCategoryChange(null)
+        showHealthGuideScreen = false
     }
 
     var showGoalDialog by remember { mutableStateOf(false) }
@@ -194,130 +191,138 @@ fun SettingsScreen(
 
     // Handle back button: returns to category list or goes to Home tab
     BackHandler(enabled = true) {
-        if (selectedCategory != null) {
-            selectedCategory = null
+        if (showHealthGuideScreen) {
+            showHealthGuideScreen = false
+        } else if (currentSelectedCategory != null) {
+            localSelectedCategory = null
+            onCategoryChange(null)
         } else {
             onNavigateToHome()
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (selectedCategory != null) {
-                            stringResource(selectedCategory!!.titleResId)
-                        } else {
-                            stringResource(R.string.settings)
-                        },
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            if (selectedCategory != null) {
-                                selectedCategory = null
+    if (showHealthGuideScreen) {
+        HealthGuideScreen(
+            userSettings = uiState.toUserSettings(),
+            onBackClick = { showHealthGuideScreen = false }
+        )
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (currentSelectedCategory != null) {
+                                stringResource(currentSelectedCategory.titleResId)
                             } else {
-                                onNavigateToHome()
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = if (selectedCategory != null) stringResource(R.string.back) else stringResource(R.string.nav_home)
+                                stringResource(R.string.settings)
+                            },
+                            fontWeight = FontWeight.Bold
                         )
-                    }
-                },
-                actions = {
-                    DrDroppyMascotButton(
-                        onClick = { selectedCategory = SettingsCategory.GUIDE },
-                        modifier = Modifier.padding(end = 4.dp)
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                if (currentSelectedCategory != null) {
+                                    localSelectedCategory = null
+                                    onCategoryChange(null)
+                                } else {
+                                    onNavigateToHome()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = if (currentSelectedCategory != null) stringResource(R.string.back) else stringResource(R.string.nav_home)
+                            )
+                        }
+                    },
+                    actions = {
+                        DrDroppyMascotButton(
+                            onClick = { showHealthGuideScreen = true },
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        modifier = modifier
-    ) { innerPadding ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            if (selectedCategory == null) {
-                // ==========================================
-                // MAIN SETTINGS: LIST OF MAIN CATEGORIES
-                // ==========================================
-                LazyColumn(
+            },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            modifier = modifier
+        ) { innerPadding ->
+            if (uiState.isLoading) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(SettingsCategory.entries.toTypedArray()) { category ->
-                        SettingsCategoryItem(
-                            category = category,
-                            summary = getCategorySummary(category, uiState, isArabic),
-                            onClick = { selectedCategory = category }
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        AboutFooterPanel()
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                    CircularProgressIndicator()
                 }
             } else {
-                // ==========================================
-                // DETAIL SCREEN FOR SELECTED CATEGORY (Single Un-nested Scrollable Column)
-                // ==========================================
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    when (selectedCategory!!) {
-                        SettingsCategory.PROFILE -> {
-                            ProfileSettingsDetail(
-                                uiState = uiState,
-                                isArabic = isArabic,
-                                onSaveProfile = { name, age, sex, weight, height, activity, goal ->
-                                    viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
-                                    selectedCategory = null
+                if (currentSelectedCategory == null) {
+                    // ==========================================
+                    // MAIN SETTINGS: LIST OF MAIN CATEGORIES
+                    // ==========================================
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(SettingsCategory.entries.toTypedArray()) { category ->
+                            SettingsCategoryItem(
+                                category = category,
+                                summary = getCategorySummary(category, uiState, isArabic),
+                                onClick = {
+                                    localSelectedCategory = category
+                                    onCategoryChange(category)
                                 }
                             )
                         }
-                        SettingsCategory.GUIDE -> {
-                            com.keephydrated.app.presentation.ui.guide.HealthGuideContent(
-                                userSettings = uiState.toUserSettings(),
-                                isArabic = isArabic
-                            )
+
+                        item {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            AboutFooterPanel()
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                        SettingsCategory.GOAL -> {
-                            GoalSettingsDetail(
-                                uiState = uiState,
-                                isArabic = isArabic,
-                                onEditGoalClick = { showGoalDialog = true },
-                                onFrequentAmountSelect = { viewModel.updateFrequentIntakeMl(it) },
-                                onQuickAddToggle = { viewModel.updateQuickAddOnNotificationClick(it) }
-                            )
-                        }
+                    }
+                } else {
+                    // ==========================================
+                    // DETAIL SCREEN FOR SELECTED CATEGORY (Single Un-nested Scrollable Column)
+                    // ==========================================
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        when (currentSelectedCategory) {
+                            SettingsCategory.PROFILE -> {
+                                ProfileSettingsDetail(
+                                    uiState = uiState,
+                                    isArabic = isArabic,
+                                    onSaveProfile = { name, age, sex, weight, height, activity, goal ->
+                                        viewModel.updateUserProfile(name, age, sex, weight, height, activity, goal)
+                                        localSelectedCategory = null
+                                        onCategoryChange(null)
+                                    }
+                                )
+                            }
+                            SettingsCategory.GOAL -> {
+                                GoalSettingsDetail(
+                                    uiState = uiState,
+                                    isArabic = isArabic,
+                                    onEditGoalClick = { showGoalDialog = true },
+                                    onFrequentAmountSelect = { viewModel.updateFrequentIntakeMl(it) },
+                                    onQuickAddToggle = { viewModel.updateQuickAddOnNotificationClick(it) }
+                                )
+                            }
                         SettingsCategory.BOTTLE -> {
                             BottleSettingsDetail(
                                 uiState = uiState,
@@ -357,7 +362,7 @@ fun SettingsScreen(
                             DrDroppySettingsDetail(
                                 uiState = uiState,
                                 isArabic = isArabic,
-                                onOpenGuide = { selectedCategory = SettingsCategory.GUIDE },
+                                onOpenGuide = { showHealthGuideScreen = true },
                                 onToggleDroppyTips = { viewModel.updateDroppyTipsEnabled(it) }
                             )
                         }
@@ -500,9 +505,6 @@ fun getCategorySummary(
             val wUnit = if (isArabic) "كجم" else "kg"
             val aUnit = if (isArabic) "سنة" else "yrs"
             "$weight $wUnit • $age $aUnit"
-        }
-        SettingsCategory.GUIDE -> {
-            if (isArabic) "نصائح الجفاف وأمان التسمم المائي" else "Dehydration & Toxicity Safety"
         }
         SettingsCategory.GOAL -> {
             val goal = LocalizationUtils.formatNumber(uiState.dailyGoalMl, isArabic)
