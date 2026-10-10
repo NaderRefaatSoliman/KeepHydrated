@@ -12,7 +12,7 @@ android {
     defaultConfig {
         applicationId = "com.keephydrated.app"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 3
         versionName = "3.0.0"
 
