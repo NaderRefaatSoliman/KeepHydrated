@@ -100,7 +100,6 @@
     <string name="custom_hours_input">أوقات مخصصة</string>
     <string name="enter_wake_hour">وقت الاستيقاظ (ساعة : دقيقة):</string>
     <string name="enter_sleep_hour">وقت النوم (ساعة : دقيقة):</string>
-    <string name="freq_every_30m">كل ٣٠ دقيقة</string>
 
     <!-- Settings Options -->
     <string name="daily_target">الهدف اليومي</string>
